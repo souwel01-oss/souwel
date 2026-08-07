@@ -1305,7 +1305,13 @@
       opacity 420ms var(--focus-ease);
   }
 
-  body > header,
+  /* The header is deliberately absent from both of these lists — it is the one
+     thing on the page that must never recede. It is sticky, it holds the nav
+     and the logo, and blurring it meant that hovering a product tile made the
+     way OUT of the page go soft along with everything else. Persistent chrome
+     should stay crisp while the content behind it falls back; that is what
+     makes the effect read as focus rather than as the page going out of
+     focus. The footer still dims, because it is content, not chrome. */
   body > footer,
   main > *:not([data-focus-scope]),
   [data-focus-scope] [data-focus-dim] {
@@ -1314,7 +1320,6 @@
       opacity 420ms var(--focus-ease);
   }
 
-  body[data-focus-mode] > header,
   body[data-focus-mode] > footer,
   body[data-focus-mode] main > *:not([data-focus-scope]),
   body[data-focus-mode] [data-focus-scope] [data-focus-dim],
