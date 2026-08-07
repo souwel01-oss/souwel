@@ -45,3 +45,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# `vercel link` appends its own `.vercel` and `.env*` here, and gitignore is
+# order-sensitive — the LAST matching rule wins, so those duplicates silently
+# cancelled the `!.env.example` exception above. Both patterns are already
+# covered further up, so the exception is simply restated after them. Expect
+# the CLI to append them again on a future link; keep this line last.
+!.env.example
