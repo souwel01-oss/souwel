@@ -21,6 +21,18 @@ export default defineConfig({
     seed: "tsx prisma/seed.ts",
   },
   datasource: {
-    url: env("DIRECT_URL"),
+    // NOT `env("DIRECT_URL")`. That helper throws the instant this config file
+    // is loaded if the variable is missing, and this file is loaded by EVERY
+    // Prisma CLI command — including `prisma generate`, which needs no
+    // connection at all. That broke the Vercel build: there is no database
+    // configured there yet, so `generate` could not run, `@prisma/client` was
+    // never generated, and the type check failed with "has no exported member
+    // 'PrismaClient'".
+    //
+    // Reading the variable directly means a missing URL is no longer a
+    // config-load error. `migrate` and `seed` still need it and will now fail
+    // on connect with Prisma's own message, which is the right place and the
+    // right error for that.
+    url: process.env.DIRECT_URL ?? "",
   },
 });
