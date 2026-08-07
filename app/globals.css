@@ -1,0 +1,1389 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ==========================================================================
+   Brand palette + semantic tokens
+   Source of truth: specs/001-b2b-textile-portal-crm/contracts/design-tokens.md
+
+   Tailwind v4 uses CSS-first config (@theme) — there is no tailwind.config.ts.
+   Raw brand colors are exposed as utilities (bg-navy, text-ivory, border-gold).
+   Components should prefer the SEMANTIC tokens below over raw brand names.
+   ========================================================================== */
+
+@theme {
+  /* --- Raw brand palette ------------------------------------------------ */
+  --color-brand-blue: #0b97ff;
+  --color-accent-yellow: #f9eb3e;
+  --color-accent-gold: #c9a84c;
+  --color-navy: #0a2540;
+  --color-ivory: #faf6ef;
+  --color-platinum: #e5e0d8;
+  --color-champagne: #f7e7ce;
+  --color-burgundy: #6d1a2a;
+  --color-maroon: #800020;
+  --color-olive: #4a5c2f;
+  --color-cognac: #8b4513;
+  --color-forest: #2d4a22;
+  --color-oxblood: #4a0e0e;
+
+  /* Darkened primary — the ONLY blue permitted for inline text links.
+     Raw --color-brand-blue on ivory is ~2.9:1 and fails WCAG AA for body text. */
+  --color-brand-blue-text: #0668b3;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  /* System stack, not a webfont — see the note in app/layout.tsx. Nothing
+     currently renders in mono; this exists so `font-mono` keeps working if
+     something ever needs it, without costing a font download. */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font-heading: var(--font-heading);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  /* Premium accents — decorative only, never text foreground */
+  --color-premium: var(--premium);
+  --color-premium-alt: var(--premium-alt);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* --- Semantic token mapping ------------------------------------------------
+   Per contracts/design-tokens.md §Semantic Tokens.
+   ivory + navy are the base; brand blue is the only interactive fill.
+   -------------------------------------------------------------------------- */
+
+:root {
+  --background: #faf6ef; /* ivory */
+  --foreground: #0a2540; /* navy */
+
+  --card: #ffffff;
+  --card-foreground: #0a2540;
+
+  --popover: #ffffff;
+  --popover-foreground: #0a2540;
+
+  --primary: #0b97ff; /* brand blue */
+  --primary-foreground: #ffffff;
+
+  --secondary: #e5e0d8; /* platinum */
+  --secondary-foreground: #0a2540;
+
+  --muted: #e5e0d8; /* platinum */
+  --muted-foreground: rgb(10 37 64 / 0.7); /* navy @ 70% */
+
+  --accent: #f7e7ce; /* champagne */
+  --accent-foreground: #0a2540;
+
+  --premium: #c9a84c; /* warm gold — frames, rules, decoration */
+  --premium-alt: #6d1a2a; /* burgundy — title cards, premium borders */
+
+  --destructive: #800020; /* maroon */
+
+  --border: #e5e0d8; /* platinum */
+  --input: #e5e0d8;
+  --ring: #0b97ff; /* focus ring = brand blue */
+
+  --chart-1: #0b97ff;
+  --chart-2: #0a2540;
+  --chart-3: #c9a84c;
+  --chart-4: #4a5c2f;
+  --chart-5: #8b4513;
+
+  --radius: 0.5rem;
+
+  --sidebar: #0a2540;
+  --sidebar-foreground: #faf6ef;
+  --sidebar-primary: #0b97ff;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgb(250 246 239 / 0.1);
+  --sidebar-accent-foreground: #faf6ef;
+  --sidebar-border: rgb(250 246 239 / 0.15);
+  --sidebar-ring: #0b97ff;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    /* Sticky header is 68-76px; keep anchor targets clear of it */
+    scroll-padding-top: 5.5rem;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+  }
+
+  /* Focus rings are never removed — contracts/design-tokens.md accessibility rule 4 */
+  :focus-visible {
+    @apply outline-ring outline-2 outline-offset-2;
+  }
+
+  /* Tailwind v4 dropped the opinionated `cursor: pointer` reset on buttons.
+     Restore it so every affordance reads as clickable. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
+}
+
+/* Respect the user's motion preference (WCAG 2.3.3 / prefers-reduced-motion).
+   Collapses transitions and smooth scrolling rather than removing feedback
+   entirely, so state changes are still perceivable — just not animated. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Pre-hydration hiding for elements GSAP is about to animate in.
+   Only applies while <html> carries .anim-ready, which the inline script in
+   app/layout.tsx adds before paint and removes after 2.6s as a failsafe.
+   See that script for why this is a class and not a plain rule. */
+.anim-ready [data-anim-hide] {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-ready [data-anim-hide] {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  /* Product hero treatment (FR-008): white background, thin gold frame.
+     Scoped to product hero/gallery imagery only — not lifestyle or category cards. */
+  .product-frame {
+    @apply border-premium rounded-sm border bg-white p-6;
+  }
+
+  /* Inline text links — uses the darkened blue that passes AA on ivory. */
+  .link-inline {
+    @apply text-brand-blue-text underline underline-offset-2 hover:no-underline;
+  }
+
+  /* Thread-count slider (FabricWeaveViewer).
+     Styled rather than left native because the default control is a grey
+     system widget in the middle of a gold-and-ivory panel — and because the
+     thumb needs to read as a bead running along a thread.
+     Both vendor thumb selectors are required and CANNOT be combined into one
+     rule: a selector list containing an unrecognised pseudo-element is dropped
+     entirely by both engines, so ::-webkit and ::-moz have to be written out
+     separately even though the declarations are identical. */
+  .weave-slider {
+    @apply h-1.5 w-full cursor-pointer appearance-none rounded-full bg-transparent;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-accent-gold) 0%,
+      color-mix(in srgb, var(--color-accent-gold) 35%, transparent) 100%
+    );
+  }
+
+  .weave-slider:focus-visible {
+    @apply ring-ring ring-2 ring-offset-4 outline-none;
+  }
+
+  .weave-slider::-webkit-slider-thumb {
+    @apply size-5 cursor-grab appearance-none rounded-full border-2 border-white bg-[#0A2540];
+    box-shadow:
+      0 2px 8px rgb(10 37 64 / 0.35),
+      0 0 0 1px rgb(201 168 76 / 0.5);
+    transition:
+      transform 200ms var(--ease-out),
+      box-shadow 200ms var(--ease-out);
+  }
+
+  .weave-slider::-moz-range-thumb {
+    @apply size-5 cursor-grab appearance-none rounded-full border-2 border-white bg-[#0A2540];
+    box-shadow:
+      0 2px 8px rgb(10 37 64 / 0.35),
+      0 0 0 1px rgb(201 168 76 / 0.5);
+    transition:
+      transform 200ms var(--ease-out),
+      box-shadow 200ms var(--ease-out);
+  }
+
+  .weave-slider:hover::-webkit-slider-thumb,
+  .weave-slider:focus-visible::-webkit-slider-thumb {
+    transform: scale(1.12);
+    box-shadow:
+      0 3px 12px rgb(10 37 64 / 0.4),
+      0 0 0 4px rgb(201 168 76 / 0.28);
+  }
+
+  .weave-slider:hover::-moz-range-thumb,
+  .weave-slider:focus-visible::-moz-range-thumb {
+    transform: scale(1.12);
+    box-shadow:
+      0 3px 12px rgb(10 37 64 / 0.4),
+      0 0 0 4px rgb(201 168 76 / 0.28);
+  }
+}
+
+/* ==========================================================================
+   Motion & premium effects
+   One shared timing scale so nothing feels inconsistent (150-300ms).
+   Every effect here animates only `opacity` / `transform` / `box-shadow`,
+   which stay off the layout+paint path and composite on the GPU.
+   ========================================================================== */
+
+:root {
+  --dur-fast: 150ms;
+  --dur-base: 220ms;
+  --dur-slow: 300ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Focus mode (see the .card-glow-adjacent block further down).
+     A symmetric ease-in-out, not the house --ease-out: this transition runs in
+     both directions and wants to feel the same leaving as arriving. */
+  --focus-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --focus-blur: 8px;
+  --focus-dim: 0.58;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 16px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Soft continuous halo for video play buttons */
+@keyframes gold-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0 rgb(201 168 76 / 0.45),
+      0 8px 24px rgb(0 0 0 / 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 0 14px rgb(201 168 76 / 0),
+      0 8px 24px rgb(0 0 0 / 0.35);
+  }
+}
+
+/* Blue counterpart — used on arrows, checkmarks, and other small affordances */
+@keyframes blue-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(11 151 255 / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgb(11 151 255 / 0);
+  }
+}
+
+/* Fires once on hover/focus — a ring that expands out and fades */
+@keyframes ring-pop-blue {
+  from {
+    box-shadow:
+      0 0 0 0 rgb(11 151 255 / 0.55),
+      0 0 22px -2px rgb(11 151 255 / 0.65);
+  }
+  to {
+    box-shadow:
+      0 0 0 13px rgb(11 151 255 / 0),
+      0 0 22px -2px rgb(11 151 255 / 0.65);
+  }
+}
+
+@keyframes ring-pop-gold {
+  from {
+    box-shadow:
+      0 0 0 0 rgb(201 168 76 / 0.5),
+      0 0 20px -2px rgb(201 168 76 / 0.55);
+  }
+  to {
+    box-shadow:
+      0 0 0 13px rgb(201 168 76 / 0),
+      0 0 20px -2px rgb(201 168 76 / 0.55);
+  }
+}
+
+/* Slow ambient drift for the background orbs. Three variants so no two orbs
+   ever move in lockstep — that is what stops it reading as a "loop". */
+@keyframes atmo-drift-1 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -7%, 0) scale(1.14);
+  }
+}
+
+@keyframes atmo-drift-2 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.08);
+  }
+  50% {
+    transform: translate3d(-7%, 6%, 0) scale(0.93);
+  }
+}
+
+@keyframes atmo-drift-3 {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(0.96);
+  }
+  50% {
+    transform: translate3d(5%, 8%, 0) scale(1.1);
+  }
+}
+
+/* Left-to-right draw for decorative rules */
+@keyframes rule-draw-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* A light travelling along the navbar's gold hairline. Long, mostly-empty cycle
+   on purpose — a sweep every couple of seconds reads as a loading bar. */
+@keyframes nav-shine-travel {
+  0% {
+    transform: translateX(-70%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(380%);
+    opacity: 0;
+  }
+}
+
+/* Diagonal gloss crossing a metal surface — the logo plate and the gold CTA. */
+@keyframes nav-gloss {
+  0% {
+    transform: translateX(-160%) rotate(18deg);
+  }
+  100% {
+    transform: translateX(280%) rotate(18deg);
+  }
+}
+
+/* Intro failsafe. If the GSAP timeline never runs — script error, an old
+   browser, hydration that never completes — this clears the overlay on its own
+   at 4.7s. A full-screen fixed overlay with no way out would take the whole
+   site down, so this rule is not optional. */
+/* The dissolve. This lives in CSS, not in the GSAP timeline it replaced, and
+   that is the entire point.
+
+   The timeline could not start until React had hydrated. Anchoring it to
+   `performance.now()` stopped hydration being ADDED to the sequence, but it
+   could not stop hydration DELAYING it: if hydration finished after the hold was
+   already over, the dissolve began late and the intro ran long. Walking the site
+   on a 4x-throttled CPU, the page painted at ~0.5s and was then held behind the
+   overlay until 3.9s — while a fast machine cleared at ~3.0s. The slower the
+   device, the longer the visitor was made to wait, which is exactly backwards.
+
+   A CSS animation starts when the browser parses the rule, so the sequence is
+   the same on every device and owes nothing to the main thread. JS now only
+   cleans up afterwards; if it never runs at all, intro-failsafe still lifts the
+   overlay. */
+@keyframes intro-out {
+  to {
+    opacity: 0;
+    transform: scale(1.06);
+    filter: blur(8px);
+  }
+}
+
+@keyframes intro-failsafe {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* The wordmark's entrance.
+   WHY THIS IS CSS AND NOT PART OF THE GSAP TIMELINE — the timeline cannot start
+   until React hydrates, measured at ~1.2s after navigation. A GSAP `fromTo`
+   would therefore leave the wordmark sitting at full opacity for that whole
+   second and then snap it to invisible before fading it back in. A CSS
+   animation starts at first paint instead, so the fade is the first thing that
+   happens rather than the third. GSAP still owns the hold and the dissolve,
+   which are the parts that have to be timed against everything else. */
+@keyframes intro-word-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Coverage-map location markers: a ring expanding out of the dot and fading.
+   Ends fully transparent so there is no visible snap when it loops. */
+@keyframes marker-ripple {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.6;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@layer components {
+  /* --- Coverage map ------------------------------------------------------ */
+
+  /* --ripple-delay is set per marker so the six never pulse in unison. */
+  .map-marker-ripple {
+    animation: marker-ripple 2.8s var(--ease-out) infinite;
+    animation-delay: var(--ripple-delay, 0s);
+  }
+
+  /* Tooltip: fade + slide, opening in the direction it was placed.
+     --tip-x holds the horizontal anchoring offset so the open/close transform
+     can restate both axes; without that, a centred tooltip would slide sideways
+     as it fades in. visibility keeps a closed tooltip out of hit-testing. */
+  .map-tooltip {
+    --tip-x: 0%;
+    --tip-y: 6px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translate3d(var(--tip-x), var(--tip-y), 0);
+    transition:
+      opacity var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out),
+      visibility 0s linear var(--dur-base);
+  }
+
+  /* Horizontal anchoring. Markers within 20% of an edge anchor to that edge so
+     the tooltip cannot hang outside the map card. */
+  .map-tip-center {
+    left: 50%;
+    --tip-x: -50%;
+  }
+
+  .map-tip-start {
+    left: 0;
+  }
+
+  .map-tip-end {
+    right: 0;
+  }
+
+  /* Vertical side. Near the top of the map there is no room above the marker,
+     so the tooltip flips below it and slides the other way. */
+  .map-tip-above {
+    bottom: 100%;
+    margin-bottom: 0.75rem;
+  }
+
+  .map-tip-below {
+    top: 100%;
+    margin-top: 0.75rem;
+    --tip-y: -6px;
+  }
+
+  .group:hover .map-tooltip,
+  .group:focus-visible .map-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translate3d(var(--tip-x), 0, 0);
+    transition-delay: 0s;
+  }
+
+  /* --- Scroll reveal -----------------------------------------------------
+     Elements start offset; the Reveal component adds `is-revealed` once the
+     element enters the viewport (observer disconnects after — fires once). */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 22px, 0);
+    transition:
+      opacity 620ms var(--ease-out),
+      transform 620ms var(--ease-out);
+    will-change: opacity, transform;
+  }
+
+  .reveal.is-revealed {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    will-change: auto;
+  }
+
+  /* --- Page-load entrance (hero) ---------------------------------------- */
+  .enter {
+    opacity: 0;
+    animation: fade-up 700ms var(--ease-out) forwards;
+  }
+  .enter-1 {
+    animation-delay: 60ms;
+  }
+  .enter-2 {
+    animation-delay: 160ms;
+  }
+  .enter-3 {
+    animation-delay: 260ms;
+  }
+  .enter-4 {
+    animation-delay: 360ms;
+  }
+
+  /* --- Card hover lift --------------------------------------------------- */
+  .card-lift {
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      border-color var(--dur-base) var(--ease-out);
+  }
+
+  .card-lift:hover {
+    transform: translate3d(0, -6px, 0);
+  }
+
+  /* Glow border on hover, tinted per card via --glow (set inline). */
+  .card-glow:hover {
+    border-color: color-mix(in srgb, var(--glow, #0b97ff) 55%, transparent);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--glow, #0b97ff) 35%, transparent),
+      0 14px 40px -10px color-mix(in srgb, var(--glow, #0b97ff) 45%, transparent),
+      0 8px 20px -8px rgb(10 37 64 / 0.25);
+  }
+
+  /* --- Button glows ------------------------------------------------------
+     .glow-primary / .glow-ring-* live further down, alongside the ring-pop
+     keyframes they depend on. */
+
+  .glow-gold {
+    transition:
+      color var(--dur-base) var(--ease-out),
+      text-shadow var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
+  }
+
+  .glow-gold:hover {
+    text-shadow:
+      0 0 14px rgb(201 168 76 / 0.65),
+      0 0 30px rgb(201 168 76 / 0.35);
+  }
+
+  /* --- Hero background video cover --------------------------------------
+     Container-query units keep the 16:9 player correctly cropped to the hero
+     box. Viewport units (vw/vh) break here: the two max() values resolve
+     independently and distort the frame when the hero is not viewport-sized. */
+  .hero-video-frame {
+    container-type: size;
+  }
+
+  .hero-video-cover {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: max(100cqw, 177.7778cqh);
+    height: max(100cqh, 56.25cqw);
+  }
+
+  /* ======================================================================
+     Ambient atmosphere — dark navy sections only.
+     Rendered by components/marketing/Atmosphere.tsx. Purely decorative:
+     nothing here may carry meaning or affect text contrast.
+     ====================================================================== */
+
+  .atmosphere {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    /* Parallax offset, written by Atmosphere.tsx on scroll. */
+    --atmo-y: 0px;
+
+    /* Everything inside fades to fully transparent before it reaches an edge.
+       Without this the `overflow: hidden` above slices whatever is still bright
+       at the boundary into a hard-edged rectangle — which is precisely what it
+       used to do to the orbs that bleed past the section. The clip still
+       happens; it just has nothing visible left to cut. Two axis gradients are
+       intersected so all four edges fade, not just one pair. */
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+      linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      linear-gradient(to right, transparent 0%, #000 16%, #000 84%, transparent 100%),
+      linear-gradient(to bottom, transparent 0%, #000 18%, #000 82%, transparent 100%);
+    mask-composite: intersect;
+  }
+
+  /* Parallax layers. Depth reads from how far each one travels: the orbs move
+     most (furthest away), the dot field least (nearest the surface). */
+  .atmo-layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .atmo-layer-back {
+    transform: translate3d(0, calc(var(--atmo-y) * 1), 0);
+  }
+
+  /* Radial gradient rather than filter: blur() on a solid circle — visually the
+     same, but it does not cost a full-surface blur pass on every frame. */
+  /* Many stops rather than three: a 3-stop radial gradient interpolates in a
+     straight line and leaves a faintly visible ring where it lands on zero.
+     Easing the alpha down asymptotically removes it. */
+  .atmo-orb {
+    position: absolute;
+    aspect-ratio: 1;
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle at 50% 50%,
+      var(--orb-core) 0%,
+      var(--orb-mid) 30%,
+      var(--orb-edge) 48%,
+      var(--orb-faint) 62%,
+      transparent 80%
+    );
+  }
+
+  .atmo-orb-blue {
+    --orb-core: rgb(11 151 255 / 0.3);
+    --orb-mid: rgb(11 151 255 / 0.17);
+    --orb-edge: rgb(11 151 255 / 0.075);
+    --orb-faint: rgb(11 151 255 / 0.025);
+  }
+
+  .atmo-orb-gold {
+    --orb-core: rgb(201 168 76 / 0.24);
+    --orb-mid: rgb(201 168 76 / 0.13);
+    --orb-edge: rgb(201 168 76 / 0.055);
+    --orb-faint: rgb(201 168 76 / 0.018);
+  }
+
+  .atmo-drift-1 {
+    animation: atmo-drift-1 26s ease-in-out infinite;
+  }
+  .atmo-drift-2 {
+    animation: atmo-drift-2 33s ease-in-out infinite;
+  }
+  .atmo-drift-3 {
+    animation: atmo-drift-3 39s ease-in-out infinite;
+  }
+
+  /* ======================================================================
+     Primary navigation
+     An earlier version raised the current tab into a lit panel. Over navy that
+     panel just read as a grey box, so this is the quieter treatment: every
+     label sits flat on the bar, and the current page is marked only by a fine
+     gold rule along the bar's bottom edge. Hover previews that rule at half
+     width, so the indicator teaches its own meaning.
+     ====================================================================== */
+
+  /* Deeper at the top than the section below it, which gives the bar weight
+     without needing a border or a shadow. */
+  .nav-bar {
+    background-image: linear-gradient(180deg, rgb(7 24 41 / 0.97) 0%, rgb(10 37 64 / 0.93) 100%);
+  }
+
+  /* Gold hairline along the bottom edge, faded out at both ends so it reads as
+     a rule of light rather than as a border. */
+  .nav-bar::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(201 168 76 / 0.38) 16%,
+      rgb(201 168 76 / 0.38) 84%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  .nav-link {
+    position: relative;
+    transition: color var(--dur-base) var(--ease-out);
+  }
+
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0.85rem;
+    bottom: 0;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #c9a84c 22%,
+      #e2c67d 50%,
+      #c9a84c 78%,
+      transparent 100%
+    );
+    transform: scaleX(0);
+    opacity: 0;
+    transition:
+      transform var(--dur-base) var(--ease-out),
+      opacity var(--dur-base) var(--ease-out);
+  }
+
+  /* :not(.nav-current) matters — a bare :hover rule outranks .nav-current::after
+     and would shrink the indicator when you mouse over the page you are on. */
+  .nav-link:not(.nav-current):hover::after {
+    transform: scaleX(0.55);
+    opacity: 0.55;
+  }
+
+  .nav-current::after {
+    transform: scaleX(1);
+    opacity: 1;
+    box-shadow: 0 0 10px rgb(201 168 76 / 0.5);
+  }
+
+  /* --- Navbar shine ------------------------------------------------------
+     Three separate lights, deliberately on different cycles so they never
+     pulse together and turn the header into a slot machine. */
+
+  /* 1. A highlight running along the gold hairline. It clips itself rather
+        than relying on overflow on <header>, which would also clip the mobile
+        drawer that expands out of the same element. */
+  .nav-shine {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 0;
+    height: 1px;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .nav-shine::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 26%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(226 198 125 / 0.9) 42%,
+      rgb(255 245 216 / 0.95) 50%,
+      rgb(226 198 125 / 0.9) 58%,
+      transparent 100%
+    );
+    animation: nav-shine-travel 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  /* 2. REMOVED. `.nav-mark` put a travelling gloss across the header's gold
+        "S" plate. That plate was a stand-in for the real logo and is gone now
+        that the supplied artwork is in place — and the effect should not simply
+        move onto the artwork, because a highlight sweeping across a client's
+        logo is a modification of the logo. The keyframes it used (`nav-gloss`)
+        stay, since the Register CTA below still uses them.
+
+     3. The Register CTA glosses on hover only. Continuous motion on a button
+        reads as "processing", which is the one thing a CTA must not say. */
+  .nav-cta {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nav-cta::after {
+    content: "";
+    position: absolute;
+    top: -60%;
+    bottom: -60%;
+    left: 0;
+    width: 38%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.45), transparent);
+    transform: translateX(-160%) rotate(18deg);
+    transition: transform 750ms var(--ease-out);
+    pointer-events: none;
+  }
+
+  .nav-cta:hover::after,
+  .nav-cta:focus-visible::after {
+    transform: translateX(280%) rotate(18deg);
+  }
+
+  /* Mobile drawer rows have no bottom edge to sit on, so the current row is
+     marked with a gold spine and a faint wash instead. */
+  .nav-row-current {
+    background-image: linear-gradient(90deg, rgb(201 168 76 / 0.12), transparent 70%);
+    box-shadow: inset 2px 0 0 rgb(201 168 76 / 0.7);
+  }
+
+  /* ======================================================================
+     Glassmorphism surfaces
+     ====================================================================== */
+
+  /* Baked fibre noise, shared by every fabric swatch.
+     This replaces per-swatch <feTurbulence> filters. Nine swatches meant
+     eighteen live filter graphs, each re-rasterised whenever compositing
+     changed — measured at 7fps while scrolling. As a data-URI background the
+     noise is rasterised once and reused, and the same scroll runs at 60fps. */
+  .fabric-noise,
+  .fabric-slub {
+    position: absolute;
+    inset: 0;
+    background-repeat: repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .fabric-noise {
+    background-size: 140px 140px;
+    opacity: 0.36;
+    mix-blend-mode: overlay;
+  }
+
+  /* Same texture stretched wide and flat, which reads as slub rather than grain. */
+  .fabric-slub {
+    background-size: 420px 90px;
+    opacity: 0.26;
+    mix-blend-mode: soft-light;
+  }
+
+  /* Frosted glass on DARK backgrounds.
+     No backdrop-filter: these panels sit on flat navy, where blurring the
+     backdrop is visually a no-op but still costs a full blur pass every frame.
+     Only .glass-deep (over the hero video) and the sticky header keep it. */
+  .glass {
+    position: relative;
+    background: linear-gradient(
+      150deg,
+      rgb(250 246 239 / 0.13) 0%,
+      rgb(250 246 239 / 0.06) 46%,
+      rgb(250 246 239 / 0.03) 100%
+    );
+    transition:
+      background-color var(--dur-slow) var(--ease-out),
+      box-shadow var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+  }
+
+  /* Frosted glass over IMAGERY (the hero, sitting on video).
+     Tinted navy rather than white: the footage is pale fabric, and a lightening
+     panel pushed the gold stat figures down to 2.6:1 against the brightest
+     frames — below the 3:1 floor for large text. Darkening keeps the glass read
+     (blur + hairline still do that) while raising contrast instead of sinking it.
+     Measured after this change: 4.8:1 worst case. Do not lighten. */
+  .glass-deep {
+    position: relative;
+    background: linear-gradient(
+      150deg,
+      rgb(10 37 64 / 0.62) 0%,
+      rgb(10 37 64 / 0.5) 46%,
+      rgb(10 37 64 / 0.44) 100%
+    );
+    -webkit-backdrop-filter: blur(16px) saturate(130%);
+    backdrop-filter: blur(16px) saturate(130%);
+    transition:
+      background-color var(--dur-slow) var(--ease-out),
+      box-shadow var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+  }
+
+  /* Frosted glass on LIGHT backgrounds — same construction, inverted values, so
+     ivory sections keep their brightness instead of going murky. */
+  /* Also no backdrop-filter — it sits on flat platinum. Opacity raised to
+     compensate for the blur that is no longer there. */
+  .glass-light {
+    position: relative;
+    background: linear-gradient(
+      150deg,
+      rgb(255 255 255 / 0.95) 0%,
+      rgb(255 255 255 / 0.86) 55%,
+      rgb(255 255 255 / 0.8) 100%
+    );
+    transition:
+      background-color var(--dur-slow) var(--ease-out),
+      box-shadow var(--dur-slow) var(--ease-out),
+      transform var(--dur-slow) var(--ease-out);
+  }
+
+  /* The 1px gradient hairline — brighter top-left, as if catching light.
+     Drawn as a masked ::before because a plain border cannot be a gradient. */
+  .glass::before,
+  .glass-deep::before,
+  .glass-light::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    pointer-events: none;
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+    transition: background var(--dur-slow) var(--ease-out);
+  }
+
+  .glass::before,
+  .glass-deep::before {
+    background: linear-gradient(
+      145deg,
+      rgb(250 246 239 / 0.45) 0%,
+      rgb(250 246 239 / 0.12) 40%,
+      rgb(250 246 239 / 0.04) 100%
+    );
+  }
+
+  .glass-light::before {
+    background: linear-gradient(
+      145deg,
+      rgb(255 255 255 / 0.95) 0%,
+      rgb(10 37 64 / 0.12) 52%,
+      rgb(10 37 64 / 0.07) 100%
+    );
+  }
+
+  /* Hover/focus: the hairline picks up the accent and a soft halo spreads.
+     Tint per card via --glow (set inline); defaults to Brand Blue. */
+  .glass-glow:hover,
+  .glass-glow:focus-within {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--glow, #0b97ff) 42%, transparent),
+      0 18px 48px -14px color-mix(in srgb, var(--glow, #0b97ff) 58%, transparent);
+  }
+
+  .glass-glow:hover::before,
+  .glass-glow:focus-within::before {
+    background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--glow, #0b97ff) 70%, white) 0%,
+      color-mix(in srgb, var(--glow, #0b97ff) 40%, transparent) 45%,
+      color-mix(in srgb, var(--glow, #0b97ff) 12%, transparent) 100%
+    );
+  }
+
+  /* Resting and selected states for glass cards. These are classes rather than
+     inline styles so that .glass-glow:hover can still win on specificity — an
+     inline box-shadow would beat any stylesheet rule and kill the hover glow. */
+  .glass-rest {
+    box-shadow: 0 8px 22px -14px rgb(10 37 64 / 0.35);
+  }
+
+  .glass-active {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--glow, #0b97ff) 32%, transparent),
+      0 26px 58px -20px color-mix(in srgb, var(--glow, #0b97ff) 72%, transparent),
+      0 12px 28px -12px rgb(10 37 64 / 0.28);
+  }
+
+  /* Without backdrop-filter (older Firefox, some in-app browsers) a translucent
+     panel just looks washed out — fall back to a flat, readable surface. */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass {
+      background: rgb(250 246 239 / 0.085);
+    }
+    .glass-deep {
+      background: rgb(10 37 64 / 0.72);
+    }
+    .glass-light {
+      background: rgb(255 255 255 / 0.95);
+    }
+  }
+
+  /* ======================================================================
+     Glowing text, icons and rules
+     ====================================================================== */
+
+  /* Resting glow for hero stat figures. Kept low enough that the glyph edges
+     stay crisp — the halo must never bleed into the counter shapes. */
+  .text-glow-gold {
+    text-shadow:
+      0 0 16px rgb(201 168 76 / 0.45),
+      0 0 40px rgb(201 168 76 / 0.18);
+  }
+
+  .text-glow-blue {
+    text-shadow:
+      0 0 16px rgb(11 151 255 / 0.5),
+      0 0 42px rgb(11 151 255 / 0.2);
+  }
+
+  /* Slow continuous halos for icon affordances */
+  .pulse-gold {
+    animation: gold-pulse 3.2s ease-in-out infinite;
+  }
+
+  .pulse-blue {
+    animation: blue-pulse 3.6s ease-in-out infinite;
+  }
+
+  /* Decorative rule that draws in left-to-right once its section reveals.
+     Scale, not width — animating width would relayout on every frame. */
+  .rule-draw {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 640ms var(--ease-out) 160ms;
+  }
+
+  .is-revealed .rule-draw {
+    transform: scaleX(1);
+  }
+
+  /* Hero has no Reveal wrapper — it draws on load, after the .enter cascade.
+     Must be an animation, not a transition: nothing changes state to trigger one. */
+  .rule-draw-enter {
+    animation: rule-draw-in 640ms var(--ease-out) 640ms forwards;
+  }
+
+  /* ======================================================================
+     Button glow rings
+     ====================================================================== */
+
+  .glow-primary {
+    transition:
+      background-color var(--dur-base) var(--ease-out),
+      box-shadow var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
+  }
+
+  /* The one-shot ring animation overrides box-shadow while it runs, then hands
+     back to the :hover shadow below — so it pops once and settles into a glow. */
+  .glow-primary:hover,
+  .glow-primary:focus-visible {
+    transform: translate3d(0, -2px, 0) scale(1.02);
+    box-shadow:
+      0 0 22px -2px rgb(11 151 255 / 0.65),
+      0 10px 28px -8px rgb(11 151 255 / 0.5);
+    animation: ring-pop-blue 640ms var(--ease-out) 1;
+  }
+
+  .glow-ring-gold {
+    transition:
+      box-shadow var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
+  }
+
+  .glow-ring-gold:hover,
+  .glow-ring-gold:focus-visible {
+    transform: translate3d(0, -2px, 0) scale(1.02);
+    box-shadow: 0 0 20px -2px rgb(201 168 76 / 0.55);
+    animation: ring-pop-gold 640ms var(--ease-out) 1;
+  }
+
+  .glow-ring-blue {
+    transition:
+      box-shadow var(--dur-base) var(--ease-out),
+      transform var(--dur-base) var(--ease-out);
+  }
+
+  .glow-ring-blue:hover,
+  .glow-ring-blue:focus-visible {
+    transform: translate3d(0, -2px, 0) scale(1.02);
+    box-shadow: 0 0 20px -2px rgb(11 151 255 / 0.55);
+    animation: ring-pop-blue 640ms var(--ease-out) 1;
+  }
+
+  /* --- Intro overlay -----------------------------------------------------
+     Shown only when the pre-paint script in app/layout.tsx puts `data-intro`
+     on <html>: homepage only, never under reduced motion. It now plays on
+     EVERY load, so this markup is on the critical path of every homepage
+     visit — keep it cheap. Default is `display: none`, so every other page
+     pays nothing for it beyond the markup itself. */
+  .intro-video {
+    display: none;
+  }
+
+  [data-intro] .intro-video {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    background-color: #0a2540;
+    /* Transform-boxed for the dissolve, which scales and blurs the overlay. */
+    will-change: opacity, transform, filter;
+    /* The dissolve itself, then the last-resort failsafe behind it. The failsafe
+       sits at 4700ms, well clear of the 2800ms the sequence now takes, and is
+       only reachable if setTimeout never fires at all. Both are declared here
+       because a second `animation` declaration would replace the first. */
+    animation:
+      intro-out 800ms cubic-bezier(0.4, 0, 0.2, 1) 2000ms forwards,
+      intro-failsafe 400ms linear 4700ms forwards;
+  }
+
+  /* Scroll is locked while the overlay is up. Removing the attribute — which
+     the timeline does on completion, and the pre-paint failsafe does
+     unconditionally — is what releases it, so it cannot get stuck. */
+  html[data-intro],
+  html[data-intro] body {
+    overflow: hidden;
+  }
+
+  /* The footage, cover-cropped to the viewport at any aspect ratio. `poster`
+     on the element itself is the static fallback: if the file 404s, the codec
+     is unsupported, or autoplay is refused, the poster frame stays up and the
+     sequence still reads correctly. */
+  .intro-video-media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+
+  /* THE SCRIM IS LIGHT, AND IT USED TO BE DARK. THAT INVERSION IS DELIBERATE.
+
+     The old version darkened the footage hard, because the mark was set in
+     Brand Blue (#0b97ff) — a mid-luminance colour that scores 3.06:1 on white
+     and worse over the bright folds of the fabric, but 4.6:1 on Deep Navy. A
+     dark ground was the only way that blue could read.
+
+     The supplied logo is #0030F0, darker still. Measured against that same navy
+     pool it comes out at 1.3:1 — not "weak", invisible. Darkening further only
+     makes it worse, because the artwork is dark to begin with.
+
+     So the ground was inverted rather than adjusted. The footage is white cloth;
+     lifting it toward ivory instead of pushing it toward navy suits the material
+     better AND puts the logo at 6.8:1. Two layers as before: an even ivory wash
+     so the fabric stays legibly fabric and still visibly moves, plus a centred
+     pool that brightens only where the mark sits.
+
+     If a light one-colour version of the logo is ever supplied, this can go
+     back to navy — but not before. */
+  .intro-video-scrim {
+    position: absolute;
+    inset: 0;
+    background-color: rgb(250 246 239 / 0.55);
+    background-image: radial-gradient(
+      ellipse 62% 58% at 50% 50%,
+      rgb(252 250 246 / 0.88) 0%,
+      rgb(250 246 239 / 0.6) 45%,
+      rgb(250 246 239 / 0) 100%
+    );
+  }
+
+  /* Now a lockup — the artwork plus "Textile" — rather than a line of type, so
+     this owns layout only. Colour and size live on the two children. */
+  .intro-word {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    justify-items: center;
+    gap: 0.85rem;
+    padding-inline: 1.5rem;
+    /* Soft lift off the busiest folds. Light, because the ground is now light —
+       a dark shadow here would ring the mark. */
+    filter: drop-shadow(0 2px 18px rgb(250 246 239 / 0.9));
+  }
+
+  .intro-word-sub {
+    font-family: var(--font-heading), serif;
+    /* Navy on the ivory pool: 13:1. The mark carries the brand colour; this
+       word only has to sit under it without competing. */
+    color: #0a2540;
+    font-size: clamp(0.95rem, 2.6vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: 0.42em;
+    /* Tracking adds space after the last glyph too, which visually shifts a
+       centred word left. Half the tracking back as padding re-centres it. */
+    padding-inline-start: 0.42em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* Gated on the attribute so the animation only ever exists while the overlay
+     does. `both` holds the from-state before the delay and the to-state after,
+     so there is no frame at full opacity on either side. */
+  /* Deliberately NOT --ease-out. That token is a near-expo curve, and over this
+     duration it reached 92% opacity in the first quarter of the animation — a
+     perceptible snap rather than the smooth resolve the sequence wants. This is
+     a standard accelerate-decelerate, so the fade reads evenly across its whole
+     length. */
+  [data-intro] .intro-word {
+    animation: intro-word-in 900ms cubic-bezier(0.34, 0.05, 0.2, 1) both;
+  }
+
+  /* --- Focus mode --------------------------------------------------------
+     Hovering a product tile pushes the whole rest of the page back: everything
+     else blurs and dims, the hovered tile lifts and stays sharp.
+
+     WHY THE REST IS BLURRED RATHER THAN AN OVERLAY BLURRING BEHIND IT — a
+     backdrop-filter overlay would have to sit between the tile and the page,
+     which means the tile must paint above the overlay. The tile lives several
+     stacking contexts deep (grid > section > main), so it cannot escape without
+     a portal, and a portal would take it out of its grid cell. Blurring the
+     siblings instead keeps the tile exactly where it is and needs no z-index
+     gymnastics beyond its own row.
+
+     These rules are ordered AFTER .card-glow deliberately: both are (0,2,0)
+     specificity, so source order decides which box-shadow wins on a hovered
+     tile, and the focus shadow should.
+
+     Engaged from JS (components/marketing/FocusGroup.tsx), which sets
+     body[data-focus-mode]. It never engages on touch or under reduced motion.
+     Everything here is therefore additive — with no JS the tiles keep their
+     ordinary hover and nothing is ever left blurred. */
+  [data-focus-tile] {
+    transition:
+      transform 420ms var(--focus-ease),
+      box-shadow 420ms var(--focus-ease),
+      filter 420ms var(--focus-ease),
+      opacity 420ms var(--focus-ease);
+  }
+
+  body > header,
+  body > footer,
+  main > *:not([data-focus-scope]),
+  [data-focus-scope] [data-focus-dim] {
+    transition:
+      filter 420ms var(--focus-ease),
+      opacity 420ms var(--focus-ease);
+  }
+
+  body[data-focus-mode] > header,
+  body[data-focus-mode] > footer,
+  body[data-focus-mode] main > *:not([data-focus-scope]),
+  body[data-focus-mode] [data-focus-scope] [data-focus-dim],
+  body[data-focus-mode] [data-focus-tile]:not([data-focus-active]) {
+    filter: blur(var(--focus-blur));
+    opacity: var(--focus-dim);
+  }
+
+  /* The hovered tile. z-index lifts it over its neighbours as it grows into
+     their cells; the grid does not clip, so it is free to overlap. */
+  [data-focus-tile][data-focus-active] {
+    z-index: 30;
+    transform: translate3d(0, -10px, 0) scale(1.06);
+    box-shadow:
+      0 42px 80px -32px rgb(10 37 64 / 0.6),
+      0 12px 30px -12px rgb(10 37 64 / 0.35),
+      0 0 0 1px rgb(255 255 255 / 0.14);
+  }
+}
+
+/* Motion preferences win over everything above. Reveal/entrance elements must
+   still end VISIBLE — never leave content stuck at opacity 0. */
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .reveal.is-revealed,
+  .enter {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  /* Continuous and ambient motion is dropped entirely — the texture, orbs and
+     glows all remain, they simply hold still. */
+  .pulse-gold,
+  .pulse-blue,
+  .map-marker-ripple,
+  .nav-shine::after,
+  .atmo-drift-1,
+  .atmo-drift-2,
+  .atmo-drift-3 {
+    animation: none !important;
+  }
+
+  /* Parallax is never attached in JS, but pin the layer regardless. */
+  .atmo-layer-back {
+    transform: none !important;
+  }
+
+  /* A rule that never draws would be an invisible rule — land it drawn. */
+  .rule-draw,
+  .rule-draw-enter {
+    transform: scaleX(1) !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .card-lift:hover,
+  .glow-primary:hover,
+  .glow-primary:focus-visible,
+  .glow-ring-gold:hover,
+  .glow-ring-gold:focus-visible,
+  .glow-ring-blue:hover,
+  .glow-ring-blue:focus-visible {
+    transform: none !important;
+    animation: none !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}

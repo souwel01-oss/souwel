@@ -1,0 +1,325 @@
+// Prisma schema for the B2B Textile Portal & CRM
+// Source of truth: specs/001-b2b-textile-portal-crm/data-model.md
+//
+// CRITICAL INVARIANT: the Product model has NO price field of any kind.
+// Pricing exists solely on QuoteItem. This makes public price exposure
+// structurally impossible rather than a policy someone must remember.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Prisma 7: connection URLs live in prisma.config.ts, and the runtime client
+// connects via a driver adapter (@prisma/adapter-pg) — see lib/db/prisma.ts.
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+enum Role {
+  ADMIN
+  SALES
+  CUSTOMER
+}
+
+enum QuoteStatus {
+  REQUESTED
+  QUOTED
+  ACCEPTED
+  DECLINED
+  FULFILLED
+}
+
+enum OrderStatus {
+  PENDING
+  IN_PRODUCTION
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+enum DocumentType {
+  QUOTATION
+  INVOICE
+  CONTRACT
+  SPEC_SHEET
+}
+
+enum ActivityAction {
+  QUOTE_REQUESTED
+  QUOTE_RESPONDED
+  QUOTE_ACCEPTED
+  QUOTE_DECLINED
+  ORDER_CREATED
+  ORDER_STATUS_CHANGED
+  DOCUMENT_UPLOADED
+  NOTE_ADDED
+  PROFILE_UPDATED
+}
+
+// ============================================================================
+// Auth (Better Auth managed — Prisma adapter)
+// ============================================================================
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  name          String
+  image         String?
+  role          Role     @default(CUSTOMER)
+  banned        Boolean  @default(false)
+  banReason     String?
+  banExpires    DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  customerProfile  CustomerProfile?
+  sessions         Session[]
+  accounts         Account[]
+  activityLogs     ActivityLog[]    @relation("ActivityActor")
+  internalNotes    InternalNote[]   @relation("NoteAuthor")
+  uploadedDocuments Document[]      @relation("DocumentUploader")
+
+  @@index([role])
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  token          String   @unique
+  userId         String
+  expiresAt      DateTime
+  ipAddress      String?
+  userAgent      String?
+  impersonatedBy String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  userId                String
+  accountId             String
+  providerId            String
+  accessToken           String?
+  refreshToken          String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  idToken               String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+// ============================================================================
+// Application entities
+// ============================================================================
+
+model CustomerProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  companyName  String
+  contactName  String
+  phone        String?
+  addressLine1 String?
+  addressLine2 String?
+  city         String?
+  state        String?
+  postalCode   String?
+  country      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotes        Quote[]
+  orders        Order[]
+  documents     Document[]
+  activityLogs  ActivityLog[]
+  internalNotes InternalNote[]
+
+  @@index([companyName])
+  @@index([contactName])
+}
+
+model Category {
+  id           String   @id @default(cuid())
+  slug         String   @unique
+  name         String
+  description  String?
+  heroImageUrl String?
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products Product[]
+
+  @@index([sortOrder])
+}
+
+/// NOTE: no price field. Pricing lives only on QuoteItem — see data-model.md §Product.
+model Product {
+  id               String   @id @default(cuid())
+  slug             String   @unique
+  name             String
+  description      String
+  shortDescription String?
+  specifications   Json?
+  heroImageUrl     String
+  galleryImageUrls String[] @default([])
+  categoryId       String
+  isPublished      Boolean  @default(false)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  category   Category    @relation(fields: [categoryId], references: [id])
+  quoteItems QuoteItem[]
+
+  @@index([categoryId, isPublished, sortOrder])
+  @@index([isPublished])
+}
+
+model Quote {
+  id                String      @id @default(cuid())
+  reference         String      @unique
+  customerProfileId String?
+  // Guest contact — populated only for anonymous submissions (FR-005)
+  guestName         String?
+  guestEmail        String?
+  guestCompany      String?
+  guestPhone        String?
+  status            QuoteStatus @default(REQUESTED)
+  customerMessage   String?
+  staffResponse     String?
+  quotedAt          DateTime?
+  respondedAt       DateTime?
+  validUntil        DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  customerProfile CustomerProfile? @relation(fields: [customerProfileId], references: [id])
+  items           QuoteItem[]
+  order           Order?
+  documents       Document[]
+
+  @@index([customerProfileId, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+}
+
+/// The ONLY model carrying pricing. unitPrice/lineTotal/staffNotes are never
+/// selected by lib/db/public.ts — see contracts/server-actions.md.
+model QuoteItem {
+  id            String   @id @default(cuid())
+  quoteId       String
+  productId     String
+  quantity      Int
+  customerNotes String?
+  unitPrice     Decimal? @db.Decimal(12, 2)
+  lineTotal     Decimal? @db.Decimal(12, 2)
+  staffNotes    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([quoteId])
+  @@index([productId])
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  reference         String      @unique
+  quoteId           String      @unique
+  customerProfileId String
+  status            OrderStatus @default(PENDING)
+  totalAmount       Decimal     @db.Decimal(12, 2)
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  quote           Quote           @relation(fields: [quoteId], references: [id])
+  customerProfile CustomerProfile @relation(fields: [customerProfileId], references: [id])
+  documents       Document[]
+
+  @@index([customerProfileId, createdAt(sort: Desc)])
+  @@index([status])
+}
+
+model Document {
+  id                 String       @id @default(cuid())
+  type               DocumentType
+  fileName           String
+  cloudinaryPublicId String
+  mimeType           String
+  fileSizeBytes      Int
+  customerProfileId  String?
+  quoteId            String?
+  orderId            String?
+  uploadedById       String
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  customerProfile CustomerProfile? @relation(fields: [customerProfileId], references: [id])
+  quote           Quote?           @relation(fields: [quoteId], references: [id])
+  order           Order?           @relation(fields: [orderId], references: [id])
+  uploadedBy      User             @relation("DocumentUploader", fields: [uploadedById], references: [id])
+
+  @@index([customerProfileId])
+  @@index([quoteId])
+  @@index([orderId])
+}
+
+/// Append-only. No update/delete path is exposed — see research.md §8.
+model ActivityLog {
+  id                String         @id @default(cuid())
+  customerProfileId String
+  actorId           String?
+  action            ActivityAction
+  description       String
+  metadata          Json?
+  createdAt         DateTime       @default(now())
+
+  customerProfile CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  actor           User?           @relation("ActivityActor", fields: [actorId], references: [id])
+
+  @@index([customerProfileId, createdAt(sort: Desc)])
+}
+
+/// Staff-only. Never included in any customer-facing query (FR-019).
+model InternalNote {
+  id                String   @id @default(cuid())
+  customerProfileId String
+  authorId          String
+  body              String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  customerProfile CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  author          User            @relation("NoteAuthor", fields: [authorId], references: [id])
+
+  @@index([customerProfileId, createdAt(sort: Desc)])
+}
