@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { clientEnv } from "@/lib/env";
+import { resolveBaseUrl } from "@/lib/base-url";
 import { LIVE_ROUTES } from "@/lib/site-config";
 
 /**
@@ -16,7 +16,7 @@ import { LIVE_ROUTES } from "@/lib/site-config";
  * to be behind auth and carry per-customer data.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = clientEnv.NEXT_PUBLIC_APP_URL.replace(/\/$/, "");
+  const base = resolveBaseUrl();
 
   return LIVE_ROUTES.map((r) => ({
     url: `${base}${r.href}`,

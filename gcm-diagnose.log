@@ -1,0 +1,210 @@
+﻿Diagnose log at 2026-08-07T22:11:58Z
+
+AppPath: C:\Program Files\Git\mingw64\bin\git-credential-manager.exe
+InstallDir: C:\Program Files\Git\mingw64\bin\
+Version: 2.9.0+194ba290ce533465310d50f811684ab180536ae7
+
+------------
+Diagnostic: Environment
+Skipped: False
+Success: True
+Exception: None
+Log:
+OSType: Windows
+OSVersion: 10.0 (build 26200)
+Reading environment variables... OK
+ Variables:
+SESSIONNAME=Console
+EFC_13320_3789132940=1
+MSYSTEM=MINGW64
+ProgramW6432=C:\Program Files
+EXEPATH=C:\Program Files\Git\bin
+PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 142 Stepping 12, GenuineIntel
+TMP=C:\Users\udesign\AppData\Local\Temp
+PROCESSOR_ARCHITECTURE=AMD64
+SYSTEMROOT=C:\WINDOWS
+CLAUDE_CODE_ENABLE_SDK_FILE_CHECKPOINTING=true
+ELECTRON_RUN_AS_NODE=1
+ProgramData=C:\ProgramData
+VSCODE_CWD=C:\Users\udesign\AppData\Local\Programs\Microsoft VS Code
+USERPROFILE=C:\Users\udesign
+PWD=D:/vibe code/Souwel
+USERDOMAIN=umaid
+PROCESSOR_REVISION=8e0c
+CLAUDE_CODE_EXECPATH=C:\Users\udesign\.vscode\extensions\anthropic.claude-code-2.1.224-win32-x64\resources\native-binary\claude.exe
+OLDPWD=D:/vibe code/Souwel
+TEMP=C:\Users\udesign\AppData\Local\Temp
+FPS_BROWSER_APP_PROFILE_STRING=Internet Explorer
+FPS_BROWSER_USER_PROFILE_STRING=Default
+LOGONSERVER=\\UMAID
+TERM=xterm-256color
+USERNAME=udesign
+SHELL=C:\Program Files\Git\bin\bash.exe
+CHROME_CRASHPAD_PIPE_NAME=\\.\pipe\crashpad_18340_LGXLGRAWGFFKYJIY
+OS=Windows_NT
+PLINK_PROTOCOL=ssh
+COMMONPROGRAMFILES=C:\Program Files\Common Files
+_=C:/Program Files/Git/mingw64/bin/git-credential-manager.exe
+NoDefaultCurrentDirectoryInExePath=1
+OneDrive=C:\Users\udesign\OneDrive
+LOCALAPPDATA=C:\Users\udesign\AppData\Local
+PATH=C:\Users\udesign\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\local\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\usr\bin;C:\Program Files\Git\mingw64\bin;C:\Program Files\Git\usr\bin;C:\Users\udesign\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0;C:\WINDOWS\System32\OpenSSH;C:\Program Files\Git\cmd;C:\Program Files\nodejs;C:\Users\udesign\.local\bin;C:\Users\udesign\AppData\Local\Programs\Python\Python312\Scripts;C:\Users\udesign\AppData\Local\Programs\Python\Python312;C:\Users\udesign\AppData\Local\Programs\Python\Launcher;C:\Users\udesign\AppData\Local\Microsoft\WindowsApps;C:\Users\udesign\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\udesign\AppData\Local\Microsoft\WinGet\Packages\astral-sh.uv_Microsoft.Winget.Source_8wekyb3d8bbwe;C:\Users\udesign\AppData\Roaming\npm;C:\Program Files\Git\usr\bin\vendor_perl;C:\Program Files\Git\usr\bin\core_perl;C:\Program Files\nodejs
+CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+ZES_ENABLE_SYSMAN=1
+PROCESSOR_LEVEL=6
+CLAUDE_PID=18100
+APPLICATION_INSIGHTS_NO_STATSBEAT=true
+AI_AGENT=claude-code_2-1-224_agent
+HOMEPATH=\Users\udesign
+EFC_13320_1262719628=1
+VSCODE_NLS_CONFIG={"userLocale":"en-us","osLocale":"en-pk","resolvedLanguage":"en","defaultMessagesFile":"C:\\Users\\udesign\\AppData\\Local\\Programs\\Microsoft VS Code\\df53daabb1\\resources\\app\\out\\nls.messages.json","locale":"en-us","availableLanguages":{}}
+CLAUDE_EFFORT=medium
+ALLUSERSPROFILE=C:\ProgramData
+CommonProgramW6432=C:\Program Files\Common Files
+MCP_CONNECTION_NONBLOCKING=true
+NUMBER_OF_PROCESSORS=8
+VSCODE_ESM_ENTRYPOINT=vs/workbench/api/node/extensionHostProcess
+COREPACK_ENABLE_AUTO_PIN=0
+PROGRAMFILES=C:\Program Files
+SHLVL=1
+VSCODE_HANDLES_UNCAUGHT_ERRORS=true
+CLAUDE_CODE_CHILD_SESSION=1
+DriverData=C:\Windows\System32\Drivers\DriverData
+HOMEDRIVE=C:
+VSCODE_PID=18340
+CLAUDE_AGENT_SDK_VERSION=0.3.224
+GIT_TRACE2_PARENT_SID=105e9724-3c9e-4ba0-976f-8e6574193cff
+CLAUDE_CODE_ENTRYPOINT=claude-vscode
+EFC_13320_2283032206=1
+CLAUDE_CODE_ENABLE_TASKS=0
+EFC_13320_2775293581=1
+MXC_BIN_DIR=c:\Users\udesign\AppData\Local\Programs\Microsoft VS Code\df53daabb1\resources\app\node_modules.asar.unpacked\@microsoft\mxc-sdk\bin
+VSCODE_CRASH_REPORTER_PROCESS_TYPE=extensionHost
+GIT_EDITOR=true
+PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC
+HOME=C:\Users\udesign
+VSCODE_IPC_HOOK=\\.\pipe\02a59517-1.132.0-main-sock
+ProgramFiles(x86)=C:\Program Files (x86)
+EFC_13320_4126798990=1
+PSModulePath=C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+APPDATA=C:\Users\udesign\AppData\Roaming
+SYSTEMDRIVE=C:
+COMPUTERNAME=UMAID
+EFC_13320_1592913036=1
+CLAUDE_CODE_SESSION_ID=2b6fab33-e362-485c-97c3-b9ea650f52a5
+COMSPEC=C:\WINDOWS\system32\cmd.exe
+CLAUDECODE=1
+WINDIR=C:\WINDOWS
+USERDOMAIN_ROAMINGPROFILE=umaid
+COPILOT_OTEL_FILE_EXPORTER_PATH=\\.\nul
+VSCODE_CODE_CACHE_PATH=C:\Users\udesign\AppData\Roaming\Code\CachedData\df53daabb18cd157bdb08c7f01c34df936cf12f4
+PUBLIC=C:\Users\Public
+VSCODE_L10N_BUNDLE_LOCATION=
+
+
+------------
+Diagnostic: File system
+Skipped: False
+Success: True
+Exception: None
+Log:
+Temporary directory is 'C:\Users\udesign\AppData\Local\Temp\'...
+Checking basic file I/O...
+Writing to temporary file 'C:\Users\udesign\AppData\Local\Temp\091d4144a8e0be5a7772c4c9'... OK
+Reading from temporary file 'C:\Users\udesign\AppData\Local\Temp\091d4144a8e0be5a7772c4c9'... OK
+Deleting temporary file 'C:\Users\udesign\AppData\Local\Temp\091d4144a8e0be5a7772c4c9'... OK
+Testing IFileSystem instance...
+UserHomePath: C:\Users\udesign
+UserDataDirectoryPath: C:\Users\udesign\.gcm
+GetCurrentDirectory(): D:\vibe code\Souwel
+
+------------
+Diagnostic: Networking
+Skipped: False
+Success: True
+Exception: None
+Log:
+Checking networking and HTTP stack...
+Creating HTTP client... OK
+IsNetworkAvailable: True
+Sending HEAD request to http://example.com... OK
+Sending HEAD request to https://example.com... OK
+Acquiring free TCP port... OK
+Testing local HTTP loopback connections...
+Creating new HTTP listener for http://localhost:56977/... OK
+Waiting for loopback connection... OK
+Writing response... OK
+Waiting for response data... OK
+Loopback connection data OK
+
+------------
+Diagnostic: Git
+Skipped: False
+Success: True
+Exception: None
+Log:
+Getting Git version... OK
+Git version is '2.55.0.windows.3'
+Locating current repository...Git repository at 'D:/vibe code/Souwel/.git'
+ OK
+Listing all Git configuration... OK
+Git configuration:
+file:C:/Program Files/Git/etc/gitconfig	diff.astextplain.textconv=astextplain
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.clean=git-lfs clean -- %f
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.smudge=git-lfs smudge -- %f
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.process=git-lfs filter-process
+file:C:/Program Files/Git/etc/gitconfig	filter.lfs.required=true
+file:C:/Program Files/Git/etc/gitconfig	http.sslbackend=schannel
+file:C:/Program Files/Git/etc/gitconfig	core.autocrlf=true
+file:C:/Program Files/Git/etc/gitconfig	core.fscache=true
+file:C:/Program Files/Git/etc/gitconfig	core.symlinks=false
+file:C:/Program Files/Git/etc/gitconfig	pull.rebase=false
+file:C:/Program Files/Git/etc/gitconfig	credential.helper=manager
+file:C:/Program Files/Git/etc/gitconfig	credential.https://dev.azure.com.usehttppath=true
+file:C:/Program Files/Git/etc/gitconfig	init.defaultbranch=master
+file:.git/config	core.repositoryformatversion=0
+file:.git/config	core.filemode=false
+file:.git/config	core.bare=false
+file:.git/config	core.logallrefupdates=true
+file:.git/config	core.symlinks=false
+file:.git/config	core.ignorecase=true
+file:.git/config	user.email=souwel01@gmail.com
+file:.git/config	user.name=Souwel
+file:.git/config	remote.origin.url=https://github.com/souwel01-oss/souwel.git
+file:.git/config	remote.origin.fetch=+refs/heads/*:refs/remotes/origin/*
+
+
+------------
+Diagnostic: Credential storage
+Skipped: False
+Success: True
+Exception: None
+Log:
+ICredentialStore instance is of type: CredentialStore
+Writing test credential... OK
+Reading test credential... OK
+Deleting test credential... OK
+
+------------
+Diagnostic: Microsoft authentication (AAD/MSA)
+Skipped: False
+Success: True
+Exception: None
+Log:
+Broker is not enabled.
+Gathering MSAL token cache data... OK
+CacheDirectory: C:\Users\udesign\AppData\Local\.IdentityService
+CacheFileName: msal.cache
+CacheFilePath: C:\Users\udesign\AppData\Local\.IdentityService\msal.cache
+Creating cache helper... OK
+Verifying MSAL token cache persistence... OK
+
+------------
+Diagnostic: GitHub API
+Skipped: False
+Success: True
+Exception: None
+Log:
+Using 'https://github.com/' as API target.
+Querying '/meta' endpoint... OK
+

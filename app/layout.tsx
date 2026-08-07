@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { Source_Sans_3, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+// Shared with app/sitemap.ts and app/robots.ts. It was inline here once, and
+// that is exactly how those two ended up emitting localhost URLs on the live
+// site while this file was correct.
+import { resolveBaseUrl } from "@/lib/base-url";
 import "./globals.css";
 
 /**
@@ -28,24 +32,6 @@ const heading = Playfair_Display({
  * mono stack in globals.css, which costs nothing and looks the same for the
  * incidental cases (tabular figures, code) it would ever be used for.
  */
-
-/**
- * Absolute base for canonicals and Open Graph URLs.
- *
- * The Vercel fallback is not belt-and-braces, it is the realistic case: forget
- * to set NEXT_PUBLIC_APP_URL on the deployment and every og:url and canonical
- * on the live site points at `http://localhost:3000`, which is both useless to
- * a crawler and an obvious tell in any social preview. Vercel injects
- * VERCEL_PROJECT_PRODUCTION_URL on its own, so the only way to end up on
- * localhost now is to actually be on localhost.
- */
-function resolveBaseUrl(): string {
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL)
-    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  return "http://localhost:3000";
-}
 
 export const metadata: Metadata = {
   metadataBase: new URL(resolveBaseUrl()),
