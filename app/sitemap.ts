@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { resolveBaseUrl } from "@/lib/base-url";
 import { LIVE_ROUTES } from "@/lib/site-config";
+import { PRODUCT_PAGE_SLUGS } from "@/lib/product-slugs";
 
 /**
  * sitemap.xml (NFR: SEO).
@@ -17,11 +18,21 @@ import { LIVE_ROUTES } from "@/lib/site-config";
  */
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = resolveBaseUrl();
+  const now = new Date();
 
-  return LIVE_ROUTES.map((r) => ({
-    url: `${base}${r.href}`,
-    lastModified: new Date(),
+  // LIVE_ROUTES covers everything that is not a product page. The product pages
+  // come from PRODUCT_PAGE_SLUGS — the same list the route's
+  // generateStaticParams builds from — so a product cannot exist as a page and
+  // be missing from the sitemap, or vice versa.
+  const pages = [
+    ...LIVE_ROUTES.map((r) => r.href),
+    ...PRODUCT_PAGE_SLUGS.map((slug) => `/products/${slug}`),
+  ];
+
+  return pages.map((href) => ({
+    url: `${base}${href}`,
+    lastModified: now,
     changeFrequency: "weekly" as const,
-    priority: r.href === "/" ? 1 : 0.7,
+    priority: href === "/" ? 1 : 0.7,
   }));
 }

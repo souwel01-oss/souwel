@@ -2,6 +2,7 @@
  * Static site configuration shared across marketing surfaces.
  * Category slugs here MUST match the seeded Category.slug values in prisma/seed.ts.
  */
+import { hasProductPage } from "@/lib/product-slugs";
 
 export const SITE = {
   name: "Souwel",
@@ -126,25 +127,20 @@ export function productSlug(name: string) {
 /**
  * Where a product name in the nav should link.
  *
- * Products with a real detail page go there. The rest fall back to an anchor on
- * their category page, which is where they will live once that page is built.
+ * Products with a real detail page go there. Anything without one falls back to
+ * an anchor on its category page — which is itself still unbuilt, so that branch
+ * is a placeholder for a placeholder. It stays because it is the honest target:
+ * that is where the content is planned to live.
  *
- * Deliberately NOT "point everything at /products/<slug>". Only one of the
- * twenty-five products has a page today, and routing the other twenty-four at a
- * route that returns 404 would trade one kind of dead link for a worse one — at
- * least the category anchor is where the content is actually planned to be.
- *
- * The lookup lives here rather than importing lib/product-data directly into
- * the header so the nav does not pull the full specification blob of every
- * product into the client bundle. Keep the two in step.
+ * The slug list comes from lib/product-slugs, which both this file and
+ * lib/product-data import. It is deliberately a separate module: the header
+ * cannot import product-data without dragging every product's specification
+ * blob into the client bundle, and duplicating the list here is what this
+ * arrangement exists to prevent.
  */
-const PRODUCTS_WITH_PAGES = new Set(["bedding-linens"]);
-
 export function productHref(categorySlug: string, name: string) {
   const slug = productSlug(name);
-  return PRODUCTS_WITH_PAGES.has(slug)
-    ? `/products/${slug}`
-    : `/categories/${categorySlug}#${slug}`;
+  return hasProductPage(slug) ? `/products/${slug}` : `/categories/${categorySlug}#${slug}`;
 }
 
 /**
@@ -161,11 +157,15 @@ export function productHref(categorySlug: string, name: string) {
  *
  * So those two read from here instead. Move an entry up as its route is built;
  * the two consumers then pick it up with no further edits.
+ *
+ * PRODUCT PAGES ARE NOT LISTED HERE, deliberately. There are twenty-four of
+ * them and the two consumers want different things from that fact:
+ *   - sitemap.xml wants every one, so it composes this list with
+ *     PRODUCT_PAGE_SLUGS itself
+ *   - the 404 page wants a short set of ways out; twenty-four product links
+ *     under "helpful links" is a catalogue, not help
  */
-export const LIVE_ROUTES: { href: string; label: string }[] = [
-  { href: "/", label: "Homepage" },
-  { href: "/products/bedding-linens", label: "Bedding Linens" },
-];
+export const LIVE_ROUTES: { href: string; label: string }[] = [{ href: "/", label: "Homepage" }];
 
 /** Not yet built. Kept beside LIVE_ROUTES so the gap is visible in one place. */
 export const PLANNED_ROUTES = [
