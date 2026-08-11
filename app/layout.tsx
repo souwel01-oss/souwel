@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Source_Sans_3, Playfair_Display } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 // Shared with app/sitemap.ts and app/robots.ts. It was inline here once, and
 // that is exactly how those two ended up emitting localhost URLs on the live
 // site while this file was correct.
@@ -152,8 +153,13 @@ try{if(location.pathname==='/'&&!matchMedia('(prefers-reduced-motion: reduce)').
         mismatch this can hide.
       */}
       <body suppressHydrationWarning className="flex min-h-full flex-col">
-        {children}
-        <Toaster />
+        {/* Owns the light/dark class on <html>. Wraps everything, including the
+            Toaster, so a toast raised on a dark page is not the one white
+            rectangle on screen. */}
+        <ThemeProvider>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );

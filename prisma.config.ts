@@ -1,5 +1,5 @@
 import { config as loadEnv } from "dotenv";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 // Next.js reads .env.local; plain `dotenv/config` only reads .env.
 // Load both so the Prisma CLI sees the same values the app does.

@@ -1,34 +1,43 @@
-import Link from "next/link";
 import type { Metadata } from "next";
-
-/**
- * Sign-in scaffold. Implemented in Phase 4 (T051).
- *
- * The task ID stays HERE, in the comment, and out of the rendered copy. It was
- * previously printed on the page — and this route is linked from "SIGN IN" in
- * the site header, so a customer clicking it was shown an internal ticket
- * reference. Placeholder pages that are reachable from public navigation have
- * to read as unfinished product, not as a leaked backlog.
- */
+import { redirect } from "next/navigation";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { enabledSocialProviders } from "@/lib/auth";
+import { getSessionUser } from "@/lib/auth/session";
+import { safeNext } from "@/lib/auth/redirect";
 
 export const metadata: Metadata = {
   title: "Sign In",
+  // Sign-in pages carry no content worth ranking and attract credential-stuffing
+  // traffic when indexed.
   robots: { index: false, follow: false },
 };
 
-export default function LoginPlaceholderPage() {
+/**
+ * `next` is validated before it ever reaches a component — see
+ * lib/auth/redirect.ts. It arrives from the query string and would otherwise
+ * be a working open redirect on a page people are about to type a password
+ * into.
+ *
+ * Which social buttons render is decided HERE rather than in the client
+ * component, because only the server can see whether the credentials exist.
+ */
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; verified?: string; reset?: string }>;
+}) {
+  const params = await searchParams;
+  const next = safeNext(params.next);
+
+  // Already signed in — a sign-in form is not what this person needs.
+  if (await getSessionUser()) redirect(next);
+
   return (
-    <main className="mx-auto w-full max-w-md px-4 py-16">
-      <h1 className="font-heading text-3xl">Sign In</h1>
-      <p className="text-muted-foreground mt-3">
-        Customer sign-in is not available yet. You can still request a quote without an account.
-      </p>
-      <Link
-        href="/"
-        className="text-primary focus-visible:ring-ring mt-6 inline-block rounded-sm text-sm underline-offset-4 hover:underline focus-visible:ring-2 focus-visible:outline-none"
-      >
-        Back to homepage
-      </Link>
-    </main>
+    <LoginForm
+      providers={enabledSocialProviders}
+      next={next}
+      justVerified={params.verified === "1"}
+      justReset={params.reset === "1"}
+    />
   );
 }

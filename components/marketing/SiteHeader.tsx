@@ -7,7 +7,8 @@ import { ChevronDown, Menu, X } from "lucide-react";
 import { CATEGORY_PRODUCTS, MAIN_NAV, SITE, productHref } from "@/lib/site-config";
 import { CategoryMegaMenu } from "@/components/marketing/CategoryMegaMenu";
 import { SouwelLogo } from "@/components/marketing/SouwelLogo";
-import { Button } from "@/components/ui/button";
+import { DrawerAuth, HeaderAuth } from "@/components/auth/HeaderAuth";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 
 /** Category slug a nav href points at, or null if it is not a category link. */
@@ -262,40 +263,29 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
           </nav>
         </div>
 
-        {/* Desktop actions */}
-        <div className="hidden shrink-0 items-center gap-5 xl:flex">
-          <Link
-            href="/login"
-            className="text-ivory/60 hover:text-ivory text-[11.5px] font-semibold tracking-[0.11em] uppercase transition-colors"
-          >
-            Sign In
-          </Link>
-
-          {/* Hairline between the quiet link and the emphasised one, so they
-              do not read as a pair of equal actions. */}
-          <span aria-hidden className="h-5 w-px bg-white/15" />
-
-          <Button
-            asChild
-            size="sm"
-            variant="outline"
-            className="border-accent-gold/70 text-accent-gold hover:bg-accent-gold hover:text-navy hover:border-accent-gold glow-ring-gold nav-cta h-9 rounded-[6px] bg-transparent px-5 text-[11.5px] font-semibold tracking-[0.11em] uppercase shadow-[0_0_16px_-6px_rgb(201_168_76/0.55)]"
-          >
-            <Link href="/register">Register</Link>
-          </Button>
+        {/* Desktop actions — theme toggle, then either Sign In/Register or the
+            signed-in account menu. HeaderAuth owns that decision; see the note
+            at the top of it for why the session is read on the client. */}
+        <div className="hidden shrink-0 items-center xl:flex">
+          <HeaderAuth />
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className="self-center rounded-md p-2.5 hover:bg-white/10 xl:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-nav"
-          aria-label={open ? "Close menu" : "Open menu"}
-        >
-          {open ? <X className="size-6" /> : <Menu className="size-6" />}
-        </button>
+        {/* Mobile: theme toggle stays on the bar rather than being buried in
+            the drawer — it is a display preference, wanted at the moment the
+            screen is too bright, not after opening a navigation menu. */}
+        <div className="flex items-center gap-1 xl:hidden">
+          <ThemeToggle tone="onDark" />
+          <button
+            type="button"
+            onClick={() => setOpen((v) => !v)}
+            className="self-center rounded-md p-2.5 hover:bg-white/10"
+            aria-expanded={open}
+            aria-controls="mobile-nav"
+            aria-label={open ? "Close menu" : "Open menu"}
+          >
+            {open ? <X className="size-6" /> : <Menu className="size-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Travelling highlight on the bar's gold hairline. A real element rather
@@ -403,22 +393,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
           })}
 
           <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3">
-            <Link
-              href="/login"
-              onClick={() => setOpen(false)}
-              className="text-ivory/60 hover:text-ivory rounded-md px-3 py-3.5 text-xs font-semibold tracking-[0.11em] uppercase"
-            >
-              Sign In
-            </Link>
-            <Button
-              asChild
-              variant="outline"
-              className="border-accent-gold/70 text-accent-gold hover:bg-accent-gold hover:text-navy glow-ring-gold h-11 rounded-[6px] bg-transparent text-xs font-semibold tracking-[0.11em] uppercase"
-            >
-              <Link href="/register" onClick={() => setOpen(false)}>
-                Register
-              </Link>
-            </Button>
+            <DrawerAuth onNavigate={() => setOpen(false)} />
           </div>
         </nav>
       </div>
