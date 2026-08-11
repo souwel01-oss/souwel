@@ -122,11 +122,24 @@
   --input: #e5e0d8;
   --ring: #0b97ff; /* focus ring = brand blue */
 
-  --chart-1: #0b97ff;
-  --chart-2: #0a2540;
-  --chart-3: #c9a84c;
-  --chart-4: #4a5c2f;
-  --chart-5: #8b4513;
+  /* Chart series 1 and 2 are NOT the raw brand blue and gold, and that is the
+     result of measurement rather than preference.
+
+     Both were run through the categorical-palette checks against the card
+     surface: OKLCH lightness band, chroma floor, colour-vision-deficiency
+     separation between the adjacent pair, normal-vision separation, and
+     contrast against the surface. Raw #0b97ff and #c9a84c separate fine under
+     every CVD simulation (ΔE 27 protan, 20 tritan) but land at 2.95:1 and
+     2.21:1 against an ivory card — under the 3:1 a mark needs to be seen at
+     all. Deepened one step each, they clear it with the hue intact.
+
+     Series 3-5 are unvalidated and unused; validate them before a third series
+     ever ships. */
+  --chart-1: #0b7ad4; /* leads — deepened brand blue */
+  --chart-2: #9a7c2c; /* orders — deepened warm gold */
+  --chart-3: #4a5c2f;
+  --chart-4: #8b4513;
+  --chart-5: #6d1a2a;
 
   --radius: 0.5rem;
 
@@ -199,11 +212,16 @@
   --input: rgb(250 246 239 / 0.2);
   --ring: #4fb3ff;
 
-  --chart-1: #4fb3ff;
-  --chart-2: #d8bc6a;
-  --chart-3: #f7e7ce;
-  --chart-4: #7fa05c;
-  --chart-5: #c98a4b;
+  /* Re-stepped for the dark card, not brightened versions of the light pair.
+     The dark lightness band is narrower (L 0.48-0.67) and #4fb3ff / #d8bc6a
+     sit above it at 0.74 and 0.80 — they glare on navy. These two measure
+     inside the band, keep chroma, separate by ΔE 23.7 protan / 18.3 tritan,
+     and clear 3:1 against #0a2540. */
+  --chart-1: #1e90e0;
+  --chart-2: #b0913f;
+  --chart-3: #7fa05c;
+  --chart-4: #c98a4b;
+  --chart-5: #a8324a;
 
   /* The sidebar was already navy-on-ivory in light mode, so in dark it needs to
      separate from a navy page rather than from an ivory one. */

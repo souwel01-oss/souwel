@@ -2,6 +2,7 @@ import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect, unstable_rethrow } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { isAdmin, isStaff } from "@/lib/auth/roles";
 
 export type SessionUser = {
   id: string;
@@ -80,6 +81,39 @@ export async function requireUser(currentPath: string): Promise<SessionUser> {
     redirect(`/login?next=${encodeURIComponent(currentPath)}`);
   }
   return user;
+}
+
+/**
+ * The signed-in user if they are Admin or Sales, otherwise null.
+ *
+ * WHY THIS RETURNS NULL RATHER THAN REDIRECTING, unlike requireRole below.
+ * These two are for SERVER ACTIONS. An action is called by JavaScript that is
+ * waiting for a result; a thrown NEXT_REDIRECT there surfaces as an
+ * unexplained page jump instead of "you are not allowed to do that". Pages
+ * redirect, actions refuse.
+ *
+ * EVERY CRM ACTION CALLS ONE OF THESE, including the ones behind a guarded
+ * layout. The layout guard protects the PAGE. A Server Action is its own
+ * public HTTP endpoint with its own id, reachable by anyone who has ever
+ * loaded the bundle — a customer who signs in once can post to the role-change
+ * action forever unless the action itself checks.
+ */
+export async function getStaffUser(): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  return user && isStaff(user.role) ? user : null;
+}
+
+/**
+ * The signed-in user if they are an Admin, otherwise null.
+ *
+ * Sales deliberately fails this. Sales can move a quote through its statuses
+ * but cannot grant anyone a role — including themselves, which is the actual
+ * risk. A Sales account that can promote itself to Admin is not a Sales
+ * account.
+ */
+export async function getAdminUser(): Promise<SessionUser | null> {
+  const user = await getSessionUser();
+  return user && isAdmin(user.role) ? user : null;
 }
 
 /** Guard for staff-only surfaces (the CRM). */

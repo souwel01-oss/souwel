@@ -67,6 +67,28 @@ the account they just created.
 
 ---
 
+## Roles
+
+| | Sales | Admin |
+| --- | :---: | :---: |
+| View users, leads, quotes, orders | ✅ | ✅ |
+| Change a quote or lead status | ✅ | ✅ |
+| Export users and leads to Excel | ✅ | ✅ |
+| Change a user's role | — | ✅ |
+| Activate / deactivate an account | — | ✅ |
+
+Sales cannot grant roles **including to itself** — a Sales account that can
+promote itself to Admin is not a Sales account. An Admin also cannot change
+their own role or deactivate their own account: if they were the last Admin,
+the controls become unreachable by anyone and the only fix is raw SQL.
+
+Deactivating an account deletes its sessions, so the person is signed out
+immediately rather than whenever their cookie happens to expire.
+
+The live readout of who can do what is at **/admin/settings**.
+
+---
+
 ## How access control works
 
 Two layers, and only one of them is a security boundary.
@@ -74,9 +96,17 @@ Two layers, and only one of them is a security boundary.
 | Layer | File | What it does |
 | --- | --- | --- |
 | Middleware | `middleware.ts` | Checks a session cookie is **present**. Redirects with the intended path in `?next=`. **Not a security check** — it never validates the cookie. |
-| Server guard | `app/(portal)/layout.tsx`, `app/(crm)/layout.tsx` | Verifies the session against the store via `requireUser` / `requireRole`. **This is the boundary.** |
+| Server guard | `app/(portal)/layout.tsx`, `app/(crm)/layout.tsx` | Verifies the session against the store via `requireUser` / `requireRole`. **This is the boundary for pages.** |
+| Action guard | every function in `app/(crm)/actions.ts` | `getStaffUser()` / `getAdminUser()` on every call. **This is the boundary for mutations.** |
 
 A forged or expired cookie passes the middleware and is rejected by the layout.
+
+The third row is not belt-and-braces. A Server Action is its own public POST
+endpoint with a stable id — the layout guard decides who can *see* a button,
+and nothing more. Anyone who has loaded the bundle once can call these for as
+long as their session lasts, so the action checks for itself. Same for
+`/admin/export`, which is a Route Handler: a URL that returns the entire
+customer list as a spreadsheet.
 
 Other invariants worth knowing:
 
