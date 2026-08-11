@@ -72,31 +72,80 @@ export async function getOrders(userId: string, take = 25): Promise<PortalOrder[
     // Prisma Decimal into a Client Component throws — it is not a plain value —
     // and converting with Number() would quietly lose precision on a money
     // column.
-    totalAmount: o.totalAmount.toString(),
+    totalAmount: formatAmount(o.totalAmount.toString()),
     createdAt: o.createdAt,
     itemCount: o.quote._count.items,
   }));
 }
 
-export type PortalQuoteSummary = {
-  requested: number;
-  quoted: number;
-  accepted: number;
+/**
+ * Money, formatted for a table column.
+ *
+ * `Decimal.toString()` alone rendered "7320.5" and "24980" next to "3610.75" —
+ * a total that reads as seven thousand three hundred and twenty point five,
+ * and a five-figure sum with nothing to break up the digits. Grouping and a
+ * fixed two decimals are the minimum for a column people scan down.
+ *
+ * NO CURRENCY SYMBOL, because there is no currency to show. Order has an
+ * amount and no currency field, and this is an exporter whose orders will not
+ * all be in one currency — so a hard-coded "$" or "PKR" would be a guess
+ * printed next to someone's money. The header says Total; the unit is a
+ * decision for the schema, not for this function.
+ *
+ * Formatted here rather than in the component so the server and the client
+ * cannot disagree about it — Intl in a component renders under the server's
+ * locale first and the browser's on hydration, which is a mismatch waiting to
+ * happen.
+ */
+function formatAmount(value: string): string {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return value;
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(n);
+}
+
+export type PortalSummary = {
+  quotesAwaitingPrice: number;
+  quotesReadyToReview: number;
+  ordersInProgress: number;
 };
 
-export async function getQuoteSummary(userId: string): Promise<PortalQuoteSummary> {
-  const grouped = await prisma.quote.groupBy({
-    by: ["status"],
-    where: { customerProfile: { userId } },
-    _count: { _all: true },
-  });
+/**
+ * The three counters on the dashboard.
+ *
+ * `ordersInProgress` IS ITS OWN QUERY and that is the point. It used to be
+ * `recentOrders.length` — which is the length of a list capped at four and
+ * containing every status, so a customer with two live orders and twenty
+ * finished ones saw "Orders in progress: 4". The label was a lie in both
+ * directions at once: it counted completed orders, and it stopped counting at
+ * four.
+ *
+ * In progress means not yet delivered and not cancelled — PENDING or
+ * IN_PRODUCTION. SHIPPED is deliberately excluded: from the customer's side
+ * that order has left the factory and is no longer something Souwel is working
+ * on.
+ */
+export async function getSummary(userId: string): Promise<PortalSummary> {
+  const scope = { customerProfile: { userId } };
 
-  const count = (status: string) =>
-    grouped.find((g) => g.status === status)?._count._all ?? 0;
+  const [quotes, ordersInProgress] = await Promise.all([
+    prisma.quote.groupBy({
+      by: ["status"],
+      where: scope,
+      _count: { _all: true },
+    }),
+    prisma.order.count({
+      where: { ...scope, status: { in: ["PENDING", "IN_PRODUCTION"] } },
+    }),
+  ]);
+
+  const count = (status: string) => quotes.find((q) => q.status === status)?._count._all ?? 0;
 
   return {
-    requested: count("REQUESTED"),
-    quoted: count("QUOTED"),
-    accepted: count("ACCEPTED"),
+    quotesAwaitingPrice: count("REQUESTED"),
+    quotesReadyToReview: count("QUOTED"),
+    ordersInProgress,
   };
 }

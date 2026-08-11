@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight, FileText, Package, ShieldCheck, User } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { firstNameOf } from "@/lib/auth/user";
-import { getOrders, getProfile, getQuoteSummary } from "@/lib/db/portal";
+import { getOrders, getProfile, getSummary, type PortalSummary } from "@/lib/db/portal";
 import { Card, PortalPage } from "@/components/portal/Surface";
 import { OrderStatusBadge } from "@/components/portal/OrderStatusBadge";
 import { FormAlert } from "@/components/auth/fields";
@@ -22,14 +22,18 @@ export default async function DashboardPage() {
    * independent error banners for one outage is noise.
    */
   let profile = null;
-  let quotes = { requested: 0, quoted: 0, accepted: 0 };
+  let summary: PortalSummary = {
+    quotesAwaitingPrice: 0,
+    quotesReadyToReview: 0,
+    ordersInProgress: 0,
+  };
   let recentOrders: Awaited<ReturnType<typeof getOrders>> = [];
   let loadFailed = false;
 
   try {
-    [profile, quotes, recentOrders] = await Promise.all([
+    [profile, summary, recentOrders] = await Promise.all([
       getProfile(user.id),
-      getQuoteSummary(user.id),
+      getSummary(user.id),
       getOrders(user.id, 4),
     ]);
   } catch (error) {
@@ -37,10 +41,13 @@ export default async function DashboardPage() {
     loadFailed = true;
   }
 
+  // Every figure here is counted by its own query. "Orders in progress" was
+  // once recentOrders.length, which is a list capped at four containing every
+  // status — see the note on getSummary.
   const stats = [
-    { label: "Quotes awaiting a price", value: quotes.requested, icon: FileText },
-    { label: "Quotes ready to review", value: quotes.quoted, icon: ShieldCheck },
-    { label: "Orders in progress", value: recentOrders.length, icon: Package },
+    { label: "Quotes awaiting a price", value: summary.quotesAwaitingPrice, icon: FileText },
+    { label: "Quotes ready to review", value: summary.quotesReadyToReview, icon: ShieldCheck },
+    { label: "Orders in progress", value: summary.ordersInProgress, icon: Package },
   ];
 
   return (
