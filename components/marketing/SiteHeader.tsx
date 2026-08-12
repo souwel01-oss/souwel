@@ -46,6 +46,8 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
   /** Mobile drawer: which category's product list is expanded. */
   const [drawerOpen, setDrawerOpen] = useState<string | null>(null);
   const timer = useRef<number | undefined>(undefined);
+  /** The hamburger/X button, so Escape can hand focus back to it. */
+  const drawerToggle = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
   const isDark = variant === "dark";
 
@@ -109,6 +111,30 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [menu, setNow]);
+
+  /**
+   * Escape closes the mobile drawer.
+   *
+   * The desktop mega-menu above has done this all along; the drawer had no
+   * handler, so once it was open the ONLY way out was to find the X. Escape is
+   * the standard dismiss for anything that covers the page, and a visitor who
+   * presses it and sees nothing happen reasonably concludes the page is stuck.
+   *
+   * Focus returns to the toggle, which is the same button in its closed state,
+   * so the next Tab continues from the header rather than restarting at the top
+   * of the document.
+   */
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      setDrawerOpen(null);
+      drawerToggle.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
 
   /**
    * ArrowDown from a trigger moves focus into its panel.
@@ -277,6 +303,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
           <ThemeToggle tone="onDark" />
           <button
             type="button"
+            ref={drawerToggle}
             onClick={() => setOpen((v) => !v)}
             className="self-center rounded-md p-2.5 hover:bg-white/10"
             aria-expanded={open}

@@ -165,15 +165,14 @@ export function productHref(categorySlug: string, name: string) {
  *   - the 404 page wants a short set of ways out; twenty-four product links
  *     under "helpful links" is a catalogue, not help
  */
-export const LIVE_ROUTES: { href: string; label: string }[] = [{ href: "/", label: "Homepage" }];
+export const LIVE_ROUTES: { href: string; label: string }[] = [
+  { href: "/", label: "Homepage" },
+  ...CATEGORIES.map((c) => ({ href: `/categories/${c.slug}`, label: c.name })),
+  { href: "/quote", label: "Request a Quote" },
+];
 
 /** Not yet built. Kept beside LIVE_ROUTES so the gap is visible in one place. */
-export const PLANNED_ROUTES = [
-  "/about",
-  "/contact",
-  "/quote",
-  ...CATEGORIES.map((c) => `/categories/${c.slug}`),
-] as const;
+export const PLANNED_ROUTES = ["/about", "/contact"] as const;
 
 /**
  * Header navigation. Uses each category's `shortName`, not `name`: the header
