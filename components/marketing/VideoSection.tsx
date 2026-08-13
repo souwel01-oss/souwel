@@ -1,4 +1,3 @@
-import { Atmosphere } from "@/components/marketing/Atmosphere";
 import { LiteYouTube } from "@/components/marketing/LiteYouTube";
 
 /**
@@ -41,25 +40,23 @@ export function VideoSection() {
   const single = PROMO_VIDEOS.length === 1;
 
   return (
+    /* Full bleed: no section padding, no container, no frame and no rounding,
+       so the footage runs edge to edge and none of the navy shows around it.
+       The navy stays as the element's own background only so there is no white
+       flash while the poster frame decodes. */
     <section
       aria-label="Souwel promotional videos"
-      className="bg-navy text-ivory relative isolate overflow-hidden py-16 sm:py-20 lg:py-24"
+      className="bg-navy text-ivory relative isolate overflow-hidden"
     >
-      <Atmosphere variant="section" />
-
-      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className={`mx-auto grid gap-6 lg:gap-8 ${single ? "max-w-3xl" : "lg:grid-cols-2"}`}>
-          {PROMO_VIDEOS.map((video) => (
-            <div
-              key={video.videoId}
-              /* Thin gold frame, the same detail the product pages and the
-                 category arches use around photography. */
-              className="overflow-hidden rounded-xl ring-1 ring-[color-mix(in_srgb,var(--color-accent-gold)_38%,transparent)]"
-            >
-              <LiteYouTube videoId={video.videoId} title={video.title} poster="maxresdefault" />
-            </div>
-          ))}
-        </div>
+      <div className={single ? "" : "grid lg:grid-cols-2"}>
+        {PROMO_VIDEOS.map((video) => (
+          <LiteYouTube
+            key={video.videoId}
+            videoId={video.videoId}
+            title={video.title}
+            poster="maxresdefault"
+          />
+        ))}
       </div>
     </section>
   );

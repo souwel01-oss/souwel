@@ -36,9 +36,11 @@ export function LiteYouTube({
   const [playing, setPlaying] = useState(false);
 
   return (
-    <div
-      className={`relative aspect-video w-full overflow-hidden rounded-lg bg-black/40 ${className ?? ""}`}
-    >
+    /* No border radius here on purpose: the caller decides. This used to
+       hardcode `rounded-lg`, which a full-bleed usage cannot undo — two
+       utilities of equal specificity are resolved by stylesheet order, not by
+       the order they appear in the class string. */
+    <div className={`relative aspect-video w-full overflow-hidden bg-black/40 ${className ?? ""}`}>
       {playing ? (
         <iframe
           className="absolute inset-0 h-full w-full"
