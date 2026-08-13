@@ -52,43 +52,50 @@ const VIEW_W = 1000;
 const VIEW_H = 541;
 
 type Node = {
-  name: string;
-  /** States the region covers — this is the tooltip's second line. */
+  /** The city itself — the tooltip's first line, and what the gold marks. */
+  city: string;
+  /** The region it serves, kept because the card still says "6 REGIONS". */
+  region: string;
+  /** States the region covers — the tooltip's third line. */
   states: string;
   x: number;
   y: number;
 };
 
-/** Regional nodes, projected from real lat/lon. All weighted equally — the map
- *  deliberately does not single out a primary manufacturing site. */
+/**
+ * Destination cities, projected from real lat/lon.
+ *
+ * HOUSTON IS INDEX 0 AND THAT IS LOAD-BEARING. Every route is drawn from
+ * NODES[0] outward, so moving it out of first position silently rewires the
+ * network instead of merely reordering a list.
+ *
+ * The coordinates are unchanged from the regional version that preceded this —
+ * they were already projected to the city at the centre of each region, so
+ * naming them is the only thing that moved.
+ */
+const HUB = 0;
+
 const NODES: Node[] = [
+  { city: "Houston", region: "South Central", states: "TX · OK · LA", x: 482.1, y: 359.7 },
   // Nudged in from the true Seattle projection (45.6, 42.6). That point is
   // inside the boundary, but only just — the marker's halo straddled the corner
   // and read as sitting off the coast.
-  { name: "Pacific Northwest", states: "WA · OR · ID", x: 56, y: 58 },
-  { name: "West Coast", states: "CA · NV · AZ", x: 115.6, y: 332.5 },
-  { name: "South Central", states: "TX · OK · LA", x: 482.1, y: 359.7 },
-  { name: "Great Lakes", states: "IL · IN · OH · MI", x: 638.8, y: 165.1 },
-  { name: "Southeast", states: "GA · FL · SC · AL", x: 694.2, y: 338.9 },
-  { name: "Northeast", states: "NY · NJ · MA · PA", x: 871.8, y: 190.1 },
+  { city: "Seattle", region: "Pacific Northwest", states: "WA · OR · ID", x: 56, y: 58 },
+  { city: "Los Angeles", region: "West Coast", states: "CA · NV · AZ", x: 115.6, y: 332.5 },
+  { city: "Chicago", region: "Great Lakes", states: "IL · IN · OH · MI", x: 638.8, y: 165.1 },
+  { city: "Atlanta", region: "Southeast", states: "GA · FL · SC · AL", x: 694.2, y: 338.9 },
+  { city: "New York", region: "Northeast", states: "NY · NJ · MA · PA", x: 871.8, y: 190.1 },
 ];
 
 /**
- * Which regions are drawn as connected.
+ * Hub and spoke: every route starts at Houston and ends at one city.
  *
- * A line between every pair would be 15 curves and pure noise. This is a spine
- * — coast to coast through the middle, with the two eastern regions closing the
- * loop — which is what a distribution network actually looks like and keeps the
- * middle of the map from filling up.
+ * This replaced a chain that ran coast to coast and closed a loop in the east.
+ * A chain says "these places are connected to each other"; the claim here is
+ * that one origin supplies all of them, and a viewer reads direction from the
+ * shape long before they read an arrowhead.
  */
-const LINKS: [number, number][] = [
-  [0, 1], // Pacific Northwest -> West Coast
-  [1, 2], // West Coast -> South Central
-  [2, 3], // South Central -> Great Lakes
-  [2, 4], // South Central -> Southeast
-  [3, 5], // Great Lakes -> Northeast
-  [4, 5], // Southeast -> Northeast
-];
+const LINKS: number[] = NODES.map((_, i) => i).filter((i) => i !== HUB);
 
 /**
  * Quadratic arc between two nodes.
@@ -98,15 +105,33 @@ const LINKS: [number, number][] = [
  * amount regardless of length, and long transcontinental runs do not flatten
  * out into straight lines while short ones balloon.
  */
-function arc(a: Node, b: Node, bow = 0.16) {
+function arc(a: Node, b: Node, bow = 0.1, trimStart = 15, trimEnd = 17) {
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
   const dx = b.x - a.x;
   const dy = b.y - a.y;
   // Perpendicular, consistently to one side so the arcs never cross each other.
+  // The bow is shallower than the chain version used: five curves leaving one
+  // point fan out on their own, and the deeper bow bent them back across each
+  // other around the hub.
   const cx = mx + dy * bow;
   const cy = my - dx * bow;
-  return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
+
+  // Pull both ends back along the curve's own tangent — which at an endpoint of
+  // a quadratic is the line to the control point. Without this the route starts
+  // underneath Houston's marker and its arrowhead lands on top of the
+  // destination's, so the two brightest things on the map sit on each other.
+  const trim = (from: { x: number; y: number }, toward: { x: number; y: number }, by: number) => {
+    const vx = toward.x - from.x;
+    const vy = toward.y - from.y;
+    const len = Math.hypot(vx, vy) || 1;
+    return { x: from.x + (vx / len) * by, y: from.y + (vy / len) * by };
+  };
+
+  const start = trim(a, { x: cx, y: cy }, trimStart);
+  const end = trim(b, { x: cx, y: cy }, trimEnd);
+
+  return `M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`;
 }
 
 /**
@@ -226,7 +251,7 @@ export function CoverageMapGraphic() {
           viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
           className="absolute inset-0 h-full w-full overflow-visible"
           role="img"
-          aria-label="Dot-matrix map of the continental United States showing six regional distribution areas"
+          aria-label="Dot-matrix map of the continental United States. Houston is the central distribution hub, with routes running out to Seattle, Los Angeles, Chicago, Atlanta and New York."
         >
           <defs>
             {/* Light dots on a dark field, the inverse of the previous version. */}
@@ -280,6 +305,24 @@ export function CoverageMapGraphic() {
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
+
+            {/* Arrowhead at each route's destination.
+                `orient="auto"` turns it to the path's tangent, so one marker
+                definition serves all five spokes at whatever angle they arrive.
+                It is deliberately NOT on the bloomed copy of the path: a filter
+                applies to markers too, and a blurred arrowhead is a smudge. */}
+            <marker
+              id="coverage-arrow"
+              viewBox="0 0 10 10"
+              refX="8"
+              refY="5"
+              markerWidth="5.5"
+              markerHeight="5.5"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M 0 0.6 L 9.4 5 L 0 9.4 L 2.2 5 Z" fill="#E4C778" />
+            </marker>
           </defs>
 
           <g clipPath="url(#coverage-us)">
@@ -311,29 +354,44 @@ export function CoverageMapGraphic() {
               there, and a short bright dash that travels it. The travelling dash
               is the only thing GSAP touches — the base line is static so the
               network still reads with JS off or under reduced motion. */}
+          {/* Routes. Three passes per spoke, because one path cannot be both
+              bloomed and carry a crisp arrowhead — an SVG filter applies to the
+              marker as well, and a blurred arrowhead is just a smudge.
+
+              1. a soft gold glow under the line
+              2. the crisp line, which owns the arrowhead
+              3. the travelling pulse, the only thing GSAP touches
+
+              The base passes are static, so the network still reads with JS off
+              or under reduced motion. */}
           <g fill="none" strokeLinecap="round">
-            {LINKS.map(([a, b]) => (
+            {LINKS.map((to) => (
               <path
-                key={`base-${a}-${b}`}
-                d={arc(NODES[a], NODES[b])}
-                stroke="#66C0FF"
-                // Solid and bloomed, not a hairline dash. The first pass used
-                // `stroke-dasharray="3 6"` at 0.22 opacity and the routes were
-                // effectively invisible over the dot field — the only thing
-                // legible was the travelling pulse, which then read as a stray
-                // fragment sliding across the map with no line under it.
-                strokeOpacity="0.38"
-                strokeWidth="1.3"
+                key={`glow-${to}`}
+                d={arc(NODES[HUB], NODES[to])}
+                stroke="#C9A84C"
+                strokeOpacity="0.3"
+                strokeWidth="2.2"
                 filter="url(#coverage-bloom-soft)"
               />
             ))}
-            {LINKS.map(([a, b]) => (
+            {LINKS.map((to) => (
               <path
-                key={`pulse-${a}-${b}`}
+                key={`base-${to}`}
+                d={arc(NODES[HUB], NODES[to])}
+                stroke="#D9BC6B"
+                strokeOpacity="0.72"
+                strokeWidth="1.25"
+                markerEnd="url(#coverage-arrow)"
+              />
+            ))}
+            {LINKS.map((to) => (
+              <path
+                key={`pulse-${to}`}
                 data-map="pulse"
-                d={arc(NODES[a], NODES[b])}
-                stroke="#9BD6FF"
-                strokeWidth="2"
+                d={arc(NODES[HUB], NODES[to])}
+                stroke="#F4E0A6"
+                strokeWidth="2.4"
                 strokeOpacity="0"
                 filter="url(#coverage-bloom-soft)"
               />
@@ -341,62 +399,90 @@ export function CoverageMapGraphic() {
           </g>
         </svg>
 
-        {/* Markers */}
-        {NODES.map((node, i) => (
-          <button
-            key={node.name}
-            type="button"
-            data-map="marker"
-            aria-label={`${node.name} distribution region, covering ${node.states.replace(/ · /g, ", ")}`}
-            style={{
-              left: `${(node.x / VIEW_W) * 100}%`,
-              top: `${(node.y / VIEW_H) * 100}%`,
-              // Staggered so the six ripples never pulse in unison, which
-              // would read as a single blinking graphic rather than six
-              // independent locations.
-              ["--ripple-delay" as string]: `${i * 0.45}s`,
-            }}
-            className="group absolute z-10 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:outline-none"
-          >
-            {/* Ripple. opacity is lifted by the entrance timeline so it cannot
+        {/* Markers. Gold against the blue field — the map is the network and
+            the cities are the points on it, so they are the one thing that is
+            not blue. Houston runs larger because it is the origin, and size is
+            the only cue that survives when someone is not hovering anything. */}
+        {NODES.map((node, i) => {
+          const isHub = i === HUB;
+          return (
+            <button
+              key={node.city}
+              type="button"
+              data-map="marker"
+              aria-label={
+                isHub
+                  ? `${node.city}, central distribution hub for the ${node.region} region, covering ${node.states.replace(/ · /g, ", ")}`
+                  : `${node.city}, ${node.region} distribution region, covering ${node.states.replace(/ · /g, ", ")}`
+              }
+              style={{
+                left: `${(node.x / VIEW_W) * 100}%`,
+                top: `${(node.y / VIEW_H) * 100}%`,
+                // Staggered so the six ripples never pulse in unison, which
+                // would read as a single blinking graphic rather than six
+                // independent locations.
+                ["--ripple-delay" as string]: `${i * 0.45}s`,
+              }}
+              className="group absolute z-10 grid size-11 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full focus-visible:outline-none"
+            >
+              {/* Ripple. opacity is lifted by the entrance timeline so it cannot
                   pulse before its marker exists. */}
-            <span
-              aria-hidden
-              data-map="ripple"
-              className="map-marker-ripple bg-primary/25 absolute size-5 rounded-full opacity-0"
-            />
+              <span
+                aria-hidden
+                data-map="ripple"
+                className={`map-marker-ripple absolute rounded-full bg-[#C9A84C]/30 opacity-0 ${
+                  isHub ? "size-7" : "size-5"
+                }`}
+              />
 
-            {/* Soft halo — grows and brightens on hover/focus. Blurred rather
+              {/* Soft halo — grows and brightens on hover/focus. Blurred rather
                 than a flat disc, so the marker sits IN the glow instead of on a
                 visible circle of colour. */}
-            <span
-              aria-hidden
-              className="bg-primary/40 group-hover:bg-primary/70 group-focus-visible:bg-primary/70 absolute size-8 rounded-full blur-[7px] transition-all duration-300 ease-[var(--ease-out)] group-hover:size-11 group-focus-visible:size-11"
-            />
+              <span
+                aria-hidden
+                className={`absolute rounded-full bg-[#C9A84C]/45 blur-[7px] transition-all duration-300 ease-[var(--ease-out)] group-hover:bg-[#E4C778]/80 group-focus-visible:bg-[#E4C778]/80 ${
+                  isHub
+                    ? "size-11 group-hover:size-14 group-focus-visible:size-14"
+                    : "size-8 group-hover:size-11 group-focus-visible:size-11"
+                }`}
+              />
 
-            {/* Core dot. The ring is a pale blue rather than the old white:
-                against a dark field a hard white ring reads as a pin stuck on
-                top of the map, where this reads as a light source in it. */}
-            <span
-              aria-hidden
-              className="relative size-[0.6875rem] rounded-full bg-[#BFE4FF] shadow-[0_0_0_2px_rgb(11_151_255/0.55),0_0_14px_3px_rgb(11_151_255/0.75)] transition-transform duration-300 ease-[var(--ease-out)] group-hover:scale-[1.35] group-focus-visible:scale-[1.35]"
-            />
+              {/* Core dot. Pale gold rather than solid brand gold: at this size a
+                fully saturated dot goes muddy against the blue, where a lifted
+                core inside a gold halo reads as a light source. */}
+              <span
+                aria-hidden
+                className={`relative rounded-full bg-[#F6E7B4] transition-transform duration-300 ease-[var(--ease-out)] group-hover:scale-[1.35] group-focus-visible:scale-[1.35] ${
+                  isHub
+                    ? "size-[0.9375rem] shadow-[0_0_0_2.5px_rgb(201_168_76/0.7),0_0_20px_5px_rgb(201_168_76/0.85)]"
+                    : "size-[0.6875rem] shadow-[0_0_0_2px_rgb(201_168_76/0.6),0_0_14px_3px_rgb(201_168_76/0.75)]"
+                }`}
+              />
 
-            {/* Tooltip. aria-hidden because the button's aria-label already
+              {/* Tooltip. aria-hidden because the button's aria-label already
                   carries the same text — announcing both would duplicate it. */}
-            <span
-              aria-hidden
-              className={`map-tooltip pointer-events-none absolute z-20 w-max max-w-[11rem] rounded-lg border border-[#4FB3FF]/35 bg-[#061726]/92 px-3 py-2 text-left shadow-[0_10px_34px_-12px_rgb(0_0_0/0.75),0_0_22px_-6px_rgb(11_151_255/0.45)] backdrop-blur-md ${placement(node)}`}
-            >
-              <span className="text-ivory block text-[13px] leading-tight font-semibold">
-                {node.name}
+              <span
+                aria-hidden
+                className={`map-tooltip pointer-events-none absolute z-20 w-max max-w-[11rem] rounded-lg border border-[#4FB3FF]/35 bg-[#061726]/92 px-3 py-2 text-left shadow-[0_10px_34px_-12px_rgb(0_0_0/0.75),0_0_22px_-6px_rgb(11_151_255/0.45)] backdrop-blur-md ${placement(node)}`}
+              >
+                <span className="text-ivory block text-[13px] leading-tight font-semibold">
+                  {node.city}
+                  {isHub ? (
+                    <span className="ml-1.5 align-middle text-[10px] font-semibold tracking-wider text-[#E4C778] uppercase">
+                      Hub
+                    </span>
+                  ) : null}
+                </span>
+                <span className="mt-1 block text-[11px] leading-tight tracking-wide text-[#9BC4E4]">
+                  {node.region}
+                </span>
+                <span className="mt-0.5 block text-[11px] leading-tight tracking-wide text-[#7FA5C4]">
+                  {node.states}
+                </span>
               </span>
-              <span className="mt-1 block text-[11px] leading-tight tracking-wide text-[#9BC4E4]">
-                {node.states}
-              </span>
-            </span>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
     </div>
   );
