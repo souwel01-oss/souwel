@@ -1,4 +1,7 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { LiteYouTube } from "@/components/marketing/LiteYouTube";
+import { PromoVideo } from "@/components/marketing/PromoVideo";
 
 /**
  * Promotional video band (FR-007d) — two players, no copy.
@@ -7,54 +10,98 @@ import { LiteYouTube } from "@/components/marketing/LiteYouTube";
  * videos speak for themselves and the section is the pause between the
  * catalogue above and the coverage map below.
  *
- * The section still carries an `aria-label`, and each player still has a
- * `title`. Neither is rendered — they exist because a screen reader landing in
- * a region with no text at all has nothing to announce but "region", and a
- * bare play button with no accessible name is unusable. Removing visible text
- * is a design decision; removing the accessible name would be a defect.
+ * The section still carries an `aria-label`, and each player still has one.
+ * Neither renders. They exist because a region with no text at all announces as
+ * nothing, and a bare play button with no accessible name cannot be used.
+ * Dropping visible copy is a design decision; dropping the accessible name
+ * would be a defect.
  *
- * These are real embeds, not a facade over nothing. What was here before was a
- * decorative gradient with a play button that did nothing when pressed and two
- * invented durations ("2:40", "3:15") presented as fact — a control that looks
- * live and is dead reads as a broken site, which is worse than no control.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * TO ADD OR REPLACE A VIDEO, drop the file into public/videos/ with the exact
+ * name below. Nothing else has to change.
  *
- * LiteYouTube keeps the cost down: the poster frame loads, and the ~1MB player
- * bundle only mounts once someone actually presses play.
+ *   public/videos/promo-1.mp4      ← left / first
+ *   public/videos/promo-2.mp4      ← right / second
+ *
+ * Optional still frame, shown before playback and used as the poster:
+ *
+ *   public/videos/promo-1.jpg
+ *   public/videos/promo-2.jpg
+ *
+ * ONLY FILES THAT ACTUALLY EXIST ARE RENDERED. The check is a filesystem lookup
+ * at build time, which is possible because this is a server component. A slot
+ * pointing at a missing file would render a black box with a play button that
+ * fails silently on press — the exact defect this section had before, when it
+ * was a gradient with a dead control over it. One video centred is a finished
+ * section; two slots with a dead one is not.
+ *
+ * KEEP EACH FILE UNDER ~50MB. These ship in the git repository, and GitHub
+ * rejects any single file over 100MB outright. If the finished cuts are larger
+ * than that, they belong on Cloudinary — already configured for this project —
+ * rather than in the repo.
+ * ─────────────────────────────────────────────────────────────────────────────
  */
 
-/**
- * The videos, in order.
- *
- * ONLY REAL IDS BELONG HERE. An id that does not resolve renders a broken
- * poster and a player that fails on press, so the section maps over whatever is
- * configured rather than assuming two — one video centred is a finished-looking
- * section; two slots where one is dead is not.
- */
-const PROMO_VIDEOS: { videoId: string; title: string }[] = [
-  { videoId: "rOzAV40WgMA", title: "Souwel company and product overview" },
+const SLOTS = [
+  { file: "promo-1.mp4", poster: "promo-1.jpg", label: "Souwel company and product overview" },
+  { file: "promo-2.mp4", poster: "promo-2.jpg", label: "Inside Souwel manufacturing" },
 ];
 
-export function VideoSection() {
-  if (PROMO_VIDEOS.length === 0) return null;
+const PUBLIC_DIR = path.join(process.cwd(), "public", "videos");
 
-  const single = PROMO_VIDEOS.length === 1;
+function resolveSlots() {
+  return SLOTS.filter((slot) => existsSync(path.join(PUBLIC_DIR, slot.file))).map((slot) => ({
+    ...slot,
+    src: `/videos/${slot.file}`,
+    posterSrc: existsSync(path.join(PUBLIC_DIR, slot.poster))
+      ? `/videos/${slot.poster}`
+      : undefined,
+  }));
+}
+
+/**
+ * What plays until the real cuts are uploaded.
+ *
+ * Not a placeholder in the bad sense — it is a real, playable video, the same
+ * footage the hero uses. It exists so the homepage does not lose a whole
+ * section in the gap between wiring this up and the files arriving. The moment
+ * promo-1.mp4 appears in public/videos/, this stops being used.
+ */
+const FALLBACK_YOUTUBE_ID = "rOzAV40WgMA";
+
+export function VideoSection() {
+  const videos = resolveSlots();
+
+  if (videos.length === 0) {
+    return (
+      <section
+        aria-label="Souwel promotional video"
+        className="bg-navy text-ivory relative isolate overflow-hidden"
+      >
+        <LiteYouTube
+          videoId={FALLBACK_YOUTUBE_ID}
+          title="Souwel textile manufacturing"
+          poster="maxresdefault"
+        />
+      </section>
+    );
+  }
 
   return (
     /* Full bleed: no section padding, no container, no frame and no rounding,
-       so the footage runs edge to edge and none of the navy shows around it.
-       The navy stays as the element's own background only so there is no white
-       flash while the poster frame decodes. */
+       so the footage runs edge to edge. Two videos share the width on desktop
+       and stack on a phone, where half a 16:9 frame is too small to read. */
     <section
       aria-label="Souwel promotional videos"
       className="bg-navy text-ivory relative isolate overflow-hidden"
     >
-      <div className={single ? "" : "grid lg:grid-cols-2"}>
-        {PROMO_VIDEOS.map((video) => (
-          <LiteYouTube
-            key={video.videoId}
-            videoId={video.videoId}
-            title={video.title}
-            poster="maxresdefault"
+      <div className={videos.length > 1 ? "grid lg:grid-cols-2" : ""}>
+        {videos.map((video) => (
+          <PromoVideo
+            key={video.file}
+            src={video.src}
+            poster={video.posterSrc}
+            label={video.label}
           />
         ))}
       </div>
