@@ -63,47 +63,52 @@ function resolveSlots() {
  * What plays until the real cuts are uploaded.
  *
  * Not a placeholder in the bad sense — it is a real, playable video, the same
- * footage the hero uses. It exists so the homepage does not lose a whole
- * section in the gap between wiring this up and the files arriving. The moment
- * promo-1.mp4 appears in public/videos/, this stops being used.
+ * footage the hero uses. It fills BOTH halves so the split is visible now
+ * rather than only after the files land: the same clip twice, on purpose, at
+ * the client's request, so the layout can be judged before the footage exists.
+ *
+ * The moment promo-1.mp4 appears in public/videos/, this stops being used —
+ * per half, so uploading one file replaces the left side and leaves this on the
+ * right until the second arrives.
  */
 const FALLBACK_YOUTUBE_ID = "rOzAV40WgMA";
+
+const HALVES = [
+  { key: "left", label: "Souwel company and product overview" },
+  { key: "right", label: "Inside Souwel manufacturing" },
+];
 
 export function VideoSection() {
   const videos = resolveSlots();
 
-  if (videos.length === 0) {
-    return (
-      <section
-        aria-label="Souwel promotional video"
-        className="bg-navy text-ivory relative isolate overflow-hidden"
-      >
-        <LiteYouTube
-          videoId={FALLBACK_YOUTUBE_ID}
-          title="Souwel textile manufacturing"
-          poster="maxresdefault"
-        />
-      </section>
-    );
-  }
-
   return (
     /* Full bleed: no section padding, no container, no frame and no rounding,
-       so the footage runs edge to edge. Two videos share the width on desktop
-       and stack on a phone, where half a 16:9 frame is too small to read. */
+       so the footage runs edge to edge. The two halves sit side by side on
+       desktop and stack on a phone, where half a 16:9 frame is too small to
+       read. */
     <section
       aria-label="Souwel promotional videos"
       className="bg-navy text-ivory relative isolate overflow-hidden"
     >
-      <div className={videos.length > 1 ? "grid lg:grid-cols-2" : ""}>
-        {videos.map((video) => (
-          <PromoVideo
-            key={video.file}
-            src={video.src}
-            poster={video.posterSrc}
-            label={video.label}
-          />
-        ))}
+      <div className="grid lg:grid-cols-2">
+        {HALVES.map((half, index) => {
+          const uploaded = videos[index];
+          return uploaded ? (
+            <PromoVideo
+              key={half.key}
+              src={uploaded.src}
+              poster={uploaded.posterSrc}
+              label={uploaded.label}
+            />
+          ) : (
+            <LiteYouTube
+              key={half.key}
+              videoId={FALLBACK_YOUTUBE_ID}
+              title={half.label}
+              poster="maxresdefault"
+            />
+          );
+        })}
       </div>
     </section>
   );
