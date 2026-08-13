@@ -1,94 +1,63 @@
-import { Play } from "lucide-react";
 import { Atmosphere } from "@/components/marketing/Atmosphere";
+import { LiteYouTube } from "@/components/marketing/LiteYouTube";
 
 /**
- * Video section (FR-007d): two videos side by side — company/product overview
- * and manufacturing process.
+ * Promotional video band (FR-007d) — two players, no copy.
  *
- * Placeholders until real assets land. Aspect ratio is reserved up front so
- * swapping in real media causes no layout shift (CLS budget, plan.md).
- * Real embeds must keep loading="lazy" per FR-007d lazy-load requirement.
+ * DELIBERATELY TEXTLESS. No kicker, no heading, no captions, no durations: the
+ * videos speak for themselves and the section is the pause between the
+ * catalogue above and the coverage map below.
+ *
+ * The section still carries an `aria-label`, and each player still has a
+ * `title`. Neither is rendered — they exist because a screen reader landing in
+ * a region with no text at all has nothing to announce but "region", and a
+ * bare play button with no accessible name is unusable. Removing visible text
+ * is a design decision; removing the accessible name would be a defect.
+ *
+ * These are real embeds, not a facade over nothing. What was here before was a
+ * decorative gradient with a play button that did nothing when pressed and two
+ * invented durations ("2:40", "3:15") presented as fact — a control that looks
+ * live and is dead reads as a broken site, which is worse than no control.
+ *
+ * LiteYouTube keeps the cost down: the poster frame loads, and the ~1MB player
+ * bundle only mounts once someone actually presses play.
  */
 
-const VIDEOS = [
-  {
-    title: "Company & Product Overview",
-    description: "Who we supply, and what we make for them.",
-    duration: "2:40",
-  },
-  {
-    title: "Inside Our Manufacturing",
-    description: "From yarn selection through finishing and quality control.",
-    duration: "3:15",
-  },
+/**
+ * The videos, in order.
+ *
+ * ONLY REAL IDS BELONG HERE. An id that does not resolve renders a broken
+ * poster and a player that fails on press, so the section maps over whatever is
+ * configured rather than assuming two — one video centred is a finished-looking
+ * section; two slots where one is dead is not.
+ */
+const PROMO_VIDEOS: { videoId: string; title: string }[] = [
+  { videoId: "rOzAV40WgMA", title: "Souwel company and product overview" },
 ];
 
 export function VideoSection() {
+  if (PROMO_VIDEOS.length === 0) return null;
+
+  const single = PROMO_VIDEOS.length === 1;
+
   return (
-    <section className="bg-navy text-ivory relative isolate overflow-hidden py-20 sm:py-28 lg:py-32">
+    <section
+      aria-label="Souwel promotional videos"
+      className="bg-navy text-ivory relative isolate overflow-hidden py-16 sm:py-20 lg:py-24"
+    >
       <Atmosphere variant="section" />
 
       <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        {/* Heading offset into the second column — the flush-left section header
-            is the same move on every other section, so this one breaks it. */}
-        <div className="grid lg:grid-cols-12">
-          <div className="lg:col-span-7 lg:col-start-4">
-            <p className="text-accent-gold mb-4 text-xs font-semibold tracking-[0.2em] uppercase">
-              See The Process
-            </p>
-            <h2 className="font-heading text-3xl leading-[1.08] font-semibold text-balance sm:text-4xl lg:text-5xl">
-              How we build textiles that last
-            </h2>
-          </div>
-        </div>
-
-        {/* Flush two-up, equal height. An earlier version dropped the second
-            card by 56px; because these are grid items with the default
-            `align-items: stretch`, that margin came out of the second card's
-            height instead of moving it, leaving one card visibly shorter than
-            the other. Any stagger here has to come from the row, not a margin. */}
-        <div className="mt-12 grid gap-6 lg:grid-cols-2 lg:gap-8">
-          {VIDEOS.map((video) => (
-            <figure
-              key={video.title}
-              style={{ "--glow": "#C9A84C" } as React.CSSProperties}
-              /* The glass panel wraps thumb + caption together, so the frosted
-                 edge is actually visible — behind an opaque thumbnail alone it
-                 would have nothing to blur. */
-              className="glass glass-glow card-lift group rounded-xl p-3 sm:p-4"
+        <div className={`mx-auto grid gap-6 lg:gap-8 ${single ? "max-w-3xl" : "lg:grid-cols-2"}`}>
+          {PROMO_VIDEOS.map((video) => (
+            <div
+              key={video.videoId}
+              /* Thin gold frame, the same detail the product pages and the
+                 category arches use around photography. */
+              className="overflow-hidden rounded-xl ring-1 ring-[color-mix(in_srgb,var(--color-accent-gold)_38%,transparent)]"
             >
-              <div className="relative aspect-video overflow-hidden rounded-lg">
-                {/* Placeholder surface — replace with <iframe loading="lazy"> or <video preload="none"> */}
-                <div
-                  aria-hidden
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, rgba(109,26,42,0.5) 0%, rgba(10,37,64,0.2) 55%, rgba(45,74,34,0.4) 100%)",
-                  }}
-                />
-
-                <button
-                  type="button"
-                  className="focus-visible:ring-ring absolute inset-0 grid place-items-center focus-visible:ring-2 focus-visible:ring-inset"
-                  aria-label={`Play video: ${video.title}`}
-                >
-                  <span className="bg-accent-gold text-navy pulse-gold grid size-16 place-items-center rounded-full shadow-lg transition-transform duration-300 group-hover:scale-110 sm:size-20">
-                    <Play className="ml-1 size-6 fill-current sm:size-7" />
-                  </span>
-                </button>
-
-                <span className="absolute right-3 bottom-3 rounded bg-black/60 px-2 py-1 text-xs font-medium tabular-nums">
-                  {video.duration}
-                </span>
-              </div>
-
-              <figcaption className="px-2 pt-5 pb-2">
-                <h3 className="font-heading text-lg font-semibold">{video.title}</h3>
-                <span aria-hidden className="bg-accent-gold/70 rule-draw mt-3 block h-px w-10" />
-                <p className="text-ivory/70 mt-3 text-sm">{video.description}</p>
-              </figcaption>
-            </figure>
+              <LiteYouTube videoId={video.videoId} title={video.title} poster="maxresdefault" />
+            </div>
           ))}
         </div>
       </div>
