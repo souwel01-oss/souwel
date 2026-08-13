@@ -48,7 +48,7 @@ export const CATEGORIES: CategoryNavItem[] = [
   {
     slug: "institutional-laundry",
     name: "Institutional/Laundry",
-    shortName: "Institutional",
+    shortName: "Laundry",
     description:
       "High-durability textiles specified for industrial laundry cycles and institutional volume.",
     accent: "#8B4513",
