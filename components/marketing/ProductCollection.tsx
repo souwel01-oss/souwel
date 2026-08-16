@@ -57,7 +57,7 @@ type Product = {
 const PRODUCTS: Product[] = [
   {
     name: "Napkins",
-    tagline: "Elegant & durable",
+    tagline: "Simple, Elegant, Reliable",
     href: "/categories/hospitality",
     image: "/images/products/napkins.jpg",
     alt: "Folded white linen napkin fabric in soft light",
@@ -66,7 +66,7 @@ const PRODUCTS: Product[] = [
   },
   {
     name: "Bed Sheets",
-    tagline: "Soft & comfortable",
+    tagline: "Soft Comfort, Every Night",
     href: "/categories/hospitality",
     image: "/images/products/bed-sheets.jpg",
     alt: "Bed made up in white sheets and pillows",
@@ -75,7 +75,7 @@ const PRODUCTS: Product[] = [
   },
   {
     name: "Pillow Covers",
-    tagline: "Stylish & soft",
+    tagline: "Comfort That Lasts",
     href: "/categories/hospitality",
     image: "/images/products/pillow-covers.jpg",
     alt: "White pillows on a made bed",
@@ -83,7 +83,7 @@ const PRODUCTS: Product[] = [
   },
   {
     name: "Industrial Aprons",
-    tagline: "Strong & reliable",
+    tagline: "Tough Enough for the Job",
     href: "/categories/institutional-laundry",
     image: "/images/products/industrial-aprons.jpg",
     alt: "White workwear textile laid flat",
@@ -91,7 +91,7 @@ const PRODUCTS: Product[] = [
   },
   {
     name: "Duvet Covers",
-    tagline: "Soft & breathable",
+    tagline: "Cozy, Durable, Dependable",
     href: "/categories/hospitality",
     image: "/images/products/duvet-covers.jpg",
     alt: "White duvet cover draped across a bed",
@@ -103,7 +103,7 @@ const PRODUCTS: Product[] = [
     // tile — two pale blocks side by side merge into one shape and the grid
     // loses its right-edge anchor.
     name: "Bar Mops",
-    tagline: "Absorbent & hard-wearing",
+    tagline: "Built for the Busiest Shifts",
     href: "/categories/institutional-laundry",
     image: "/images/products/bar-mops.jpg",
     alt: "Rolled white cotton bar mops stacked together",
@@ -112,7 +112,7 @@ const PRODUCTS: Product[] = [
   },
   {
     name: "Towels",
-    tagline: "Soft & absorbent",
+    tagline: "Absorbent Comfort, Every Time",
     href: "/categories/hospitality",
     image: "/images/products/towels.jpg",
     alt: "Stack of folded white towels",
@@ -121,7 +121,7 @@ const PRODUCTS: Product[] = [
   },
   {
     name: "Other Textile & Linen",
-    tagline: "Made to specification",
+    tagline: "More Ways We Can Help",
     href: "/categories/health-care",
     image: "/images/products/other-textile.jpg",
     alt: "Close-up of plain white woven textile",
@@ -151,16 +151,14 @@ export function ProductCollection() {
               would just look busy at this size. */}
           <SplitReveal
             as="h2"
-            text="Premium Linens for Every Need"
+            text="The Everyday Essentials You Can Rely On"
             variant="mask-lines"
             className="font-heading mt-5 text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl"
           />
 
           <Reveal variant="fade-up" delay={0.15}>
             <p className="text-muted-foreground mt-6 text-lg leading-relaxed text-pretty">
-              Explore our premium range of high-quality linens designed for homes, hotels,
-              restaurants, hospitals, and industrial use. Crafted for comfort, durability, and
-              professional excellence.
+              Built for daily use, made to outlast it: quality you&rsquo;ll notice in the details.
             </p>
           </Reveal>
         </div>

@@ -77,7 +77,7 @@ export function SiteFooter() {
             &copy; {new Date().getFullYear()} {SITE.name}. All rights reserved.
           </p>
           <p className="text-ivory/55 text-sm">
-            Pricing is provided by quotation only. No prices are published publicly.
+            Every order, handled with care &mdash; from Houston to businesses nationwide.
           </p>
         </div>
       </div>

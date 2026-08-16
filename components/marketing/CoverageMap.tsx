@@ -20,10 +20,9 @@ import { SplitReveal } from "@/components/animation/SplitReveal";
  */
 
 const POINTS_LIST = [
-  "Direct supply across domestic and export markets",
-  "Contract manufacturing with dedicated production lines",
-  "Consolidated shipping for multi-site operators",
-  "Specification support from sample through production run",
+  "Direct supply from trusted manufacturers and specialists",
+  "Dedicated production lines for consistent, contract manufacturing",
+  "Custom solutions built around your specific needs",
 ];
 
 export function CoverageMap() {
@@ -35,7 +34,7 @@ export function CoverageMap() {
           <div className="flex flex-col lg:col-span-5">
             <Reveal variant="fade-up">
               <p className="text-premium-alt text-xs font-semibold tracking-[0.22em] uppercase">
-                Coverage &amp; Reach
+                How We Work
               </p>
             </Reveal>
 
@@ -44,7 +43,7 @@ export function CoverageMap() {
                 attention, so it can afford the weight. */}
             <SplitReveal
               as="h2"
-              text="Manufacturing reach that scales with your operation"
+              text="Built to Scale, Delivered with Care"
               variant="mask-lines"
               className="font-heading mt-5 text-4xl leading-[1.04] font-semibold tracking-[-0.015em] text-balance sm:text-5xl lg:text-[3.25rem]"
             />
@@ -53,9 +52,11 @@ export function CoverageMap() {
               {/* max-w in ch, not px — caps the measure at a readable ~62
                   characters regardless of the font size the viewport lands on. */}
               <p className="text-muted-foreground mt-7 max-w-[46ch] text-[1.0625rem] leading-[1.75]">
-                Whether you run a single property or a multi-site group, our production and
-                distribution network is set up to keep specification consistent across every
-                location you supply.
+                Whether you need one case or a full truckload, we manufacture and source textiles
+                the same way: carefully, consistently and priced fairly for businesses of every
+                size. We work directly with trusted manufacturers and maintain our own production
+                partnerships, so every order meets the same standard, no matter how big your
+                business grows.
               </p>
             </Reveal>
 
@@ -118,7 +119,7 @@ export function CoverageMap() {
 
               <figcaption className="flex items-baseline justify-between gap-4">
                 <span className="font-heading text-ivory text-base font-semibold">
-                  Distribution network
+                  Distribution Network
                 </span>
                 <span className="text-xs tracking-[0.14em] text-[#7FC7FF] uppercase">
                   6 regions
@@ -136,9 +137,16 @@ export function CoverageMap() {
                 <span className="flex items-center gap-2.5">
                   <span
                     aria-hidden
-                    className="size-2 rounded-full bg-[#BFE4FF] shadow-[0_0_10px_2px_rgb(11_151_255/0.7)]"
+                    className="size-2 rounded-full bg-[#F6E7B4] shadow-[0_0_10px_2px_rgb(201_168_76/0.75)]"
                   />
-                  <span className="text-ivory/80 text-sm">Regional distribution</span>
+                  <span className="text-ivory/80 text-sm">Warehouse &amp; Distribution</span>
+                </span>
+                <span className="flex items-center gap-2.5">
+                  <span
+                    aria-hidden
+                    className="h-px w-5 bg-[#D9BC6B] shadow-[0_0_8px_1px_rgb(201_168_76/0.6)]"
+                  />
+                  <span className="text-ivory/80 text-sm">Manufacturing Partner Network</span>
                 </span>
                 {/* /72, not /55. On the old ivory card this hint was a soft
                     grey and fine; carried straight over to navy it measured

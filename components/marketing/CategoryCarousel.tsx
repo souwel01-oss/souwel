@@ -341,7 +341,7 @@ export function CategoryCarousel() {
               Product Categories
             </p>
             <h2 className="font-heading text-ivory text-3xl leading-tight font-semibold sm:text-4xl">
-              Four specialist ranges
+              Four Ranges, One Standard of Care
             </h2>
           </div>
 
@@ -527,7 +527,7 @@ export function CategoryCarousel() {
                   </span>
 
                   <span className="text-brand-blue-text mt-5 inline-flex items-center gap-1.5 text-sm font-semibold">
-                    Browse catalog
+                    Browse Catalog
                     <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1.5" />
                   </span>
                 </Link>

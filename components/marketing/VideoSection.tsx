@@ -43,8 +43,8 @@ import { PromoVideo } from "@/components/marketing/PromoVideo";
  */
 
 const SLOTS = [
-  { file: "promo-1.mp4", poster: "promo-1.jpg", label: "Souwel company and product overview" },
-  { file: "promo-2.mp4", poster: "promo-2.jpg", label: "Inside Souwel manufacturing" },
+  { file: "promo-1.mp4", poster: "promo-1.jpg", label: "Our Process" },
+  { file: "promo-2.mp4", poster: "promo-2.jpg", label: "Delivered with Care" },
 ];
 
 const PUBLIC_DIR = path.join(process.cwd(), "public", "videos");
@@ -74,8 +74,8 @@ function resolveSlots() {
 const FALLBACK_YOUTUBE_ID = "rOzAV40WgMA";
 
 const HALVES = [
-  { key: "left", label: "Souwel company and product overview" },
-  { key: "right", label: "Inside Souwel manufacturing" },
+  { key: "left", label: "Our Process" },
+  { key: "right", label: "Delivered with Care" },
 ];
 
 export function VideoSection() {

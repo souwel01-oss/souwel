@@ -123,7 +123,7 @@ export function HeroContent() {
       <div data-hero="copy" className="max-w-2xl">
         <SplitReveal
           as="h1"
-          text="Premium textiles, engineered for commercial demand"
+          text="Textiles Built for Real Work, Delivered with Real Care"
           variant="words"
           immediate
           delay={0.15}
@@ -131,9 +131,9 @@ export function HeroContent() {
         />
 
         <p data-hero="lede" data-anim-hide className="text-ivory/85 mt-6 text-lg leading-relaxed">
-          We manufacture and supply specification-grade textiles for hospitality, health-care,
-          institutional laundry, and commercial/automotive sectors — built to hold up under
-          industrial use, and quoted to your volume.
+          We manufacture and supply quality textiles for hospitality, health care, institutional
+          laundry, and commercial businesses: built to hold up under everyday use, priced fairly and
+          delivered with the same care we&rsquo;d want for our own business.
         </p>
 
         <div data-hero="cta" className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">

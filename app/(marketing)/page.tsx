@@ -7,16 +7,23 @@ import { CoverageMap } from "@/components/marketing/CoverageMap";
 import { Reveal } from "@/components/animation/Reveal";
 import { IntroVideo } from "@/components/animation/IntroVideo";
 
+const TITLE =
+  "Souwel | Wholesale Textile Manufacturer & Distributor for Hospitality, Healthcare & Commercial Industries | Houston, TX";
+
+const DESCRIPTION =
+  "Souwel manufactures and distributes quality textiles in bulk for hospitality, healthcare, institutional laundry, and commercial businesses nationwide: built to last, priced fairly, delivered with care.";
+
 export const metadata: Metadata = {
-  title: "Premium B2B Textile Manufacturing",
-  description:
-    "Specification-grade textiles for hospitality, health-care, institutional laundry, and commercial/automotive sectors. Request a quote — no account required.",
+  // `absolute`, not a plain string. The root layout sets a "%s | Souwel"
+  // template, and this title already opens with "Souwel" — left to the template
+  // the tab would read "…| Houston, TX | Souwel".
+  title: { absolute: TITLE },
+  description: DESCRIPTION,
   alternates: { canonical: "/" },
   openGraph: {
     type: "website",
-    title: "Souwel — Premium B2B Textile Manufacturing",
-    description:
-      "Specification-grade textiles for hospitality, health-care, institutional laundry, and commercial/automotive sectors.",
+    title: TITLE,
+    description: DESCRIPTION,
     url: "/",
   },
 };

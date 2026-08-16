@@ -8,7 +8,7 @@ export const SITE = {
   name: "Souwel",
   tagline: "Textile manufacturing, engineered for business",
   blurb:
-    "Souwel manufactures premium textiles for hospitality, health-care, institutional laundry, and commercial/automotive sectors — built to withstand commercial-grade use.",
+    "Souwel manufactures and distributes quality textiles for hospitality, healthcare, institutional laundry, and commercial businesses nationwide: built to last, priced fairly, and delivered with genuine care.",
 } as const;
 
 export type CategoryNavItem = {
@@ -31,8 +31,7 @@ export const CATEGORIES: CategoryNavItem[] = [
     slug: "hospitality",
     name: "Hospitality",
     shortName: "Hospitality",
-    description:
-      "Bed linen, towels, and table textiles engineered for hotels, resorts, and food service.",
+    description: "Linens made for the moments guests remember most.",
     accent: "#6D1A2A",
     imageAlt: "Hotel bed made up in crisp white linen",
   },
@@ -40,26 +39,23 @@ export const CATEGORIES: CategoryNavItem[] = [
     slug: "health-care",
     name: "Health-Care",
     shortName: "Health-Care",
-    description:
-      "Medical-grade textiles for hospitals and clinics, built for repeated high-temperature laundering.",
+    description: "Comfort and reliability, ready for every shift, every patient.",
     accent: "#2D4A22",
     imageAlt: "Stack of clean white medical-grade towels",
   },
   {
     slug: "institutional-laundry",
-    name: "Institutional/Laundry",
+    name: "Institutional Laundry",
     shortName: "Laundry",
-    description:
-      "High-durability textiles specified for industrial laundry cycles and institutional volume.",
+    description: "Consistent quality that holds up, order after order.",
     accent: "#8B4513",
     imageAlt: "Folded white towels stacked on a laundry rack",
   },
   {
     slug: "commercial-automotive",
-    name: "Commercial/Automotive",
+    name: "Commercial / Automotive",
     shortName: "Commercial",
-    description:
-      "Technical fabrics and upholstery textiles for commercial fit-out and automotive interiors.",
+    description: "Hard-working textiles for hard-working spaces.",
     accent: "#4A5C2F",
     imageAlt: "Plain white technical textile laid flat",
   },
@@ -198,9 +194,11 @@ export const FOOTER_LINKS = {
   "Useful Links": [
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },
-    { href: "/quote", label: "Request a Quote" },
-    { href: "/register", label: "Create an Account" },
-    { href: "/login", label: "Customer Login" },
+    { href: "/quote", label: "Request Quote" },
+    // One entry, not the previous "Create an Account" plus "Customer Login".
+    // /register already links to sign-in for anyone who has an account, so two
+    // rows here were two doors into the same room.
+    { href: "/register", label: "Customer Account / Register" },
   ],
   Manufacturing: [
     { href: "/about#capabilities", label: "Our Capabilities" },
