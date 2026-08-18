@@ -165,7 +165,11 @@ export function CategoryMegaMenu({
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         <div
           data-mm="panel"
-          className="relative overflow-hidden rounded-b-2xl border border-t-0 border-white/10 bg-[linear-gradient(165deg,#0E3357_0%,#08203A_52%,#04101D_100%)] shadow-[0_40px_80px_-40px_rgb(0_0_0/0.85)]"
+          // Follows the bar it hangs from. It was a fixed navy gradient, which
+          // was right when the bar was navy too and is a dark slab dropping out
+          // of a white one now. --popover is the token for exactly this: a
+          // surface floating above the page, defined once per theme.
+          className="bg-popover border-border relative overflow-hidden rounded-b-2xl border border-t-0 shadow-[0_30px_60px_-30px_rgb(10_37_64/0.28)] dark:shadow-[0_40px_80px_-40px_rgb(0_0_0/0.85)]"
         >
           {/* Lit edge across the top of the panel. */}
           <span
@@ -177,7 +181,7 @@ export function CategoryMegaMenu({
           {/* Ambient key light, matching the coverage map's treatment. */}
           <span
             aria-hidden
-            className="pointer-events-none absolute -top-28 left-1/3 h-64 w-[32rem] rounded-full bg-[#0b97ff]/18 blur-[90px]"
+            className="bg-primary/10 dark:bg-primary/18 pointer-events-none absolute -top-28 left-1/3 h-64 w-[32rem] rounded-full blur-[90px]"
           />
 
           {category && (
@@ -197,20 +201,25 @@ export function CategoryMegaMenu({
                   />
                   <span
                     aria-hidden
-                    className="absolute inset-0 bg-[linear-gradient(180deg,transparent_30%,rgba(4,16,29,0.75))]"
+                    // Sinks the photograph into the panel it sits on, so the two
+                    // do not meet at a hard edge. That means it has to follow
+                    // the panel: a near-black wash designed for a navy panel
+                    // read as a bruise across the bottom of the image once the
+                    // panel went white.
+                    className="absolute inset-0 bg-[linear-gradient(180deg,transparent_45%,rgba(10,37,64,0.16))] dark:bg-[linear-gradient(180deg,transparent_30%,rgba(4,16,29,0.75))]"
                   />
                 </div>
 
-                <p className="font-heading text-ivory mt-5 text-xl font-semibold">
+                <p className="font-heading text-foreground mt-5 text-xl font-semibold">
                   {category.name}
                 </p>
-                <p className="text-ivory/70 mt-2.5 text-sm leading-relaxed">
+                <p className="text-muted-foreground mt-2.5 text-sm leading-relaxed">
                   {category.description}
                 </p>
 
                 <Link
                   href={`/categories/${category.slug}`}
-                  className="text-accent-gold hover:text-ivory focus-visible:ring-ring mt-5 inline-flex items-center gap-2 rounded-sm text-[11.5px] font-semibold tracking-[0.11em] uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                  className="text-primary-strong hover:text-foreground dark:text-accent-gold dark:hover:text-ivory focus-visible:ring-ring mt-5 inline-flex items-center gap-2 rounded-sm text-[11.5px] font-semibold tracking-[0.11em] uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
                 >
                   View the full range
                   <ArrowRight className="size-3.5" />
@@ -223,7 +232,7 @@ export function CategoryMegaMenu({
                   shorter than the rail beside it, and centring splits that
                   difference instead of pooling all of it at the bottom. */}
               <div className="self-center lg:col-span-9">
-                <p className="text-ivory/45 text-[10.5px] font-semibold tracking-[0.2em] uppercase">
+                <p className="text-muted-foreground text-[10.5px] font-semibold tracking-[0.2em] uppercase">
                   Products
                 </p>
                 <ul className="mt-4 grid grid-cols-1 gap-x-8 gap-y-0.5 sm:grid-cols-2 xl:grid-cols-3">
@@ -231,14 +240,14 @@ export function CategoryMegaMenu({
                     <li key={name} data-mm="item">
                       <Link
                         href={productHref(category.slug, name)}
-                        className="group/mm text-ivory/75 hover:text-ivory focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                        className="group/mm text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
                       >
                         {/* Marker picks up the map's lighting language — dim at
                             rest, lit on hover, so the row reads as active
                             without moving anything. */}
                         <span
                           aria-hidden
-                          className="size-1.5 shrink-0 rounded-full bg-[#4FB3FF]/40 transition-all duration-200 group-hover/mm:bg-[#BFE4FF] group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.7)]"
+                          className="bg-primary/40 group-hover/mm:bg-primary size-1.5 shrink-0 rounded-full transition-all duration-200 group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
                         />
                         {name}
                       </Link>

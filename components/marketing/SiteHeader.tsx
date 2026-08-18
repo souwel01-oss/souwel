@@ -30,15 +30,25 @@ const OPEN_DELAY = 90;
 const CLOSE_DELAY = 220;
 
 /**
- * Site header (FR-007a): logo, category + About/Contact nav, Register link.
- * Sits on the dark navy hero background — see contracts/design-tokens.md.
+ * Site header (FR-007a): logo, category + Contact nav, Register link.
+ *
+ * THE BAR IS TOKEN-DRIVEN, NOT PAINTED NAVY. It was `bg-navy text-ivory` on
+ * every surface, which meant the site's own theme toggle could not reach it —
+ * a light bar in dark mode, or here, a white bar in light mode, was simply not
+ * expressible. It now reads --card / --foreground like every other surface, so
+ * it is white on the light theme and brand navy on the dark one, and the
+ * mega-menu and drawer below follow the same tokens.
+ *
+ * ONE THING THIS FIXED FOR FREE: the supplied wordmark is #0030F0, which
+ * measures 6.8:1 on white and 1.8:1 on navy (see SouwelLogo). The header was
+ * the logo's WORST placement on the site; on white it is its best.
  *
  * Desktop nav is a flat strip of uppercase labels; the current page is marked
  * by a gold rule on the bar's bottom edge (see .nav-link::after). The links
  * still stretch to full bar height so that rule lands on the edge itself
  * rather than floating above it.
  */
-export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" }) {
+export function SiteHeader() {
   const [open, setOpen] = useState(false);
   /** Which category's mega-menu is open, or null. Owned here, not by the tab —
    *  see the note at the top of CategoryMegaMenu for why. */
@@ -49,7 +59,6 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
   /** The hamburger/X button, so Escape can hand focus back to it. */
   const drawerToggle = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
-  const isDark = variant === "dark";
 
   /** "/" must match exactly, or it would be current on every page. */
   const isCurrent = (href: string) =>
@@ -176,9 +185,10 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
         // blur-md, not blur-xl: the bar is already 93-97% opaque, so a 24px
         // radius buys nothing visible and costs a full-width backdrop pass on
         // every scrolled frame.
-        "bg-navy/95 text-ivory backdrop-blur-md",
-        "nav-bar transition-shadow duration-200",
-        isDark ? "" : "shadow-sm"
+        "bg-card/95 text-foreground backdrop-blur-md",
+        // A white bar needs the shadow to separate from an ivory page; the
+        // dark one has the gold hairline doing that job already.
+        "nav-bar shadow-sm transition-shadow duration-200 dark:shadow-none"
       )}
       // Focus-out is handled at the header, not at the nav strip: the panel is
       // a sibling of the nav (it has to be, to span the full width), so tabbing
@@ -269,8 +279,8 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
                     "nav-link flex items-center gap-1.5 px-3.5 text-[11.5px] font-semibold tracking-[0.11em] whitespace-nowrap uppercase",
                     "focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none focus-visible:ring-inset",
                     current || expanded
-                      ? "nav-current text-ivory"
-                      : "text-ivory/60 hover:text-ivory"
+                      ? "nav-current text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
                   )}
                 >
                   {item.label}
@@ -300,12 +310,12 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
             the drawer — it is a display preference, wanted at the moment the
             screen is too bright, not after opening a navigation menu. */}
         <div className="flex items-center gap-1 xl:hidden">
-          <ThemeToggle tone="onDark" />
+          <ThemeToggle tone="auto" />
           <button
             type="button"
             ref={drawerToggle}
             onClick={() => setOpen((v) => !v)}
-            className="self-center rounded-md p-2.5 hover:bg-white/10"
+            className="hover:bg-muted self-center rounded-md p-2.5"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -338,7 +348,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
       </div>
 
       {/* Mobile drawer */}
-      <div id="mobile-nav" hidden={!open} className="bg-navy border-t border-white/10 xl:hidden">
+      <div id="mobile-nav" hidden={!open} className="bg-card border-border border-t xl:hidden">
         <nav
           aria-label="Mobile"
           className="mx-auto flex w-full max-w-7xl flex-col px-4 py-3 sm:px-6"
@@ -363,7 +373,9 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
                     className={cn(
                       // py-3.5 keeps each row past the 44px touch-target floor.
                       "flex-1 rounded-md px-3 py-3.5 text-xs font-semibold tracking-[0.11em] uppercase transition-colors",
-                      current ? "nav-row-current text-ivory" : "text-ivory/60 hover:text-ivory"
+                      current
+                        ? "nav-row-current text-foreground"
+                        : "text-muted-foreground hover:text-foreground"
                     )}
                   >
                     {item.label}
@@ -376,7 +388,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
                       aria-expanded={expanded}
                       aria-controls={`drawer-${slug}`}
                       aria-label={`${expanded ? "Hide" : "Show"} ${item.label} products`}
-                      className="text-ivory/60 hover:text-ivory grid size-11 shrink-0 place-items-center rounded-md transition-colors hover:bg-white/10"
+                      className="text-muted-foreground hover:text-foreground hover:bg-muted grid size-11 shrink-0 place-items-center rounded-md transition-colors"
                     >
                       <ChevronDown
                         aria-hidden
@@ -396,18 +408,18 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
                   <ul
                     id={`drawer-${slug}`}
                     hidden={!expanded}
-                    className="mb-1 ml-3 grid grid-cols-1 gap-y-0.5 border-l border-white/10 pl-4 sm:grid-cols-2"
+                    className="border-border mb-1 ml-3 grid grid-cols-1 gap-y-0.5 border-l pl-4 sm:grid-cols-2"
                   >
                     {products.map((name) => (
                       <li key={name}>
                         <Link
                           href={productHref(slug, name)}
                           onClick={() => setOpen(false)}
-                          className="text-ivory/70 hover:text-ivory flex items-center gap-2.5 py-2.5 text-sm"
+                          className="text-muted-foreground hover:text-foreground flex items-center gap-2.5 py-2.5 text-sm"
                         >
                           <span
                             aria-hidden
-                            className="size-1.5 shrink-0 rounded-full bg-[#4FB3FF]/50"
+                            className="bg-primary/50 size-1.5 shrink-0 rounded-full"
                           />
                           {name}
                         </Link>
@@ -419,7 +431,7 @@ export function SiteHeader({ variant = "dark" }: { variant?: "dark" | "light" })
             );
           })}
 
-          <div className="mt-3 flex flex-col gap-2 border-t border-white/10 pt-3">
+          <div className="border-border mt-3 flex flex-col gap-2 border-t pt-3">
             <DrawerAuth onNavigate={() => setOpen(false)} />
           </div>
         </nav>

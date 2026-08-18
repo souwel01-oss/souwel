@@ -7,6 +7,7 @@ import { authClient, useSession } from "@/lib/auth/client";
 import { UserMenu } from "@/components/auth/UserMenu";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * The right-hand end of the site header: theme toggle, then either
@@ -29,7 +30,7 @@ import { Button } from "@/components/ui/button";
  * NOTHING HERE IS A SECURITY BOUNDARY. Every protected page checks the session
  * on the server (lib/auth/session.ts). This only decides what the header draws.
  */
-export function HeaderAuth({ tone = "dark" }: { tone?: "dark" | "light" }) {
+export function HeaderAuth({ tone = "light" }: { tone?: "dark" | "light" }) {
   const { data: session, isPending } = useSession();
   const onDark = tone === "dark";
 
@@ -43,10 +44,18 @@ export function HeaderAuth({ tone = "dark" }: { tone?: "dark" | "light" }) {
           className="ml-1.5 flex h-10 items-center gap-2.5 rounded-full py-1 pr-2.5 pl-1"
         >
           <span
-            className={onDark ? "size-8 animate-pulse rounded-full bg-white/15" : "bg-muted size-8 animate-pulse rounded-full"}
+            className={
+              onDark
+                ? "size-8 animate-pulse rounded-full bg-white/15"
+                : "bg-muted size-8 animate-pulse rounded-full"
+            }
           />
           <span
-            className={onDark ? "h-3 w-16 animate-pulse rounded bg-white/12" : "bg-muted h-3 w-16 animate-pulse rounded"}
+            className={
+              onDark
+                ? "h-3 w-16 animate-pulse rounded bg-white/12"
+                : "bg-muted h-3 w-16 animate-pulse rounded"
+            }
           />
         </div>
       ) : session?.user ? (
@@ -75,13 +84,30 @@ export function HeaderAuth({ tone = "dark" }: { tone?: "dark" | "light" }) {
 
           {/* Hairline between the quiet link and the emphasised one, so they
               do not read as a pair of equal actions. */}
-          <span aria-hidden className="h-5 w-px bg-white/15" />
+          <span aria-hidden className={onDark ? "h-5 w-px bg-white/15" : "bg-border h-5 w-px"} />
 
           <Button
             asChild
             size="sm"
             variant="outline"
-            className="border-accent-gold/70 text-accent-gold hover:bg-accent-gold hover:text-navy hover:border-accent-gold glow-ring-gold nav-cta h-9 rounded-[6px] bg-transparent px-5 text-[11.5px] font-semibold tracking-[0.11em] uppercase shadow-[0_0_16px_-6px_rgb(201_168_76/0.55)]"
+            // OUTLINED ON DARK, SOLID ON LIGHT, and that is a contrast
+            // requirement rather than a preference. Gold #C9A84C as TEXT on
+            // white measures 2.0:1 — it fails AA outright and the button
+            // simply disappears on an ivory page. Filled, the same gold
+            // carries navy text at 6.4:1 and stays unmistakably the loudest
+            // control in the bar.
+            className={cn(
+              "glow-ring-gold nav-cta h-9 rounded-[6px] px-5 text-[11.5px] font-semibold tracking-[0.11em] uppercase",
+              onDark
+                ? "border-accent-gold/70 text-accent-gold hover:bg-accent-gold hover:text-navy hover:border-accent-gold bg-transparent shadow-[0_0_16px_-6px_rgb(201_168_76/0.55)]"
+                : // The `dark:` half is not decoration — shadcn's `outline`
+                  // variant ships `dark:bg-input/30`, which lands after these
+                  // utilities in the cascade and painted the button a faint
+                  // translucent slab on the dark theme. Restating the fill per
+                  // theme is what keeps it solid gold on white and the
+                  // original outlined gold on navy.
+                  "bg-accent-gold text-navy border-accent-gold hover:bg-accent-gold/90 hover:text-navy dark:border-accent-gold/70 dark:text-accent-gold dark:hover:bg-accent-gold dark:hover:text-navy shadow-[0_2px_10px_-4px_rgb(201_168_76/0.8)] dark:bg-transparent dark:shadow-[0_0_16px_-6px_rgb(201_168_76/0.55)]"
+            )}
           >
             <Link href="/register">Register</Link>
           </Button>
@@ -100,7 +126,7 @@ export function DrawerAuth({ onNavigate }: { onNavigate: () => void }) {
   const { data: session, isPending } = useSession();
 
   if (isPending) {
-    return <div aria-hidden className="h-11 animate-pulse rounded-md bg-white/10" />;
+    return <div aria-hidden className="bg-muted h-11 animate-pulse rounded-md" />;
   }
 
   if (!session?.user) {
@@ -109,14 +135,14 @@ export function DrawerAuth({ onNavigate }: { onNavigate: () => void }) {
         <Link
           href="/login"
           onClick={onNavigate}
-          className="text-ivory/60 hover:text-ivory rounded-md px-3 py-3.5 text-xs font-semibold tracking-[0.11em] uppercase"
+          className="text-muted-foreground hover:text-foreground rounded-md px-3 py-3.5 text-xs font-semibold tracking-[0.11em] uppercase"
         >
           Sign In
         </Link>
         <Button
           asChild
           variant="outline"
-          className="border-accent-gold/70 text-accent-gold hover:bg-accent-gold hover:text-navy glow-ring-gold h-11 rounded-[6px] bg-transparent text-xs font-semibold tracking-[0.11em] uppercase"
+          className="bg-accent-gold text-navy border-accent-gold hover:bg-accent-gold/90 hover:text-navy glow-ring-gold dark:text-accent-gold dark:hover:bg-accent-gold dark:hover:text-navy h-11 rounded-[6px] text-xs font-semibold tracking-[0.11em] uppercase dark:bg-transparent"
         >
           <Link href="/register" onClick={onNavigate}>
             Register
@@ -128,7 +154,7 @@ export function DrawerAuth({ onNavigate }: { onNavigate: () => void }) {
 
   return (
     <>
-      <p className="text-ivory/45 px-3 pb-1 text-[10px] font-semibold tracking-[0.14em] uppercase">
+      <p className="text-muted-foreground px-3 pb-1 text-[10px] font-semibold tracking-[0.14em] uppercase">
         {session.user.name}
       </p>
       {[
@@ -140,7 +166,7 @@ export function DrawerAuth({ onNavigate }: { onNavigate: () => void }) {
           key={item.href}
           href={item.href}
           onClick={onNavigate}
-          className="text-ivory/70 hover:text-ivory rounded-md px-3 py-3.5 text-xs font-semibold tracking-[0.11em] uppercase"
+          className="text-muted-foreground hover:text-foreground rounded-md px-3 py-3.5 text-xs font-semibold tracking-[0.11em] uppercase"
         >
           {item.label}
         </Link>

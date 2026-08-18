@@ -929,7 +929,18 @@ html.theme-anim *::after {
 
   /* Deeper at the top than the section below it, which gives the bar weight
      without needing a border or a shadow. */
+  /* The bar's own wash, one per theme. Light is a near-flat white so the
+     wordmark and the gold CTA sit on a clean ground; dark keeps the deep navy
+     gradient the header has always had. */
   .nav-bar {
+    background-image: linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.97) 0%,
+      rgb(255 255 255 / 0.93) 100%
+    );
+  }
+
+  .dark .nav-bar {
     background-image: linear-gradient(180deg, rgb(7 24 41 / 0.97) 0%, rgb(10 37 64 / 0.93) 100%);
   }
 
@@ -941,6 +952,21 @@ html.theme-anim *::after {
     inset-inline: 0;
     bottom: 0;
     height: 1px;
+    /* Carried at a heavier alpha on white than on navy. The same gold that
+       reads as a rule of light against a dark bar all but vanishes against a
+       white one — a hairline's weight is set by its contrast with the ground,
+       not by its own colour. */
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(201 168 76 / 0.65) 16%,
+      rgb(201 168 76 / 0.65) 84%,
+      transparent 100%
+    );
+    pointer-events: none;
+  }
+
+  .dark .nav-bar::after {
     background: linear-gradient(
       90deg,
       transparent 0%,
@@ -948,7 +974,6 @@ html.theme-anim *::after {
       rgb(201 168 76 / 0.38) 84%,
       transparent 100%
     );
-    pointer-events: none;
   }
 
   .nav-link {
@@ -998,7 +1023,17 @@ html.theme-anim *::after {
   /* 1. A highlight running along the gold hairline. It clips itself rather
         than relying on overflow on <header>, which would also clip the mobile
         drawer that expands out of the same element. */
+  /* DARK THEME ONLY. The gloss is a cream-white highlight travelling along the
+     hairline — light moving across a dark surface. On a white bar there is
+     nothing for it to be brighter than, so it renders as an intermittent pale
+     smear with no readable cause. Cut rather than recoloured: a gold-on-white
+     version would read as a loading bar crawling under the nav. */
   .nav-shine {
+    display: none;
+  }
+
+  .dark .nav-shine {
+    display: block;
     position: absolute;
     inset-inline: 0;
     bottom: 0;
@@ -1007,7 +1042,7 @@ html.theme-anim *::after {
     pointer-events: none;
   }
 
-  .nav-shine::after {
+  .dark .nav-shine::after {
     content: "";
     position: absolute;
     inset-block: 0;
