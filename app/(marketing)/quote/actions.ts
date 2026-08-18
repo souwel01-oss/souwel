@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 import { hasProductPage } from "@/lib/product-slugs";
+import { buildReference } from "@/lib/quote-reference";
 
 /**
  * Public "Request a Quote" submission (FR-005).
@@ -43,25 +44,6 @@ const quoteSchema = z.object({
 });
 
 export type QuoteRequestResult = { ok: true; reference: string } | { ok: false; message: string };
-
-/**
- * Human-readable reference, e.g. SW-2608-4F7K.
- *
- * Staff quote this on the phone, so it has to be short and unambiguous to read
- * aloud. The random tail uses an alphabet with I, O, 0 and 1 removed for the
- * same reason.
- */
-function buildReference(): string {
-  const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  const now = new Date();
-  const yy = String(now.getUTCFullYear()).slice(2);
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  let tail = "";
-  for (let i = 0; i < 4; i += 1) {
-    tail += alphabet[Math.floor(Math.random() * alphabet.length)];
-  }
-  return `SW-${yy}${mm}-${tail}`;
-}
 
 export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestResult> {
   const parsed = quoteSchema.safeParse(input);

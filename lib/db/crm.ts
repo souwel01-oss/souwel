@@ -454,9 +454,13 @@ function toLeadRow(q: LeadRecord): LeadRow {
     itemCount: names.length,
     // Two names then a count. The full list belongs in the detail panel; a
     // fourteen-product cell wraps to five lines and destroys the row rhythm.
+    // Zero items is not missing data — it is the signature of a contact-form
+    // enquiry, which writes a Quote with no line items (see
+    // app/(marketing)/contact/actions.ts). Saying so beats an em dash that
+    // reads as "something failed to load".
     products:
       names.length === 0
-        ? "—"
+        ? "General enquiry"
         : names.length <= 2
           ? names.join(", ")
           : `${names.slice(0, 2).join(", ")} +${names.length - 2}`,

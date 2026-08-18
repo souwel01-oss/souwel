@@ -165,10 +165,11 @@ export const LIVE_ROUTES: { href: string; label: string }[] = [
   { href: "/", label: "Homepage" },
   ...CATEGORIES.map((c) => ({ href: `/categories/${c.slug}`, label: c.name })),
   { href: "/quote", label: "Request a Quote" },
+  { href: "/contact", label: "Contact Us" },
 ];
 
 /** Not yet built. Kept beside LIVE_ROUTES so the gap is visible in one place. */
-export const PLANNED_ROUTES = ["/about", "/contact"] as const;
+export const PLANNED_ROUTES = ["/about"] as const;
 
 /**
  * Header navigation. Uses each category's `shortName`, not `name`: the header
