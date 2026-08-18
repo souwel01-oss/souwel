@@ -58,7 +58,6 @@ type Props = {
    * Marks the wrapper as something focus mode should blur. Declared explicitly
    * rather than spreading `...rest`, so the component keeps a closed prop list.
    */
-  "data-focus-dim"?: boolean;
 };
 
 /** from-state per variant. `to` is always the natural resting state. */
@@ -109,7 +108,6 @@ export function Reveal({
   batch = false,
   className,
   as: Tag = "div",
-  "data-focus-dim": focusDim,
 }: Props) {
   const scope = useRef<HTMLElement>(null);
 
@@ -176,7 +174,7 @@ export function Reveal({
 
   return (
     // @ts-expect-error -- polymorphic tag; ref type varies with `as`
-    <Tag ref={scope} className={cn(className)} data-focus-dim={focusDim ? "" : undefined}>
+    <Tag ref={scope} className={cn(className)}>
       {children}
     </Tag>
   );

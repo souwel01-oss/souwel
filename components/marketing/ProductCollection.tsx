@@ -3,7 +3,6 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { Reveal } from "@/components/animation/Reveal";
 import { SplitReveal } from "@/components/animation/SplitReveal";
-import { FocusGroup } from "@/components/marketing/FocusGroup";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -132,14 +131,11 @@ const PRODUCTS: Product[] = [
 
 export function ProductCollection() {
   return (
-    // data-focus-scope marks this section as the one focus mode does NOT blur
-    // wholesale — inside it, the intro and CTA opt in individually and the
-    // hovered tile stays sharp. See the focus-mode block in globals.css.
-    <section data-focus-scope className="bg-background py-20 sm:py-28 lg:py-32">
+    <section className="bg-background py-20 sm:py-28 lg:py-32">
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Centred intro — the surrounding sections all run flush left, so this
             reads as a deliberate change of pace rather than a default. */}
-        <div data-focus-dim className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-3xl text-center">
           <Reveal variant="fade-up">
             <p className="text-premium text-xs font-semibold tracking-[0.22em] uppercase">
               Our Product Collection
@@ -169,43 +165,52 @@ export function ProductCollection() {
             ScrollTrigger.batch — see Reveal. On a grid this tall that is the
             difference between the bottom row animating when it is reached and
             it having finished three screens earlier. */}
-        <FocusGroup>
-          <Reveal
-            variant="fade-up"
-            stagger
-            batch
-            className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[13rem] lg:grid-cols-4 lg:gap-5"
-          >
-            {PRODUCTS.map((product) => (
-              <Link
-                key={product.name}
-                href={product.href}
-                data-focus-tile
-                style={{ "--glow": "#C9A84C" } as React.CSSProperties}
-                // aspect-[4/3] sizes the tile below lg, where there are no row
-                // spans; from lg the grid rows drive height instead.
-                // The lift, scale, shadow and transition all live in the CSS
-                // focus-mode rules so that hovering a tile and dimming the rest of
-                // the page are driven by one piece of state, not two.
-                className={`group card-glow focus-visible:ring-ring relative isolate flex aspect-[4/3] flex-col overflow-hidden rounded-2xl border border-transparent focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none lg:aspect-auto ${product.span ?? ""}`}
-              >
-                {/* Zoom lives on this wrapper, not the tile, so the tile's own
+        <Reveal
+          variant="fade-up"
+          stagger
+          batch
+          className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:auto-rows-[13rem] lg:grid-cols-4 lg:gap-5"
+        >
+          {PRODUCTS.map((product) => (
+            <Link
+              key={product.name}
+              href={product.href}
+              style={{ "--glow": "#C9A84C" } as React.CSSProperties}
+              // aspect-[4/3] sizes the tile below lg, where there are no row
+              // spans; from lg the grid rows drive height instead.
+              //
+              // The lift is the tile's own hover now. It used to be a CSS
+              // rule keyed on an attribute JS set, because the same state
+              // also blurred the rest of the page; with that gone there is
+              // nothing left to keep in step and :hover is the whole story.
+              // hover:z-30 needs the `relative` already here — the tile grows
+              // into its neighbours' cells and has to paint over them.
+              //
+              // The transition lists `translate` and `scale`, NOT `transform`.
+              // Tailwind v4's translate-*/scale-* utilities write the separate
+              // CSS properties of those names; transition-[transform,…] compiles
+              // fine, matches nothing, and the lift snaps into place with no
+              // easing at all. Measured on a hovered tile: computed `transform`
+              // stays `none` while `translate` reads `0px -10px`.
+              className={`group card-glow focus-visible:ring-ring relative isolate flex aspect-[4/3] flex-col overflow-hidden rounded-2xl border border-transparent transition-[translate,scale,box-shadow] duration-[420ms] ease-[var(--focus-ease)] hover:z-30 hover:-translate-y-2.5 hover:scale-[1.06] hover:shadow-[0_42px_80px_-32px_rgb(10_37_64/0.6),0_12px_30px_-12px_rgb(10_37_64/0.35)] focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:outline-none lg:aspect-auto ${product.span ?? ""}`}
+            >
+              {/* Zoom lives on this wrapper, not the tile, so the tile's own
                   rounded corners keep clipping the image as it scales. */}
-                {/* 1.04, not the old 1.06: the tile itself now scales 1.06 in
-                  focus mode, and the two multiply — 1.06 inside 1.06 zoomed the
+              {/* 1.04, not the old 1.06: the tile itself scales 1.06 on
+                  hover, and the two multiply — 1.06 inside 1.06 zoomed the
                   artwork by 12% and the crop started to show. */}
-                <div className="absolute inset-0 transition-transform duration-[600ms] ease-[var(--ease-out)] group-hover:scale-[1.04]">
-                  <Image
-                    src={product.image}
-                    alt={product.alt}
-                    fill
-                    // Tiles span one to four columns of a max-w-7xl grid.
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    className="object-cover object-center"
-                  />
-                </div>
+              <div className="absolute inset-0 transition-transform duration-[600ms] ease-[var(--ease-out)] group-hover:scale-[1.04]">
+                <Image
+                  src={product.image}
+                  alt={product.alt}
+                  fill
+                  // Tiles span one to four columns of a max-w-7xl grid.
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover object-center"
+                />
+              </div>
 
-                {/* The colour. `mix-blend-color` keeps the photograph's own
+              {/* The colour. `mix-blend-color` keeps the photograph's own
                   luminance and replaces only its hue, so the weave, the folds
                   and the light on them all survive intact — see the note at the
                   top of the file. Kept at 55% rather than full so the goods stay
@@ -215,29 +220,29 @@ export function ProductCollection() {
                   This span is painted BEFORE the washes and the caption below
                   it, which is what keeps those out of the blend — a blend mode
                   only affects the backdrop already painted beneath it. */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-55 mix-blend-color transition-opacity duration-500 ease-[var(--ease-out)] group-hover:opacity-25"
-                  style={{
-                    backgroundImage: `linear-gradient(155deg, ${product.palette[0]}, ${product.palette[1]} 55%, ${product.palette[2]})`,
-                  }}
-                />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-55 mix-blend-color transition-opacity duration-500 ease-[var(--ease-out)] group-hover:opacity-25"
+                style={{
+                  backgroundImage: `linear-gradient(155deg, ${product.palette[0]}, ${product.palette[1]} 55%, ${product.palette[2]})`,
+                }}
+              />
 
-                {/* Depth wash over the whole tile, in the tile's own dark stop
+              {/* Depth wash over the whole tile, in the tile's own dark stop
                   rather than black — black flattened the tint back out. Weak by
                   design: the photographs are white goods, and stacked with the
                   caption scrim below, a heavier wash crushed the bottom half of
                   every tile until the product itself stopped being visible,
                   which rather defeats a product grid. */}
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-30"
-                  style={{
-                    backgroundImage: `linear-gradient(to top, ${product.palette[2]}, transparent 62%)`,
-                  }}
-                />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 opacity-30"
+                style={{
+                  backgroundImage: `linear-gradient(to top, ${product.palette[2]}, transparent 62%)`,
+                }}
+              />
 
-                {/* The label carries its own scrim, sized to the label rather
+              {/* The label carries its own scrim, sized to the label rather
                   than to the tile. A single tile-wide gradient cannot do this
                   job: tiles range from 208px to 664px tall, so any fixed
                   colour-stop lands in a different place on each one.
@@ -255,21 +260,20 @@ export function ProductCollection() {
                   darkness is spent on the text band and the product above it
                   stays visible — which is what the earlier pass was right to
                   care about, even though it fixed it in the wrong place. */}
-                <span className="relative mt-auto flex w-full flex-col bg-gradient-to-t from-black/90 via-black/62 via-50% to-transparent p-5 pt-14 sm:p-6 sm:pt-16">
-                  <span className="font-heading text-ivory text-xl font-semibold sm:text-[1.35rem]">
-                    {product.name}
-                  </span>
-                  <span className="text-ivory/85 mt-1.5 inline-flex items-center gap-2 text-sm">
-                    {product.tagline}
-                    <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
-                  </span>
+              <span className="relative mt-auto flex w-full flex-col bg-gradient-to-t from-black/90 via-black/62 via-50% to-transparent p-5 pt-14 sm:p-6 sm:pt-16">
+                <span className="font-heading text-ivory text-xl font-semibold sm:text-[1.35rem]">
+                  {product.name}
                 </span>
-              </Link>
-            ))}
-          </Reveal>
-        </FocusGroup>
+                <span className="text-ivory/85 mt-1.5 inline-flex items-center gap-2 text-sm">
+                  {product.tagline}
+                  <ArrowRight className="size-3.5 transition-transform duration-200 group-hover:translate-x-1" />
+                </span>
+              </span>
+            </Link>
+          ))}
+        </Reveal>
 
-        <Reveal variant="scale" className="mt-12 flex justify-center" data-focus-dim>
+        <Reveal variant="scale" className="mt-12 flex justify-center">
           <Button
             asChild
             size="lg"

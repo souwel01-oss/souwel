@@ -421,8 +421,6 @@ html.theme-anim *::after {
      A symmetric ease-in-out, not the house --ease-out: this transition runs in
      both directions and wants to feel the same leaving as arriving. */
   --focus-ease: cubic-bezier(0.4, 0, 0.2, 1);
-  --focus-blur: 8px;
-  --focus-dim: 0.58;
 }
 
 @keyframes fade-up {
@@ -1489,67 +1487,24 @@ html.theme-anim *::after {
     animation: intro-word-in 900ms cubic-bezier(0.34, 0.05, 0.2, 1) both;
   }
 
-  /* --- Focus mode --------------------------------------------------------
-     Hovering a product tile pushes the whole rest of the page back: everything
-     else blurs and dims, the hovered tile lifts and stays sharp.
+  /* --- Product tile hover ------------------------------------------------
+     REMOVED: "focus mode". Hovering a product tile used to blur and dim the
+     entire rest of the page — footer, every other section, and the tiles that
+     were not hovered — driven from JS by components/marketing/FocusGroup.tsx.
+     Taken out at the client's request. What remains is the tile's own lift,
+     which is the part that answers the pointer; the part that pushed the rest
+     of the page out of focus is gone.
 
-     WHY THE REST IS BLURRED RATHER THAN AN OVERLAY BLURRING BEHIND IT — a
-     backdrop-filter overlay would have to sit between the tile and the page,
-     which means the tile must paint above the overlay. The tile lives several
-     stacking contexts deep (grid > section > main), so it cannot escape without
-     a portal, and a portal would take it out of its grid cell. Blurring the
-     siblings instead keeps the tile exactly where it is and needs no z-index
-     gymnastics beyond its own row.
+     The lift now belongs to the tile in Tailwind rather than living here,
+     because there is no longer any second element whose state has to stay in
+     step with it. That is safe only because Reveal clears its inline transform
+     after the entrance (clearProps) — an inline transform left on the tile
+     would silently outrank a hover transform class and the lift would do
+     nothing.
 
-     These rules are ordered AFTER .card-glow deliberately: both are (0,2,0)
-     specificity, so source order decides which box-shadow wins on a hovered
-     tile, and the focus shadow should.
-
-     Engaged from JS (components/marketing/FocusGroup.tsx), which sets
-     body[data-focus-mode]. It never engages on touch or under reduced motion.
-     Everything here is therefore additive — with no JS the tiles keep their
-     ordinary hover and nothing is ever left blurred. */
-  [data-focus-tile] {
-    transition:
-      transform 420ms var(--focus-ease),
-      box-shadow 420ms var(--focus-ease),
-      filter 420ms var(--focus-ease),
-      opacity 420ms var(--focus-ease);
-  }
-
-  /* The header is deliberately absent from both of these lists — it is the one
-     thing on the page that must never recede. It is sticky, it holds the nav
-     and the logo, and blurring it meant that hovering a product tile made the
-     way OUT of the page go soft along with everything else. Persistent chrome
-     should stay crisp while the content behind it falls back; that is what
-     makes the effect read as focus rather than as the page going out of
-     focus. The footer still dims, because it is content, not chrome. */
-  body > footer,
-  main > *:not([data-focus-scope]),
-  [data-focus-scope] [data-focus-dim] {
-    transition:
-      filter 420ms var(--focus-ease),
-      opacity 420ms var(--focus-ease);
-  }
-
-  body[data-focus-mode] > footer,
-  body[data-focus-mode] main > *:not([data-focus-scope]),
-  body[data-focus-mode] [data-focus-scope] [data-focus-dim],
-  body[data-focus-mode] [data-focus-tile]:not([data-focus-active]) {
-    filter: blur(var(--focus-blur));
-    opacity: var(--focus-dim);
-  }
-
-  /* The hovered tile. z-index lifts it over its neighbours as it grows into
-     their cells; the grid does not clip, so it is free to overlap. */
-  [data-focus-tile][data-focus-active] {
-    z-index: 30;
-    transform: translate3d(0, -10px, 0) scale(1.06);
-    box-shadow:
-      0 42px 80px -32px rgb(10 37 64 / 0.6),
-      0 12px 30px -12px rgb(10 37 64 / 0.35),
-      0 0 0 1px rgb(255 255 255 / 0.14);
-  }
+     Kept here: nothing. The rules that were in this block are gone rather than
+     commented out. --focus-blur and --focus-dim went with them; --focus-ease
+     stays, because the reduced-motion block above still references it. */
 }
 
 /* Motion preferences win over everything above. Reveal/entrance elements must
