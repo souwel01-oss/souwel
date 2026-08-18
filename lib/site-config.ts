@@ -183,10 +183,13 @@ export const PLANNED_ROUTES = ["/about"] as const;
  * drawer, which renders below the bar rather than over it. A "Home" tab beside
  * it is the same destination twice, and it spends the widest slot in the bar on
  * the one place a visitor can always already reach.
+ *
+ * THERE IS NO "ABOUT" ENTRY EITHER, by the client's decision. /about is still
+ * reached from the footer and from the hero's second button, so the route is
+ * not orphaned — it is simply not one of the six tabs competing for the bar.
  */
 export const MAIN_NAV = [
   ...CATEGORIES.map((c) => ({ href: `/categories/${c.slug}`, label: c.shortName })),
-  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact Us" },
 ];
 
