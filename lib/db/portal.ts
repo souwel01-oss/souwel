@@ -149,3 +149,161 @@ export async function getSummary(userId: string): Promise<PortalSummary> {
     ordersInProgress,
   };
 }
+
+// ---------------------------------------------------------------------------
+// Quotations
+// ---------------------------------------------------------------------------
+
+/**
+ * PRICING IS EXPOSED HERE, AND ONLY HERE IN THIS FILE.
+ *
+ * The note at the top of this module says nothing selects `QuoteItem.unitPrice`
+ * — that was true while a customer had no way to see a quotation at all. It is
+ * now qualified rather than abandoned: the price Sales put on a customer's own
+ * quote is the entire thing that quote is FOR. Withholding it would mean the
+ * portal shows a buyer that they have been quoted and refuses to say for what.
+ *
+ * What has not changed is the boundary. `staffNotes` is never selected — that
+ * column is Sales talking to Sales. And every read below is still scoped by
+ * userId, so this widens what a customer sees of THEIR OWN quote and widens
+ * nothing else.
+ *
+ * THE GATE IS `quotedAt`. Until that timestamp exists the quote has not been
+ * sent, and any price sitting on a line is half-entered work in progress, not
+ * an offer. Those rows come back with their pricing and the staff reply nulled
+ * out, so a customer can never read a figure over a salesperson's shoulder
+ * mid-edit. Both writers stamp it: respondToQuote, and the status dropdown
+ * when it moves a quote to QUOTED.
+ */
+
+export type PortalQuoteItem = {
+  id: string;
+  name: string;
+  slug: string;
+  quantity: number;
+  customerNotes: string | null;
+  unitPrice: string | null;
+  lineTotal: string | null;
+};
+
+export type PortalQuote = {
+  id: string;
+  reference: string;
+  status: string;
+  itemCount: number;
+  createdAt: Date;
+  quotedAt: Date | null;
+  /** True once there is something from Souwel to read. */
+  hasReply: boolean;
+  total: string | null;
+};
+
+export type PortalQuoteDetail = PortalQuote & {
+  customerMessage: string | null;
+  staffResponse: string | null;
+  validUntil: Date | null;
+  /**
+   * Decided here rather than in the page. `Date.now()` during render is an
+   * impure read that React's lint rules reject outright, and the comparison
+   * belongs beside the value it is comparing anyway — a page should not have
+   * to know that an expiry is measured against the end of its stated day.
+   */
+  expired: boolean;
+  items: PortalQuoteItem[];
+  orderReference: string | null;
+};
+
+const QUOTE_SELECT = {
+  id: true,
+  reference: true,
+  status: true,
+  createdAt: true,
+  quotedAt: true,
+  validUntil: true,
+  customerMessage: true,
+  staffResponse: true,
+  order: { select: { reference: true } },
+  items: {
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      quantity: true,
+      customerNotes: true,
+      unitPrice: true,
+      lineTotal: true,
+      // staffNotes is deliberately absent. It is the one column on QuoteItem
+      // that is internal even from the customer the line belongs to.
+      product: { select: { name: true, slug: true } },
+    },
+  },
+} satisfies import("@prisma/client").Prisma.QuoteSelect;
+
+type QuoteRecord = import("@prisma/client").Prisma.QuoteGetPayload<{ select: typeof QUOTE_SELECT }>;
+
+function toPortalQuote(q: QuoteRecord): PortalQuoteDetail {
+  const sent = q.quotedAt !== null;
+
+  const items: PortalQuoteItem[] = q.items.map((i) => ({
+    id: i.id,
+    name: i.product.name,
+    slug: i.product.slug,
+    quantity: i.quantity,
+    customerNotes: i.customerNotes,
+    unitPrice: sent && i.unitPrice ? formatAmount(i.unitPrice.toString()) : null,
+    lineTotal: sent && i.lineTotal ? formatAmount(i.lineTotal.toString()) : null,
+  }));
+
+  // Summed from the Decimals rather than from the formatted strings — parsing
+  // "1,250.00" back to a number is how a thousands separator turns into a 1.
+  const rawTotal = sent
+    ? q.items.reduce((sum, i) => sum + (i.lineTotal ? Number(i.lineTotal) : 0), 0)
+    : 0;
+  const anyPriced = sent && q.items.some((i) => i.lineTotal !== null);
+
+  return {
+    id: q.id,
+    reference: q.reference,
+    status: q.status,
+    itemCount: q.items.length,
+    createdAt: q.createdAt,
+    quotedAt: q.quotedAt,
+    hasReply: sent && (q.staffResponse !== null || anyPriced),
+    total: anyPriced ? formatAmount(String(rawTotal)) : null,
+    customerMessage: q.customerMessage,
+    staffResponse: sent ? q.staffResponse : null,
+    validUntil: sent ? q.validUntil : null,
+    expired: sent && q.validUntil !== null && q.validUntil.getTime() < Date.now(),
+    items,
+    orderReference: q.order?.reference ?? null,
+  };
+}
+
+export async function getQuotes(userId: string, take = 50): Promise<PortalQuote[]> {
+  const quotes = await prisma.quote.findMany({
+    where: { customerProfile: { userId } },
+    orderBy: { createdAt: "desc" },
+    take,
+    select: QUOTE_SELECT,
+  });
+
+  return quotes.map(toPortalQuote);
+}
+
+/**
+ * One quotation, by id — and the id comes from the URL, which is exactly the
+ * shape this module's opening note warns about. It is safe here only because
+ * `userId` is part of the WHERE clause rather than checked afterwards: a
+ * customer pasting someone else's quote id gets no row back, not a row they
+ * then have to be denied. Returns null, which the page renders as notFound().
+ */
+export async function getQuoteDetail(
+  userId: string,
+  quoteId: string
+): Promise<PortalQuoteDetail | null> {
+  const quote = await prisma.quote.findFirst({
+    where: { id: quoteId, customerProfile: { userId } },
+    select: QUOTE_SELECT,
+  });
+
+  return quote ? toPortalQuote(quote) : null;
+}

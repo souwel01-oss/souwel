@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Drawer, DrawerSection } from "@/components/crm/Drawer";
 import { QuoteStatusSelect } from "@/components/crm/QuoteStatusSelect";
+import { QuoteReplyForm } from "@/components/crm/QuoteReplyForm";
 import { OrderStatusBadge } from "@/components/portal/OrderStatusBadge";
 import type { LeadDetail } from "@/lib/db/crm";
 
@@ -31,9 +32,7 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
   };
 
   const priced = detail.items.some((i) => i.lineTotal !== null);
-  const total = priced
-    ? detail.items.reduce((sum, i) => sum + Number(i.lineTotal ?? 0), 0)
-    : null;
+  const total = priced ? detail.items.reduce((sum, i) => sum + Number(i.lineTotal ?? 0), 0) : null;
 
   return (
     <Drawer paramName="lead" title={detail.reference}>
@@ -86,14 +85,23 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
             <table className="w-full border-collapse text-left text-[13px]">
               <thead className="border-border/60 text-muted-foreground border-b">
                 <tr>
-                  <th scope="col" className="px-3 py-2 text-[11px] font-semibold tracking-[0.08em] uppercase">
+                  <th
+                    scope="col"
+                    className="px-3 py-2 text-[11px] font-semibold tracking-[0.08em] uppercase"
+                  >
                     Product
                   </th>
-                  <th scope="col" className="px-3 py-2 text-right text-[11px] font-semibold tracking-[0.08em] uppercase">
+                  <th
+                    scope="col"
+                    className="px-3 py-2 text-right text-[11px] font-semibold tracking-[0.08em] uppercase"
+                  >
                     Qty
                   </th>
                   {priced ? (
-                    <th scope="col" className="px-3 py-2 text-right text-[11px] font-semibold tracking-[0.08em] uppercase">
+                    <th
+                      scope="col"
+                      className="px-3 py-2 text-right text-[11px] font-semibold tracking-[0.08em] uppercase"
+                    >
                       Line total
                     </th>
                   ) : null}
@@ -124,7 +132,10 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
               {total !== null ? (
                 <tfoot>
                   <tr className="border-border/60 border-t">
-                    <th scope="row" className="text-muted-foreground px-3 py-2.5 text-left font-semibold">
+                    <th
+                      scope="row"
+                      className="text-muted-foreground px-3 py-2.5 text-left font-semibold"
+                    >
                       Total
                     </th>
                     <td />
@@ -142,18 +153,6 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
         ) : undefined}
       </DrawerSection>
 
-      {!priced ? (
-        <DrawerSection title="Pricing">
-          {/* Honest about what is not built rather than showing an inert
-              "Add price" button. Pricing a quote line is its own screen with
-              its own validation, and it is not in this change. */}
-          <p className="text-muted-foreground border-border rounded-xl border border-dashed p-4 text-[13px] leading-relaxed">
-            No prices entered yet. Entering line prices is a separate screen and is not built —
-            the columns exist on every line item and are staff-only.
-          </p>
-        </DrawerSection>
-      ) : null}
-
       {detail.customerMessage ? (
         <DrawerSection title="Customer message">
           <p className="border-border bg-card rounded-xl border p-4 text-[13px] leading-relaxed">
@@ -161,6 +160,36 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
           </p>
         </DrawerSection>
       ) : null}
+
+      {/* The reply. This section used to be a note saying pricing "is a
+          separate screen and is not built" — which was true, and meant a quote
+          could be marked QUOTED with no price and no words behind it. It is
+          built now, and it is here rather than on its own screen because
+          pricing a line needs the quantity and the customer's note sitting
+          directly above it. */}
+      {detail.items.length ? (
+        <DrawerSection title="Reply to this request">
+          <QuoteReplyForm
+            quoteId={detail.id}
+            hasAccount={!isGuest}
+            message={detail.staffResponse}
+            validUntil={detail.validUntil ? toDateInput(detail.validUntil) : ""}
+            items={detail.items.map((i) => ({
+              id: i.id,
+              name: i.product.name,
+              quantity: i.quantity,
+              unitPrice: i.unitPrice,
+            }))}
+          />
+        </DrawerSection>
+      ) : (
+        <DrawerSection title="Reply to this request">
+          <p className="text-muted-foreground border-border rounded-xl border border-dashed p-4 text-[13px] leading-relaxed">
+            This is a contact enquiry with no line items, so there is nothing to price. Reply by
+            email to {contact.email}.
+          </p>
+        </DrawerSection>
+      )}
 
       {detail.order ? (
         <DrawerSection title="Order">
@@ -174,6 +203,11 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
       ) : null}
     </Drawer>
   );
+}
+
+/** Date as yyyy-mm-dd for <input type="date">, which accepts nothing else. */
+function toDateInput(date: Date): string {
+  return date.toISOString().slice(0, 10);
 }
 
 function Row({ label, value }: { label: string; value: string | null }) {
