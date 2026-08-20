@@ -249,10 +249,11 @@ export function QuoteRequestForm({ products, initialSlug, prefill }: QuoteReques
             defaultValue={prefill?.email}
           />
           <Field
-            label="Phone (optional)"
+            label="Phone"
             name="phone"
             type="tel"
             autoComplete="tel"
+            required
             hint="Fastest way to reach you about specifications."
           />
         </div>

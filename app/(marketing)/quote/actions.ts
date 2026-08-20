@@ -38,7 +38,13 @@ const quoteSchema = z.object({
   name: z.string().trim().min(2, "Please give us a name.").max(120),
   email: z.string().trim().email("That does not look like an email address."),
   company: z.string().trim().min(2, "Please give us a company name.").max(160),
-  phone: z.string().trim().max(40).optional(),
+  // REQUIRED, unlike on the contact form. A quote request is the start of a
+  // supply conversation about quantities and specifications, and that gets
+  // settled on a call — a lead with no number costs Sales a day per round trip.
+  // The minimum is 6 rather than a pattern: phone numbers vary by country far
+  // more than a regex can usefully describe, and a validator that rejects a
+  // real number is worse than one that accepts a bad one.
+  phone: z.string().trim().min(6, "Please give us a phone number.").max(40),
   message: z.string().trim().max(2000).optional(),
   items: z.array(itemSchema).min(1, "Add at least one product.").max(MAX_ITEMS),
 });
@@ -114,7 +120,7 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
             guestName: profile ? null : name,
             guestEmail: profile ? null : email,
             guestCompany: profile ? null : company,
-            guestPhone: profile ? null : phone || null,
+            guestPhone: profile ? null : phone,
             customerMessage: message || null,
             items: {
               create: merged.map((item) => ({
