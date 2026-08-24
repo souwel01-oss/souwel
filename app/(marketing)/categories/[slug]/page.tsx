@@ -15,10 +15,10 @@ import { PRODUCTS } from "@/lib/product-data";
  * product pages and the quote picker read, so a product cannot appear here and
  * be missing there.
  *
- * TWO OF THE FOUR CATEGORIES HAVE NO PRODUCTS YET — institutional-laundry and
- * commercial-automotive were supplied as ranges without an item list. Those
- * pages say so and route the visitor to the quote form rather than rendering an
- * empty grid that reads like a fault.
+ * ALL FOUR CATEGORIES HAVE PRODUCTS NOW. Two of them did not, when the site was
+ * built on a range list rather than the client's product sheet. The empty-state
+ * branch below stays anyway — it costs nothing and it is what a new category
+ * looks like on the day it is added.
  */
 
 export function generateStaticParams() {
@@ -50,7 +50,12 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const category = getCategory(slug);
   if (!category) notFound();
 
-  const products = Object.values(PRODUCTS).filter((p) => p.categorySlug === category.slug);
+  // Filtered on `sectors`, not on `categorySlug`. Most products in the
+  // client's sheet are specified for more than one sector — a Bath Towel is
+  // listed under health-care, hospitality AND institutional laundry — and
+  // filtering on the single home category hid each of them from two of the
+  // three pages a buyer might arrive on.
+  const products = Object.values(PRODUCTS).filter((p) => p.sectors.includes(category.slug));
 
   return (
     <main className="bg-background">

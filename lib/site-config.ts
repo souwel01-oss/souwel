@@ -62,53 +62,77 @@ export const CATEGORIES: CategoryNavItem[] = [
 ];
 
 /**
- * Product ranges per category, as supplied by the client.
+ * Product ranges per category. These drive the header's mega-menu.
  *
- * These drive the header's mega-menu. Rendered in title case rather than the
- * uppercase they were given in: the nav labels above are uppercase because they
- * are three or four short words, but a column of fourteen all-caps product names
- * is genuinely slower to read — caps strip the word-shape the eye scans by.
+ * GENERATED FROM THE CATALOGUE, NOT TYPED BY HAND. The names and the grouping
+ * both come from lib/product-data.ts, where each product carries every sector
+ * the client's sheet lists it under. That is why a product appears in more than
+ * one column here -- a Bath Towel really is specified for health-care,
+ * hospitality and institutional laundry, and a menu that picked one of the
+ * three would hide it from the buyers looking in the other two.
  *
- * ASSUMPTION: the health-care list arrived with "BED LINENS PILLOW COVERS" on a
- * single line, where every other entry was one per line. Read as two items, a
- * line break having been lost — "Bed Linens" and "Pillow Covers" are distinct
- * products, and Hospitality lists its combined form separately as
- * "Duvet/Pillow Covers". Say the word if it was meant as one item.
+ * ALL FOUR CATEGORIES HAVE LISTS NOW. They did not before, and the two without
+ * one fell through to a plain link with no menu.
  *
- * Only two categories have lists so far; the other two fall through to a plain
- * link with no menu, which is why this is a partial record rather than a map
- * that must cover every slug.
+ * Title case rather than the SHEET'S uppercase: the nav labels above are
+ * uppercase because they are one or two short words, but a column of seventeen
+ * all-caps product names is genuinely slower to read -- caps strip the
+ * word-shape the eye scans by.
+ *
+ * Kept as plain strings, and kept in this file, because the header imports it.
+ * Importing product-data here would drag every product's specification table
+ * into the client bundle to render a list of names.
  */
 export const CATEGORY_PRODUCTS: Partial<Record<string, string[]>> = {
-  "health-care": [
-    "Bed Linens",
-    "Pillow Covers",
-    "Terry Towels",
-    "Patient Gowns",
-    "Scrub Suits",
-    "Lab Coats",
-    "Bath Blankets",
-    "Baby Blankets",
-    "Thermal Blankets",
-    "Surgical Towels (Lint Free)",
-    "Water Proof Flat Pads",
-  ],
   hospitality: [
-    "Bedding Linens",
-    "Terry Towels",
-    "Pillow",
-    "Pool and Beach Towels",
-    "Duvet/Pillow Covers",
-    "Barmops",
-    "Kitchen Towels",
-    "Duvet Comforters",
-    "Salon and Spa",
-    "Table Covers / Napkins",
-    "Mattress Protector",
-    "Terry Grill Pads",
+    "Chevron Blanket",
+    "Spectrum Spread Blanket",
+    "Spectrum Links Spread Blanket",
+    "Serpentine Blanket",
+    "Saloon Towel",
+    "Huck Towel",
+    "Napkin",
+    "Bistro Napkin",
+    "Kitchen Towel Herringbone",
+    "Kitchen Towel Checks",
     "Glass Towel",
-    "Bib Apron",
+    "Dish Towel",
+    "Bar Mop",
+    "Bath Mat",
+    "Hand Towel",
+    "Bath Towel",
+    "Wash Cloth",
   ],
+  "health-care": [
+    "Surgical Towel",
+    "Hyperbaric Blanket",
+    "Chevron Blanket",
+    "Spectrum Spread Blanket",
+    "Spectrum Links Spread Blanket",
+    "Serpentine Blanket",
+    "Herringbone Thermal Blanket",
+    "Bath Blanket",
+    "Baby Blanket",
+    "Huck Towel",
+    "Hand Towel",
+    "Bath Towel",
+    "Wash Cloth",
+  ],
+  "institutional-laundry": [
+    "Bath Blanket",
+    "Baby Blanket",
+    "Shop Towel",
+    "Bistro Napkin",
+    "Kitchen Towel Herringbone",
+    "Kitchen Towel Checks",
+    "Glass Towel",
+    "Dish Towel",
+    "Bar Mop",
+    "Hand Towel",
+    "Bath Towel",
+    "Wash Cloth",
+  ],
+  "commercial-automotive": ["Shop Towel", "Drop Cloth"],
 };
 
 /** URL-safe slug for a product name, e.g. "Duvet/Pillow Covers" -> "duvet-pillow-covers". */

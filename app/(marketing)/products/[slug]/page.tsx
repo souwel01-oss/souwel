@@ -63,6 +63,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const product = getProduct(slug);
   if (!product) notFound();
 
+  const hasCare = product.care.length > 0;
+
   const category = CATEGORIES.find((c) => c.slug === product.categorySlug);
 
   return (
@@ -256,10 +258,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <section className="bg-background py-16 sm:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal variant="fade-up">
-            <h2 className="font-heading text-3xl font-semibold sm:text-4xl">Sizes supplied</h2>
+            <h2 className="font-heading text-3xl font-semibold sm:text-4xl">
+              Everything we run in this line
+            </h2>
             <p className="text-muted-foreground mt-3 max-w-2xl leading-relaxed">
-              Standard finished sizes. Fitted depths are cut to your actual mattress and topper
-              build rather than to a standard pocket — see customisation below.
+              One row per build, straight from our product sheet. A dash means that detail is not
+              recorded against that line — ask us and we will confirm it rather than guess.
             </p>
           </Reveal>
 
@@ -268,31 +272,42 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 must be scrollable on a phone without the whole document
                 scrolling sideways. */}
             <div className="border-premium/25 mt-8 overflow-x-auto rounded-xl border">
-              <table className="w-full min-w-[34rem] text-left text-sm">
+              <table className="w-full min-w-[44rem] text-left text-sm">
                 <thead className="bg-platinum/40">
                   <tr>
                     <th scope="col" className="text-foreground px-5 py-3.5 font-semibold">
-                      Size
+                      Colour / finish
                     </th>
                     <th scope="col" className="text-foreground px-5 py-3.5 font-semibold">
-                      Finished dimensions
+                      Finished size
                     </th>
                     <th scope="col" className="text-foreground px-5 py-3.5 font-semibold">
-                      Typical application
+                      Weight
+                    </th>
+                    <th scope="col" className="text-foreground px-5 py-3.5 font-semibold">
+                      Blend
+                    </th>
+                    <th scope="col" className="text-foreground px-5 py-3.5 font-semibold">
+                      Stitching
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {product.sizes.map((row) => (
+                  {/* Keyed on the whole row, not on the colour: Bath Towel runs
+                      the same "White, double cam border" finish at two sizes,
+                      and keying on colour alone collided them. */}
+                  {product.variants.map((row) => (
                     <tr
-                      key={row.name}
+                      key={`${row.colour}-${row.size}-${row.weight}`}
                       className="border-premium/15 hover:bg-platinum/20 border-t transition-colors"
                     >
                       <th scope="row" className="text-foreground px-5 py-3.5 font-medium">
-                        {row.name}
+                        {row.colour}
                       </th>
                       <td className="text-foreground/85 px-5 py-3.5 tabular-nums">{row.size}</td>
-                      <td className="text-muted-foreground px-5 py-3.5">{row.use}</td>
+                      <td className="text-foreground/85 px-5 py-3.5 tabular-nums">{row.weight}</td>
+                      <td className="text-muted-foreground px-5 py-3.5">{row.blend}</td>
+                      <td className="text-muted-foreground px-5 py-3.5">{row.stitching}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -332,17 +347,24 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── Care & durability ──────────────────────────────────────────── */}
+      {/* ── Where it is specified, and how it launders ─────────────────────
+          The laundering list is EMPTY on every product today: the client's
+          product sheet carries no wash temperatures or cycle figures, and those
+          are exactly the numbers an institutional buyer leans on hardest. So
+          the section degrades to the sectors alone rather than printing a
+          confident heading over invented care instructions. Fill `care` in
+          product-data and the two-column layout comes back on its own. */}
       <section className="bg-background py-16 sm:py-20">
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-16 lg:px-8">
-          <div className="lg:col-span-5">
+          <div className={hasCare ? "lg:col-span-5" : "lg:col-span-12"}>
             <Reveal variant="fade-up">
               <h2 className="font-heading text-3xl font-semibold text-balance sm:text-4xl">
-                How it launders
+                {hasCare ? "How it launders" : "Where this is specified"}
               </h2>
-              <p className="text-muted-foreground mt-4 leading-relaxed">
-                The question that decides a contract. Linen that looks right on delivery and grey
-                after forty cycles costs more than linen that was specified properly.
+              <p className="text-muted-foreground mt-4 max-w-2xl leading-relaxed">
+                {hasCare
+                  ? "The question that decides a contract. Linen that looks right on delivery and grey after forty cycles costs more than linen that was specified properly."
+                  : "The sectors this line is built and supplied for. Tell us which of them you are buying for and we will quote against the way you actually launder."}
               </p>
 
               <div className="mt-8">
@@ -363,28 +385,32 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </Reveal>
           </div>
 
-          <Reveal
-            variant="fade-up"
-            stagger
-            staggerAmount={0.07}
-            as="ul"
-            className="border-premium/30 border-t lg:col-span-7"
-          >
-            {product.care.map((line) => (
-              <li
-                key={line}
-                className="border-premium/15 flex items-start gap-4 border-b py-[1.15rem]"
-              >
-                <span
-                  aria-hidden
-                  className="border-primary/35 text-primary mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border"
+          {hasCare ? (
+            <Reveal
+              variant="fade-up"
+              stagger
+              staggerAmount={0.07}
+              as="ul"
+              className="border-premium/30 border-t lg:col-span-7"
+            >
+              {product.care.map((line) => (
+                <li
+                  key={line}
+                  className="border-premium/15 flex items-start gap-4 border-b py-[1.15rem]"
                 >
-                  <Check className="size-3.5" strokeWidth={2.5} />
-                </span>
-                <span className="text-foreground/90 text-[0.9375rem] leading-relaxed">{line}</span>
-              </li>
-            ))}
-          </Reveal>
+                  <span
+                    aria-hidden
+                    className="border-primary/35 text-primary mt-0.5 grid size-6 shrink-0 place-items-center rounded-full border"
+                  >
+                    <Check className="size-3.5" strokeWidth={2.5} />
+                  </span>
+                  <span className="text-foreground/90 text-[0.9375rem] leading-relaxed">
+                    {line}
+                  </span>
+                </li>
+              ))}
+            </Reveal>
+          ) : null}
         </div>
       </section>
 

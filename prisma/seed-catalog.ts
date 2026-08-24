@@ -94,6 +94,28 @@ async function main() {
   }
 
   console.log(`products: ${written}`);
+
+  /**
+   * Retire anything the catalogue no longer lists.
+   *
+   * UNPUBLISHED, NEVER DELETED. `QuoteItem.productId` is a required foreign key
+   * to Product, so deleting a row that any customer has ever asked us to price
+   * would either fail or take their quote history with it. Unpublishing keeps
+   * the record intact and takes it out of circulation.
+   *
+   * This exists because the catalogue was replaced wholesale: the twenty-four
+   * placeholder products the site launched with are not in the client's real
+   * product sheet, and an upsert-only seed leaves them sitting in the database
+   * marked published forever.
+   */
+  const slugs = products.map((p) => p.slug);
+  const retired = await prisma.product.updateMany({
+    where: { slug: { notIn: slugs }, isPublished: true },
+    data: { isPublished: false },
+  });
+  if (retired.count > 0) {
+    console.log(`retired (unpublished, not deleted): ${retired.count}`);
+  }
 }
 
 main()
