@@ -3,6 +3,7 @@
  * Category slugs here MUST match the seeded Category.slug values in prisma/seed.ts.
  */
 import { hasProductPage } from "@/lib/product-slugs";
+import { HOSPITALITY_GROUPS, hospitalityItemByName } from "@/lib/hospitality";
 
 export const SITE = {
   name: "Souwel",
@@ -61,78 +62,88 @@ export const CATEGORIES: CategoryNavItem[] = [
   },
 ];
 
+export type ProductGroup = {
+  /** Heading shown above this block. Null renders the list with no heading. */
+  title: string | null;
+  items: string[];
+};
+
 /**
- * Product ranges per category. These drive the header's mega-menu.
+ * Product ranges per category. These drive the header's mega-menu and the
+ * mobile drawer.
  *
- * GENERATED FROM THE CATALOGUE, NOT TYPED BY HAND. The names and the grouping
- * both come from lib/product-data.ts, where each product carries every sector
- * the client's sheet lists it under. That is why a product appears in more than
- * one column here -- a Bath Towel really is specified for health-care,
- * hospitality and institutional laundry, and a menu that picked one of the
- * three would hide it from the buyers looking in the other two.
+ * GROUPED, NOT FLAT. Hospitality carries thirty-one lines organised under five
+ * headings the client uses internally — Bed, Bath, Table, Kitchen, and the
+ * leisure floor. Thirty-one names in one alphabetised column is a list you read
+ * end to end; under five headings it is a list you skim to the one heading you
+ * came for. The other three categories have a single untitled group, which
+ * renders exactly as the flat list did.
  *
- * ALL FOUR CATEGORIES HAVE LISTS NOW. They did not before, and the two without
- * one fell through to a plain link with no menu.
+ * HOSPITALITY IS DERIVED FROM lib/hospitality.ts, which is also what builds the
+ * /hospitality landing page and its five listing pages. Typing the names here
+ * as well would put the same thirty-one strings in two files, and the drift
+ * would be silent: the menu would offer a product the listing page had dropped.
  *
- * Title case rather than the SHEET'S uppercase: the nav labels above are
- * uppercase because they are one or two short words, but a column of seventeen
- * all-caps product names is genuinely slower to read -- caps strip the
+ * Title case rather than the product sheet's uppercase: the nav labels above
+ * are uppercase because they are one or two short words, but a column of
+ * seventeen all-caps product names is genuinely slower to read — caps strip the
  * word-shape the eye scans by.
  *
  * Kept as plain strings, and kept in this file, because the header imports it.
  * Importing product-data here would drag every product's specification table
- * into the client bundle to render a list of names.
+ * into the client bundle to render a list of names. lib/hospitality.ts is safe
+ * to import for the same reason: it holds no specifications either.
  */
-export const CATEGORY_PRODUCTS: Partial<Record<string, string[]>> = {
-  hospitality: [
-    "Chevron Blanket",
-    "Spectrum Spread Blanket",
-    "Spectrum Links Spread Blanket",
-    "Serpentine Blanket",
-    "Saloon Towel",
-    "Huck Towel",
-    "Napkin",
-    "Bistro Napkin",
-    "Kitchen Towel Herringbone",
-    "Kitchen Towel Checks",
-    "Glass Towel",
-    "Dish Towel",
-    "Bar Mop",
-    "Bath Mat",
-    "Hand Towel",
-    "Bath Towel",
-    "Wash Cloth",
-  ],
+export const CATEGORY_PRODUCTS: Partial<Record<string, ProductGroup[]>> = {
+  hospitality: HOSPITALITY_GROUPS.map((g) => ({
+    title: g.title,
+    items: g.items.map((i) => i.name),
+  })),
   "health-care": [
-    "Surgical Towel",
-    "Hyperbaric Blanket",
-    "Chevron Blanket",
-    "Spectrum Spread Blanket",
-    "Spectrum Links Spread Blanket",
-    "Serpentine Blanket",
-    "Herringbone Thermal Blanket",
-    "Bath Blanket",
-    "Baby Blanket",
-    "Huck Towel",
-    "Hand Towel",
-    "Bath Towel",
-    "Wash Cloth",
+    {
+      title: null,
+      items: [
+        "Surgical Towel",
+        "Hyperbaric Blanket",
+        "Chevron Blanket",
+        "Spectrum Spread Blanket",
+        "Spectrum Links Spread Blanket",
+        "Serpentine Blanket",
+        "Herringbone Thermal Blanket",
+        "Bath Blanket",
+        "Baby Blanket",
+        "Huck Towel",
+        "Hand Towel",
+        "Bath Towel",
+        "Wash Cloth",
+      ],
+    },
   ],
   "institutional-laundry": [
-    "Bath Blanket",
-    "Baby Blanket",
-    "Shop Towel",
-    "Bistro Napkin",
-    "Kitchen Towel Herringbone",
-    "Kitchen Towel Checks",
-    "Glass Towel",
-    "Dish Towel",
-    "Bar Mop",
-    "Hand Towel",
-    "Bath Towel",
-    "Wash Cloth",
+    {
+      title: null,
+      items: [
+        "Bath Blanket",
+        "Baby Blanket",
+        "Shop Towel",
+        "Bistro Napkin",
+        "Kitchen Towel Herringbone",
+        "Kitchen Towel Checks",
+        "Glass Towel",
+        "Dish Towel",
+        "Bar Mop",
+        "Hand Towel",
+        "Bath Towel",
+        "Wash Cloth",
+      ],
+    },
   ],
-  "commercial-automotive": ["Shop Towel", "Drop Cloth"],
+  "commercial-automotive": [
+    {
+      title: null,
+      items: ["Shop Towel", "Drop Cloth"],
+    },
+  ],
 };
 
 /** URL-safe slug for a product name, e.g. "Duvet/Pillow Covers" -> "duvet-pillow-covers". */
@@ -147,10 +158,20 @@ export function productSlug(name: string) {
 /**
  * Where a product name in the nav should link.
  *
- * Products with a real detail page go there. Anything without one falls back to
- * an anchor on its category page — which is itself still unbuilt, so that branch
- * is a placeholder for a placeholder. It stays because it is the honest target:
- * that is where the content is planned to live.
+ * Three targets, in order:
+ *
+ *   1. A product with a real detail page goes to it. Twenty-four do.
+ *   2. A Hospitality line without one goes to its listing page, anchored to its
+ *      own card — /hospitality/bath-linen#bath-robes. That anchor RESOLVES: the
+ *      listing page renders a card for every line in the group, specification
+ *      or not.
+ *   3. Anything else falls back to an anchor on its category page.
+ *
+ * Branch 2 exists because twenty of the thirty-one Hospitality lines are not on
+ * the client's product sheet and so have no detail page. Before it they all
+ * pointed at /categories/hospitality#something, which lands on the right page
+ * and then does nothing, because that page has no such anchor. A link that
+ * quietly fails to move is worse than one that 404s: nobody reports it.
  *
  * The slug list comes from lib/product-slugs, which both this file and
  * lib/product-data import. It is deliberately a separate module: the header
@@ -159,6 +180,14 @@ export function productSlug(name: string) {
  * arrangement exists to prevent.
  */
 export function productHref(categorySlug: string, name: string) {
+  const hospitality = hospitalityItemByName(name);
+  if (hospitality) {
+    const { group, item } = hospitality;
+    return item.productSlug
+      ? `/products/${item.productSlug}`
+      : `/hospitality/${group.slug}#${item.slug}`;
+  }
+
   const slug = productSlug(name);
   return hasProductPage(slug) ? `/products/${slug}` : `/categories/${categorySlug}#${slug}`;
 }
@@ -187,7 +216,14 @@ export function productHref(categorySlug: string, name: string) {
  */
 export const LIVE_ROUTES: { href: string; label: string }[] = [
   { href: "/", label: "Homepage" },
-  ...CATEGORIES.map((c) => ({ href: `/categories/${c.slug}`, label: c.name })),
+  ...CATEGORIES.map((c) => ({ href: categoryHref(c.slug), label: c.name })),
+  // Hospitality's five listing pages. They are real routes with their own
+  // metadata, and leaving them out of the sitemap would hide thirty-one
+  // products behind a page that only links to them client-side.
+  ...HOSPITALITY_GROUPS.map((g) => ({
+    href: `/hospitality/${g.slug}`,
+    label: `Hospitality — ${g.title}`,
+  })),
   { href: "/quote", label: "Request a Quote" },
   { href: "/contact", label: "Contact Us" },
 ];
@@ -212,13 +248,24 @@ export const PLANNED_ROUTES = ["/about"] as const;
  * reached from the footer and from the hero's second button, so the route is
  * not orphaned — it is simply not one of the six tabs competing for the bar.
  */
+/**
+ * Hospitality is the one category with a landing page of its own rather than a
+ * /categories/ page — five ranges, a video band and thirty-one lines needed
+ * more room than the shared category template gives. `categoryHref` keeps that
+ * exception in one place so the header, the footer, the sitemap and the 404's
+ * helpful links cannot disagree about where Hospitality lives.
+ */
+export function categoryHref(slug: string) {
+  return slug === "hospitality" ? "/hospitality" : `/categories/${slug}`;
+}
+
 export const MAIN_NAV = [
-  ...CATEGORIES.map((c) => ({ href: `/categories/${c.slug}`, label: c.shortName })),
+  ...CATEGORIES.map((c) => ({ href: categoryHref(c.slug), label: c.shortName })),
   { href: "/contact", label: "Contact Us" },
 ];
 
 export const FOOTER_LINKS = {
-  Categories: CATEGORIES.map((c) => ({ href: `/categories/${c.slug}`, label: c.name })),
+  Categories: CATEGORIES.map((c) => ({ href: categoryHref(c.slug), label: c.name })),
   "Useful Links": [
     { href: "/about", label: "About Us" },
     { href: "/contact", label: "Contact" },

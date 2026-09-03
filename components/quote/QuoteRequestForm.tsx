@@ -38,6 +38,15 @@ export type QuoteRequestFormProps = {
   products: QuotePickerProduct[];
   /** Slug taken from ?product=, so the row is pre-filled from a product page. */
   initialSlug?: string;
+  /**
+   * A product NAME, for a Hospitality line with no catalogue entry.
+   *
+   * Twenty of the thirty-one lines have no slug for the picker to select, so
+   * the name arrives as prose. When it is set the product picker becomes
+   * optional: the request is about a named line, and the server accepts it with
+   * no line items — see the schema note in the quote action.
+   */
+  enquiryName?: string;
   /** Prefill for a signed-in customer, so they are not retyping known details. */
   prefill?: { name: string; email: string; company: string };
 };
@@ -45,7 +54,12 @@ export type QuoteRequestFormProps = {
 let rowCounter = 0;
 const nextKey = () => `row-${(rowCounter += 1)}`;
 
-export function QuoteRequestForm({ products, initialSlug, prefill }: QuoteRequestFormProps) {
+export function QuoteRequestForm({
+  products,
+  initialSlug,
+  enquiryName,
+  prefill,
+}: QuoteRequestFormProps) {
   const [items, setItems] = useState<LineItem[]>(() => [
     { key: nextKey(), slug: initialSlug ?? "", quantity: "", notes: "" },
   ]);
@@ -72,7 +86,10 @@ export function QuoteRequestForm({ products, initialSlug, prefill }: QuoteReques
     const form = new FormData(event.currentTarget);
     const chosen = items.filter((i) => i.slug);
 
-    if (chosen.length === 0) {
+    // The guard is skipped for a named enquiry — there is nothing in the
+    // picker to choose, which is the whole reason the name came through the
+    // query string in the first place.
+    if (chosen.length === 0 && !enquiryName) {
       setFormError("Choose at least one product before sending.");
       return;
     }
@@ -90,6 +107,7 @@ export function QuoteRequestForm({ products, initialSlug, prefill }: QuoteReques
         company: String(form.get("company") ?? ""),
         phone: String(form.get("phone") ?? ""),
         message: String(form.get("message") ?? ""),
+        enquiry: enquiryName,
         items: chosen.map((i) => ({
           slug: i.slug,
           quantity: Number(i.quantity),
@@ -142,6 +160,18 @@ export function QuoteRequestForm({ products, initialSlug, prefill }: QuoteReques
     <form onSubmit={onSubmit} className="grid gap-8" noValidate>
       <section className="grid gap-4">
         <h2 className="text-foreground text-lg font-semibold">What do you need?</h2>
+
+        {enquiryName ? (
+          /* Says what the buyer already told us by clicking through, and says
+             that the picker below is now optional. Without it the form looks
+             identical to the one that would reject them, and the fastest way to
+             find out otherwise is to fill it all in and press send. */
+          <p className="border-premium/40 bg-premium/10 text-foreground rounded-lg border px-4 py-3 text-[14px] leading-relaxed">
+            You are asking about <span className="font-semibold">{enquiryName}</span>. We do not
+            publish a specification for that line yet, so there is nothing to pick below — just add
+            your volumes in the message and send it.
+          </p>
+        ) : null}
 
         <ul className="grid gap-4">
           {items.map((item, index) => (
@@ -267,6 +297,9 @@ export function QuoteRequestForm({ products, initialSlug, prefill }: QuoteReques
             name="message"
             rows={4}
             maxLength={2000}
+            defaultValue={
+              enquiryName ? `We are looking at ${enquiryName}. Rough annual volume: ` : undefined
+            }
             placeholder="Delivery location, target lead time, existing specification you are matching…"
             className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 w-full rounded-lg border px-3.5 py-3 text-[15px] outline-none focus-visible:ring-4"
           />

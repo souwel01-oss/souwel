@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { CATEGORIES, CATEGORY_PRODUCTS, productHref } from "@/lib/site-config";
+import { CATEGORIES, CATEGORY_PRODUCTS, categoryHref, productHref } from "@/lib/site-config";
 import { gsap, useGSAP, prefersReducedMotion } from "@/lib/animation/gsap";
 
 /**
@@ -70,7 +70,7 @@ export function CategoryMegaMenu({
   }
 
   const category = CATEGORIES.find((c) => c.slug === content) ?? null;
-  const products = content ? (CATEGORY_PRODUCTS[content] ?? []) : [];
+  const groups = content ? (CATEGORY_PRODUCTS[content] ?? []) : [];
 
   useGSAP(
     () => {
@@ -218,7 +218,7 @@ export function CategoryMegaMenu({
                 </p>
 
                 <Link
-                  href={`/categories/${category.slug}`}
+                  href={categoryHref(category.slug)}
                   className="text-primary-strong hover:text-foreground dark:text-accent-gold dark:hover:text-ivory focus-visible:ring-ring mt-5 inline-flex items-center gap-2 rounded-sm text-[11.5px] font-semibold tracking-[0.11em] uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none"
                 >
                   View the full range
@@ -235,25 +235,57 @@ export function CategoryMegaMenu({
                 <p className="text-muted-foreground text-[10.5px] font-semibold tracking-[0.2em] uppercase">
                   Products
                 </p>
-                <ul className="mt-4 grid grid-cols-1 gap-x-8 gap-y-0.5 sm:grid-cols-2 xl:grid-cols-3">
-                  {products.map((name) => (
-                    <li key={name} data-mm="item">
-                      <Link
-                        href={productHref(category.slug, name)}
-                        className="group/mm text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                      >
-                        {/* Marker picks up the map's lighting language — dim at
-                            rest, lit on hover, so the row reads as active
-                            without moving anything. */}
-                        <span
-                          aria-hidden
-                          className="bg-primary/40 group-hover/mm:bg-primary size-1.5 shrink-0 rounded-full transition-all duration-200 group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
-                        />
-                        {name}
-                      </Link>
-                    </li>
+
+                {/* GROUPS FLOW DOWN COLUMNS, they are not a grid of blocks.
+                    A CSS grid would give every group a row of equal height, so
+                    the five-item Kitchen block would sit in a cell sized by the
+                    seven-item Bed block and leave two rows of air. `columns`
+                    lets the browser pour the whole run into balanced columns
+                    instead, which is how a printed range card is set — and it
+                    keeps the flat categories rendering exactly as before, since
+                    one untitled group in three columns is the same list it
+                    always was.
+
+                    break-inside-avoid on each block so a heading is never left
+                    stranded at the bottom of one column with its items at the
+                    top of the next. */}
+                <div className="mt-4 gap-x-8 sm:columns-2 xl:columns-3">
+                  {groups.map((group, gi) => (
+                    <div
+                      key={group.title ?? "all"}
+                      className={`break-inside-avoid ${gi > 0 ? "mt-5" : ""}`}
+                    >
+                      {group.title ? (
+                        <h3
+                          data-mm="item"
+                          className="text-accent-gold dark:text-accent-gold mb-1.5 text-[10.5px] font-semibold tracking-[0.16em] uppercase"
+                        >
+                          {group.title}
+                        </h3>
+                      ) : null}
+
+                      <ul>
+                        {group.items.map((name) => (
+                          <li key={name} data-mm="item">
+                            <Link
+                              href={productHref(category.slug, name)}
+                              className="group/mm text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                            >
+                              {/* Marker picks up the map's lighting language —
+                                  dim at rest, lit on hover, so the row reads as
+                                  active without moving anything. */}
+                              <span
+                                aria-hidden
+                                className="bg-primary/40 group-hover/mm:bg-primary size-1.5 shrink-0 rounded-full transition-all duration-200 group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
+                              />
+                              {name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             </div>
           )}

@@ -21,8 +21,13 @@ import { PRODUCTS } from "@/lib/product-data";
  * looks like on the day it is added.
  */
 
+/**
+ * Hospitality is excluded: it has its own landing page at /hospitality, and
+ * next.config.ts 308s the old path there. Pre-rendering a page that every
+ * request is redirected away from is build time spent on HTML nobody receives.
+ */
 export function generateStaticParams() {
-  return CATEGORIES.map((c) => ({ slug: c.slug }));
+  return CATEGORIES.filter((c) => c.slug !== "hospitality").map((c) => ({ slug: c.slug }));
 }
 
 function getCategory(slug: string) {

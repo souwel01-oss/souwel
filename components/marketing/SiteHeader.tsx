@@ -11,8 +11,18 @@ import { DrawerAuth, HeaderAuth } from "@/components/auth/HeaderAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 
-/** Category slug a nav href points at, or null if it is not a category link. */
+/**
+ * Category slug a nav href points at, or null if it is not a category link.
+ *
+ * TWO SHAPES, because Hospitality no longer lives under /categories. It has its
+ * own landing page at /hospitality — five ranges, a video band and thirty-one
+ * lines outgrew the shared category template — and the mega-menu is keyed on
+ * the slug this returns. Matching only the /categories/ shape silently dropped
+ * the chevron, the hover panel and the whole drawer disclosure from the busiest
+ * tab on the bar, with no error anywhere: the tab simply became a plain link.
+ */
 function slugOf(href: string) {
+  if (href === "/hospitality") return "hospitality";
   const m = /^\/categories\/([a-z0-9-]+)$/.exec(href);
   return m?.[1] ?? null;
 }
@@ -360,7 +370,7 @@ export function SiteHeader() {
           {MAIN_NAV.map((item) => {
             const current = isCurrent(item.href);
             const slug = slugOf(item.href);
-            const products = slug ? CATEGORY_PRODUCTS[slug] : undefined;
+            const groups = slug ? CATEGORY_PRODUCTS[slug] : undefined;
             const expanded = slug !== null && drawerOpen === slug;
 
             return (
@@ -381,7 +391,7 @@ export function SiteHeader() {
                     {item.label}
                   </Link>
 
-                  {products?.length ? (
+                  {groups?.length ? (
                     <button
                       type="button"
                       onClick={() => setDrawerOpen(expanded ? null : slug)}
@@ -404,28 +414,43 @@ export function SiteHeader() {
                 {/* `slug &&` is redundant at runtime — products only exists
                     when slug does — but it is what narrows the type for
                     productHref below. */}
-                {slug && products?.length ? (
-                  <ul
+                {slug && groups?.length ? (
+                  <div
                     id={`drawer-${slug}`}
                     hidden={!expanded}
-                    className="border-border mb-1 ml-3 grid grid-cols-1 gap-y-0.5 border-l pl-4 sm:grid-cols-2"
+                    className="border-border mb-1 ml-3 border-l pl-4"
                   >
-                    {products.map((name) => (
-                      <li key={name}>
-                        <Link
-                          href={productHref(slug, name)}
-                          onClick={() => setOpen(false)}
-                          className="text-muted-foreground hover:text-foreground flex items-center gap-2.5 py-2.5 text-sm"
-                        >
-                          <span
-                            aria-hidden
-                            className="bg-primary/50 size-1.5 shrink-0 rounded-full"
-                          />
-                          {name}
-                        </Link>
-                      </li>
+                    {/* The headings matter MORE here than on desktop, not less.
+                        Thirty-one hospitality lines in a phone drawer is four
+                        screens of scrolling; five headings make it a list you
+                        can thumb past to the one you want. */}
+                    {groups.map((group, gi) => (
+                      <div key={group.title ?? "all"} className={gi > 0 ? "mt-3" : ""}>
+                        {group.title ? (
+                          <h3 className="text-accent-gold mb-0.5 text-[10px] font-semibold tracking-[0.16em] uppercase">
+                            {group.title}
+                          </h3>
+                        ) : null}
+                        <ul className="grid grid-cols-1 gap-y-0.5 sm:grid-cols-2">
+                          {group.items.map((name) => (
+                            <li key={name}>
+                              <Link
+                                href={productHref(slug, name)}
+                                onClick={() => setOpen(false)}
+                                className="text-muted-foreground hover:text-foreground flex items-center gap-2.5 py-2.5 text-sm"
+                              >
+                                <span
+                                  aria-hidden
+                                  className="bg-primary/50 size-1.5 shrink-0 rounded-full"
+                                />
+                                {name}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : null}
               </div>
             );

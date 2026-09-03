@@ -28,26 +28,56 @@ import { buildReference } from "@/lib/quote-reference";
 
 const MAX_ITEMS = 25;
 
+/** Blank line between the enquiry name and whatever else the buyer typed. */
+const JOIN = "\n\n";
+
 const itemSchema = z.object({
   slug: z.string().trim().min(1).max(120),
   quantity: z.coerce.number().int().min(1).max(1_000_000),
   notes: z.string().trim().max(500).optional(),
 });
 
-const quoteSchema = z.object({
-  name: z.string().trim().min(2, "Please give us a name.").max(120),
-  email: z.string().trim().email("That does not look like an email address."),
-  company: z.string().trim().min(2, "Please give us a company name.").max(160),
-  // REQUIRED, unlike on the contact form. A quote request is the start of a
-  // supply conversation about quantities and specifications, and that gets
-  // settled on a call — a lead with no number costs Sales a day per round trip.
-  // The minimum is 6 rather than a pattern: phone numbers vary by country far
-  // more than a regex can usefully describe, and a validator that rejects a
-  // real number is worse than one that accepts a bad one.
-  phone: z.string().trim().min(6, "Please give us a phone number.").max(40),
-  message: z.string().trim().max(2000).optional(),
-  items: z.array(itemSchema).min(1, "Add at least one product.").max(MAX_ITEMS),
-});
+/**
+ * `items` MAY BE EMPTY, but only when `enquiry` names a product instead.
+ *
+ * Twenty of the thirty-one Hospitality lines have no catalogue entry and so no
+ * slug for the picker to select. Before this they hit a form that demanded a
+ * product they could not choose — a dead end reached by clicking the button
+ * that was supposed to start the conversation. Now the line arrives by name and
+ * the quote is written with no line items, which is the same shape the contact
+ * form produces and which the CRM already renders as "General enquiry".
+ *
+ * What is NOT relaxed: a request with neither items nor an enquiry is still
+ * refused. The check is a `superRefine` rather than two optional fields,
+ * because "either of these, not neither" is not something the field types can
+ * say on their own.
+ */
+const quoteSchema = z
+  .object({
+    name: z.string().trim().min(2, "Please give us a name.").max(120),
+    email: z.string().trim().email("That does not look like an email address."),
+    company: z.string().trim().min(2, "Please give us a company name.").max(160),
+    // REQUIRED, unlike on the contact form. A quote request is the start of a
+    // supply conversation about quantities and specifications, and that gets
+    // settled on a call — a lead with no number costs Sales a day per round trip.
+    // The minimum is 6 rather than a pattern: phone numbers vary by country far
+    // more than a regex can usefully describe, and a validator that rejects a
+    // real number is worse than one that accepts a bad one.
+    phone: z.string().trim().min(6, "Please give us a phone number.").max(40),
+    message: z.string().trim().max(2000).optional(),
+    items: z.array(itemSchema).max(MAX_ITEMS),
+    /** A product NAME, for a line with no catalogue entry. */
+    enquiry: z.string().trim().max(160).optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (value.items.length === 0 && !value.enquiry) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["items"],
+        message: "Add at least one product.",
+      });
+    }
+  });
 
 export type QuoteRequestResult = { ok: true; reference: string } | { ok: false; message: string };
 
@@ -57,7 +87,7 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
     const first = parsed.error.issues[0];
     return { ok: false, message: first?.message ?? "Please check the form and try again." };
   }
-  const { name, email, company, phone, message, items } = parsed.data;
+  const { name, email, company, phone, message, items, enquiry } = parsed.data;
 
   // Reject slugs that are not real products before touching the database. The
   // slug arrives from a query string, so it is attacker-controlled.
@@ -121,7 +151,13 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
             guestEmail: profile ? null : email,
             guestCompany: profile ? null : company,
             guestPhone: profile ? null : phone,
-            customerMessage: message || null,
+            // The enquiry name leads, because for these lines it IS the
+            // request — there are no line items underneath it saying what was
+            // asked for.
+            customerMessage:
+              [enquiry ? `Enquiry: ${enquiry}` : null, message || null]
+                .filter(Boolean)
+                .join(JOIN) || null,
             items: {
               create: merged.map((item) => ({
                 productId: productIdBySlug.get(item.slug)!,
@@ -141,9 +177,11 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
               customerProfileId: profile.id,
               actorId: sessionUser?.id ?? null,
               action: "QUOTE_REQUESTED",
-              description: `Quote ${quote.reference} requested with ${merged.length} product${
-                merged.length === 1 ? "" : "s"
-              }.`,
+              description: enquiry
+                ? `Quote ${quote.reference} requested — ${enquiry}.`
+                : `Quote ${quote.reference} requested with ${merged.length} product${
+                    merged.length === 1 ? "" : "s"
+                  }.`,
             },
           });
         }

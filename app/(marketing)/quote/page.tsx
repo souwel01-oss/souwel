@@ -4,6 +4,7 @@ import { QuoteRequestForm, type QuotePickerProduct } from "@/components/quote/Qu
 import { PRODUCTS } from "@/lib/product-data";
 import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
+import { hospitalityItemByName } from "@/lib/hospitality";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -32,12 +33,23 @@ const PICKER_PRODUCTS: QuotePickerProduct[] = Object.values(PRODUCTS)
 export default async function QuotePage({
   searchParams,
 }: {
-  searchParams: Promise<{ product?: string }>;
+  searchParams: Promise<{ product?: string; enquiry?: string }>;
 }) {
   const params = await searchParams;
   // The slug comes from a query string, so it is only a prefill hint until it
   // is checked. An unknown value simply leaves the row empty.
   const initialSlug = params.product && hasProductPage(params.product) ? params.product : undefined;
+
+  // `?enquiry=` carries a product NAME rather than a slug — it comes from the
+  // twenty Hospitality lines that have no catalogue entry and therefore no slug
+  // to select in the picker. It seeds the message box instead, so the buyer
+  // does not have to retype what they just clicked.
+  //
+  // Checked against the range rather than trusted: this lands in a textarea a
+  // member of staff will read, and a query string is attacker-controlled.
+  // Anything not in HOSPITALITY_GROUPS is dropped.
+  const enquiryName =
+    params.enquiry && hospitalityItemByName(params.enquiry) ? params.enquiry : undefined;
 
   const user = await getSessionUser();
   const profile = user
@@ -83,7 +95,12 @@ export default async function QuotePage({
           ) : null}
         </header>
 
-        <QuoteRequestForm products={PICKER_PRODUCTS} initialSlug={initialSlug} prefill={prefill} />
+        <QuoteRequestForm
+          products={PICKER_PRODUCTS}
+          initialSlug={initialSlug}
+          enquiryName={enquiryName}
+          prefill={prefill}
+        />
       </div>
     </main>
   );
