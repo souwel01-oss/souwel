@@ -184,11 +184,11 @@ export default function HospitalityPage() {
         <div className="mx-auto w-full max-w-6xl px-5 py-16 text-center sm:px-8 sm:py-20">
           <Reveal variant="fade-up">
             <h2 className="font-heading mx-auto max-w-2xl text-3xl font-semibold text-balance sm:text-4xl">
-              Tell us what your property runs
+              Partner with us for your linen program
             </h2>
             <p className="text-ivory/75 mx-auto mt-4 max-w-xl leading-relaxed">
               Sizes, weights and annual volumes. We come back with pricing, specifications and lead
-              times — no account needed to ask.
+              times.
             </p>
             <Link
               href="/quote"
