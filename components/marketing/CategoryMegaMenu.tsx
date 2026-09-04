@@ -55,6 +55,8 @@ const COL_START: Record<number, string> = {
   1: "col-start-1",
   2: "col-start-2",
   3: "col-start-3",
+  4: "col-start-4",
+  5: "col-start-5",
 };
 const ROW_START: Record<number, string> = {
   1: "row-start-1",
@@ -260,26 +262,30 @@ export function CategoryMegaMenu({
                 {/* TWO LAYOUTS, PICKED ON WHETHER THE CATEGORY IS GROUPED.
 
                     A grouped category (Hospitality) is placed on an explicit
-                    three-column grid, because the client's arrangement is not
-                    something a flow algorithm can be talked into: Bed, Bath and
-                    Kitchen across the top, then Table under Bath and the leisure
-                    floor under Kitchen, with those two starting on the same
-                    line. Sharing a grid row is the only thing that guarantees
-                    that alignment — poured columns would start each second block
-                    directly under whatever sat above it, so Table would begin
-                    36px lower than the leisure floor because Bath carries one
-                    more line than Kitchen.
+                    grid — one column per block, all on one row, in the client's
+                    order. Explicit placement rather than flow because the order
+                    is theirs to set and does not follow from item counts; the
+                    map lives in lib/site-config.ts.
 
-                    The cost is real and deliberate: row one is as tall as the
-                    seven-line Bed block, so there is air under Bath and Kitchen
-                    before row two begins. That gap is what the alignment is made
-                    of. The placement itself lives in lib/site-config.ts.
+                    THE COLUMN GAP IS TIGHTER HERE THAN ANYWHERE ELSE ON THE
+                    SITE, and it still is not enough. Five columns across this
+                    panel leave 153px each at gap-x-5; three labels are longer
+                    than that and wrap to two lines — "Duvet insert /
+                    comforter" and both "Kitchen towels –" lines — as does the
+                    "Pool, Fitness, Spa & Salon" heading. That is the price of
+                    one row and it is the client's call, so it is left alone
+                    rather than paid for by shrinking the type.
+
+                    Do not try to reclaim the width from the rail beside it:
+                    dropping the aside to two columns buys about 20px per
+                    column and the longest label needs another 60, so the wraps
+                    survive and the range photograph is cramped for nothing.
 
                     A FLAT CATEGORY STILL POURS. One untitled list of thirteen
                     has no blocks to align, and balanced columns are the right
                     shape for it — the same list it has always been. */}
                 {groups.some((g) => g.col) ? (
-                  <div className="mt-4 grid grid-cols-3 items-start gap-x-8 gap-y-5">
+                  <div className="mt-4 grid grid-cols-5 items-start gap-x-5 gap-y-5">
                     {groups.map((group) => (
                       <div
                         key={group.title ?? "all"}

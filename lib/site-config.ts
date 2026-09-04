@@ -78,21 +78,22 @@ export type ProductGroup = {
 };
 
 /**
- * The client's arrangement of the five Hospitality blocks in the mega-menu.
+ * The client's arrangement of the five Hospitality blocks in the mega-menu:
+ * one row, one column each, in this order.
  *
- * SET BY HAND, BECAUSE NO RULE PRODUCES IT. Balancing by item count would give
- * three roughly equal columns; this is 7 lines beside 12 and 11. It is a layout
- * the client asked for — Bed, Bath and Kitchen across the top, Table under Bath
- * and the leisure floor under Kitchen — so it is written down rather than
- * derived, and a new group added to HOSPITALITY_GROUPS needs an entry here or
- * the grid will place it wherever it fits.
+ * SET BY HAND, BECAUSE NO RULE PRODUCES IT. This is the order the client reads
+ * the range in, not the order the source list happens to be written in, so it is
+ * written down rather than derived — and a new group added to
+ * HOSPITALITY_GROUPS needs an entry here or the grid will place it wherever it
+ * fits. Note that a sixth group would also need a wider column set in
+ * components/marketing/CategoryMegaMenu.tsx; five is what the panel fits.
  */
 const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> = {
   "bed-linen": { col: 1, row: 1 },
   "bath-linen": { col: 2, row: 1 },
   "kitchen-linen": { col: 3, row: 1 },
-  "table-linen": { col: 2, row: 2 },
-  "pool-fitness-spa-salon": { col: 3, row: 2 },
+  "table-linen": { col: 4, row: 1 },
+  "pool-fitness-spa-salon": { col: 5, row: 1 },
 };
 
 /**
