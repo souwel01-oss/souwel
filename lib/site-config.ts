@@ -66,6 +66,33 @@ export type ProductGroup = {
   /** Heading shown above this block. Null renders the list with no heading. */
   title: string | null;
   items: string[];
+  /**
+   * Where this block sits in the mega-menu's three-column grid, 1-based.
+   *
+   * Only grouped categories carry it. A flat category leaves both undefined and
+   * its single list flows into balanced columns instead — see the note on the
+   * grid in components/marketing/CategoryMegaMenu.tsx.
+   */
+  col?: number;
+  row?: number;
+};
+
+/**
+ * The client's arrangement of the five Hospitality blocks in the mega-menu.
+ *
+ * SET BY HAND, BECAUSE NO RULE PRODUCES IT. Balancing by item count would give
+ * three roughly equal columns; this is 7 lines beside 12 and 11. It is a layout
+ * the client asked for — Bed, Bath and Kitchen across the top, Table under Bath
+ * and the leisure floor under Kitchen — so it is written down rather than
+ * derived, and a new group added to HOSPITALITY_GROUPS needs an entry here or
+ * the grid will place it wherever it fits.
+ */
+const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> = {
+  "bed-linen": { col: 1, row: 1 },
+  "bath-linen": { col: 2, row: 1 },
+  "kitchen-linen": { col: 3, row: 1 },
+  "table-linen": { col: 2, row: 2 },
+  "pool-fitness-spa-salon": { col: 3, row: 2 },
 };
 
 /**
@@ -98,7 +125,14 @@ export const CATEGORY_PRODUCTS: Partial<Record<string, ProductGroup[]>> = {
   hospitality: HOSPITALITY_GROUPS.map((g) => ({
     title: g.title,
     items: g.items.map((i) => i.name),
-  })),
+    ...HOSPITALITY_MENU_PLACEMENT[g.slug],
+  }))
+    // ROW-MAJOR, so the DOM order is the order the grid is read in. The blocks
+    // are placed explicitly, which means source order and visual order are free
+    // to disagree — and if they did, a keyboard user would tab from the bottom
+    // of the middle column back up to the top of the right one. Sorting here
+    // costs nothing and keeps the two in step.
+    .sort((a, b) => (a.row ?? 99) - (b.row ?? 99) || (a.col ?? 99) - (b.col ?? 99)),
   "health-care": [
     {
       title: null,

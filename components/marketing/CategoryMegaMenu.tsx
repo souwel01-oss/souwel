@@ -4,7 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { CATEGORIES, CATEGORY_PRODUCTS, categoryHref, productHref } from "@/lib/site-config";
+import {
+  CATEGORIES,
+  CATEGORY_PRODUCTS,
+  categoryHref,
+  productHref,
+  type ProductGroup,
+} from "@/lib/site-config";
 import { gsap, useGSAP, prefersReducedMotion } from "@/lib/animation/gsap";
 
 /**
@@ -39,6 +45,21 @@ import { gsap, useGSAP, prefersReducedMotion } from "@/lib/animation/gsap";
 /** Timing shared with the trigger's own hover intent. */
 const OPEN_DUR = 0.42;
 const CLOSE_DUR = 0.22;
+
+/**
+ * Written out rather than interpolated. Tailwind reads class names out of the
+ * source as literal strings, so a template like `col-start-${n}` compiles to
+ * nothing at all and the block silently lands wherever the grid puts it.
+ */
+const COL_START: Record<number, string> = {
+  1: "col-start-1",
+  2: "col-start-2",
+  3: "col-start-3",
+};
+const ROW_START: Record<number, string> = {
+  1: "row-start-1",
+  2: "row-start-2",
+};
 
 export function CategoryMegaMenu({
   slug,
@@ -236,61 +257,94 @@ export function CategoryMegaMenu({
                   Products
                 </p>
 
-                {/* GROUPS FLOW DOWN COLUMNS, they are not a grid of blocks.
-                    A CSS grid would give every group a row of equal height, so
-                    the five-item Kitchen block would sit in a cell sized by the
-                    seven-item Bed block and leave two rows of air. `columns`
-                    lets the browser pour the whole run into balanced columns
-                    instead, which is how a printed range card is set — and it
-                    keeps the flat categories rendering exactly as before, since
-                    one untitled group in three columns is the same list it
-                    always was.
+                {/* TWO LAYOUTS, PICKED ON WHETHER THE CATEGORY IS GROUPED.
 
-                    break-inside-avoid on each block so a heading is never left
-                    stranded at the bottom of one column with its items at the
-                    top of the next. */}
-                <div className="mt-4 gap-x-8 sm:columns-2 xl:columns-3">
-                  {groups.map((group, gi) => (
-                    <div
-                      key={group.title ?? "all"}
-                      className={`break-inside-avoid ${gi > 0 ? "mt-5" : ""}`}
-                    >
-                      {group.title ? (
-                        <h3
-                          data-mm="item"
-                          className="text-accent-gold dark:text-accent-gold mb-1.5 text-[10.5px] font-semibold tracking-[0.16em] uppercase"
-                        >
-                          {group.title}
-                        </h3>
-                      ) : null}
+                    A grouped category (Hospitality) is placed on an explicit
+                    three-column grid, because the client's arrangement is not
+                    something a flow algorithm can be talked into: Bed, Bath and
+                    Kitchen across the top, then Table under Bath and the leisure
+                    floor under Kitchen, with those two starting on the same
+                    line. Sharing a grid row is the only thing that guarantees
+                    that alignment — poured columns would start each second block
+                    directly under whatever sat above it, so Table would begin
+                    36px lower than the leisure floor because Bath carries one
+                    more line than Kitchen.
 
-                      <ul>
-                        {group.items.map((name) => (
-                          <li key={name} data-mm="item">
-                            <Link
-                              href={productHref(category.slug, name)}
-                              className="group/mm text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                            >
-                              {/* Marker picks up the map's lighting language —
-                                  dim at rest, lit on hover, so the row reads as
-                                  active without moving anything. */}
-                              <span
-                                aria-hidden
-                                className="bg-primary/40 group-hover/mm:bg-primary size-1.5 shrink-0 rounded-full transition-all duration-200 group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
-                              />
-                              {name}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
+                    The cost is real and deliberate: row one is as tall as the
+                    seven-line Bed block, so there is air under Bath and Kitchen
+                    before row two begins. That gap is what the alignment is made
+                    of. The placement itself lives in lib/site-config.ts.
+
+                    A FLAT CATEGORY STILL POURS. One untitled list of thirteen
+                    has no blocks to align, and balanced columns are the right
+                    shape for it — the same list it has always been. */}
+                {groups.some((g) => g.col) ? (
+                  <div className="mt-4 grid grid-cols-3 items-start gap-x-8 gap-y-5">
+                    {groups.map((group) => (
+                      <div
+                        key={group.title ?? "all"}
+                        className={`${COL_START[group.col ?? 0] ?? ""} ${
+                          ROW_START[group.row ?? 0] ?? ""
+                        }`}
+                      >
+                        <GroupBlock group={group} categorySlug={category.slug} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-4 gap-x-8 sm:columns-2 xl:columns-3">
+                    {groups.map((group) => (
+                      <GroupBlock
+                        key={group.title ?? "all"}
+                        group={group}
+                        categorySlug={category.slug}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
         </div>
       </div>
     </div>
+  );
+}
+
+/**
+ * One heading-and-list block, shared by both layouts above so the grid and the
+ * poured columns cannot drift apart in styling.
+ */
+function GroupBlock({ group, categorySlug }: { group: ProductGroup; categorySlug: string }) {
+  return (
+    <>
+      {group.title ? (
+        <h3
+          data-mm="item"
+          className="text-accent-gold dark:text-accent-gold mb-1.5 text-[10.5px] font-semibold tracking-[0.16em] uppercase"
+        >
+          {group.title}
+        </h3>
+      ) : null}
+
+      <ul>
+        {group.items.map((name) => (
+          <li key={name} data-mm="item">
+            <Link
+              href={productHref(categorySlug, name)}
+              className="group/mm text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            >
+              {/* Marker picks up the map's lighting language — dim at rest, lit
+                  on hover, so the row reads as active without moving anything. */}
+              <span
+                aria-hidden
+                className="bg-primary/40 group-hover/mm:bg-primary size-1.5 shrink-0 rounded-full transition-all duration-200 group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
+              />
+              {name}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
