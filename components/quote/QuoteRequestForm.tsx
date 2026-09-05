@@ -73,9 +73,16 @@ export function QuoteRequestForm({
   messagePrefill,
   prefill,
 }: QuoteRequestFormProps) {
-  const [items, setItems] = useState<LineItem[]>(() => [
-    { key: nextKey(), slug: initialSlug ?? "", quantity: "", notes: "" },
-  ]);
+  // NO EMPTY ROW WHEN THE REQUEST ALREADY NAMES ITS PRODUCT.
+  //
+  // Arriving from a Terry Towels page means the construction, blend, hem, size
+  // and quantity have all been chosen already. Opening on a blank
+  // "Select a product…" row asks the buyer to do the job they just did, and
+  // worse, implies the thing they picked did not come through. The picker is
+  // still there behind "Add a product" for anyone who wants a second line.
+  const [items, setItems] = useState<LineItem[]>(() =>
+    enquiryName ? [] : [{ key: nextKey(), slug: initialSlug ?? "", quantity: "", notes: "" }]
+  );
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
@@ -89,7 +96,11 @@ export function QuoteRequestForm({
   };
 
   const removeItem = (key: string) => {
-    setItems((prev) => (prev.length === 1 ? prev : prev.filter((i) => i.key !== key)));
+    // The last row is kept only when it is the only way to say what is wanted.
+    // A named enquiry already says it, so the list may go back to empty.
+    setItems((prev) =>
+      prev.length === 1 && !enquiryName ? prev : prev.filter((i) => i.key !== key)
+    );
   };
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -232,7 +243,12 @@ export function QuoteRequestForm({
                 <button
                   type="button"
                   onClick={() => removeItem(item.key)}
-                  disabled={items.length === 1}
+                  // The last row locks only when removing it would leave the
+                  // form with nothing to say. A named enquiry already carries
+                  // the request, so a row added from the empty state has to be
+                  // removable again — otherwise one stray click leaves a blank
+                  // product the buyer cannot get rid of.
+                  disabled={items.length === 1 && !enquiryName}
                   aria-label={`Remove product ${index + 1}`}
                   className="text-muted-foreground hover:text-destructive hover:border-destructive/40 border-border focus-visible:ring-ring grid h-11 w-11 place-items-center rounded-lg border transition-colors focus-visible:ring-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                 >
@@ -260,7 +276,7 @@ export function QuoteRequestForm({
             className="border-border text-foreground hover:bg-muted focus-visible:ring-ring inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:outline-none"
           >
             <Plus aria-hidden className="size-4" />
-            Add another product
+            {items.length === 0 ? "Add a product" : "Add another product"}
           </button>
         </div>
       </section>
