@@ -5,7 +5,7 @@ import { PRODUCTS } from "@/lib/product-data";
 import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
-import { getTerryProduct, terryEnquiryName, terrySizesFor } from "@/lib/terry-towels";
+import { getTerryProduct, parseTerryLines } from "@/lib/terry-towels";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -16,9 +16,6 @@ export const metadata: Metadata = {
 };
 
 const CATEGORY_NAME = new Map(CATEGORIES.map((c) => [c.slug, c.name]));
-
-/** Terry towels are supplied by the dozen. Mirrors TerrySpecPicker. */
-const DOZEN = 12;
 
 /**
  * The catalogue as a picker needs it — no specification blobs, no imagery.
@@ -37,42 +34,45 @@ const PICKER_PRODUCTS: QuotePickerProduct[] = Object.values(PRODUCTS)
 /**
  * A Terry Towels request, rebuilt from the query string.
  *
- * THE SLUG AND THE SIZE KEY ARE THE ONLY THINGS TRUSTED, and only after both
- * are looked up in lib/terry-towels.ts. Everything a member of staff will read
- * — the product name, the blend, the hem, the weight — is written here from
- * that file, not carried in the URL. A `?spec=` parameter holding prose would
- * put attacker-controlled text straight into the lead a salesperson opens.
+ * THE SLUG AND THE SIZE KEYS ARE THE ONLY THINGS TRUSTED, and only after both
+ * are looked up in lib/terry-towels.ts. Everything a member of staff reads —
+ * the product name, the blend, the hem, the SKU, the weight — is written here
+ * from that file, not carried in the URL. A `?spec=` parameter holding prose
+ * would put attacker-controlled text straight into the lead a salesperson
+ * opens.
  *
- * Quantity is the one number that comes from the visitor, so it is bounded to
- * seven digits of nothing but digits before it is echoed back, and rounded up
- * to a dozen the same way the picker does. These are supplied by the dozen; a
- * hand-edited URL should not be able to place an order for 10,000 of something
- * that only exists in twelves.
+ * Quantities are the only numbers that come from the visitor, so each is
+ * bounded to seven digits of nothing but digits and rounded up to a dozen the
+ * way the page does it. These are supplied by the dozen; a hand-edited URL
+ * should not be able to ask for 10,000 of something that only exists in twelves.
  */
-function readTerryRequest(params: { terry?: string; type?: string; qty?: string }) {
+function readTerryRequest(params: { terry?: string; lines?: string }) {
   if (!params.terry) return null;
   const product = getTerryProduct(params.terry);
   if (!product) return null;
 
-  const match = terrySizesFor(product).find((s) => s.size.key === params.type);
-  if (!match) return null;
+  const lines = parseTerryLines(product, params.lines);
+  if (lines.length === 0) return null;
 
-  const typed = params.qty && /^\d{1,7}$/.test(params.qty) ? Number(params.qty) : null;
-  const qty = typed !== null && typed > 0 ? Math.ceil(typed / DOZEN) * DOZEN : null;
+  const body = lines.map(
+    (l) =>
+      `- ${l.size.name} ${l.size.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString(
+        "en-US"
+      )}, weight ${l.weight ?? "on request"}`
+  );
 
-  const lines = [
-    `Blend: ${product.blend}`,
-    `Hem: ${product.hem}`,
-    `Product type: ${match.size.name} ${match.size.dimensions}`,
-    `Weight: ${match.weight}`,
-    ...(qty && qty > 0 ? [`Quantity: ${qty}`] : []),
-  ];
+  // The name says the construction; the body says which sizes. Putting every
+  // size in the subject line would run past the 160 characters the enquiry
+  // field allows the moment a buyer lists four of them.
+  const name = `${product.name} (${product.blend}) — ${lines.length} ${
+    lines.length === 1 ? "line" : "lines"
+  }`;
 
   return {
-    name: terryEnquiryName(product, match.size),
+    name,
     // Trailing blank line so the buyer types after the specification rather
     // than into the middle of it.
-    message: `${lines.join("\n")}\n\n`,
+    message: [`Blend: ${product.blend}`, `Hem: ${product.hem}`, "", ...body, "", ""].join("\n"),
   };
 }
 
@@ -83,8 +83,7 @@ export default async function QuotePage({
     product?: string;
     enquiry?: string;
     terry?: string;
-    type?: string;
-    qty?: string;
+    lines?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -159,7 +158,7 @@ export default async function QuotePage({
           enquiryName={terry?.name ?? enquiryName}
           enquiryNote={
             terry
-              ? "Your specification is below. Add anything else you need — delivery location, target lead time — and send it."
+              ? "Your list and its specification are below. Fill in your details and send it."
               : undefined
           }
           messagePrefill={terry?.message}

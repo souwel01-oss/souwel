@@ -15,6 +15,8 @@ import {
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { TerrySpecPicker } from "@/components/hospitality/TerrySpecPicker";
+import { TerrySpecTable } from "@/components/hospitality/TerrySpecTable";
+import { SPEC_SECTION_ID, TerryOrderListProvider } from "@/components/hospitality/TerryOrderList";
 import { Reveal } from "@/components/animation/Reveal";
 
 /**
@@ -157,176 +159,128 @@ function ProductDetail({ product }: { product: TerryProduct }) {
   const hasChooser = siblings.length > 1;
 
   return (
-    <main className="bg-background">
-      <section className="border-premium/20 border-b">
-        <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">
-          <Crumbs
-            trail={[
-              ...(hasChooser
-                ? [{ label: product.name, href: `${TERRY_BASE}/${product.family}` }]
-                : []),
-              { label: hasChooser ? product.blend : product.name },
-            ]}
-          />
-        </div>
-      </section>
+    // Provider around both interactive sections, so the picker in the hero and
+    // the table further down share one list. The prose and the gallery inside
+    // it stay server-rendered — a provider does not pull its children into the
+    // client bundle.
+    <TerryOrderListProvider>
+      <main className="bg-background">
+        <section className="border-premium/20 border-b">
+          <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">
+            <Crumbs
+              trail={[
+                ...(hasChooser
+                  ? [{ label: product.name, href: `${TERRY_BASE}/${product.family}` }]
+                  : []),
+                { label: hasChooser ? product.blend : product.name },
+              ]}
+            />
+          </div>
+        </section>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────── */}
-      <section className="py-12 sm:py-16">
-        <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-14">
-          <Reveal variant="fade-up">
-            <ProductGallery images={IMAGES} />
-          </Reveal>
-
-          <div className="flex flex-col justify-center">
+        {/* ── Hero ─────────────────────────────────────────────────────────── */}
+        <section className="py-12 sm:py-16">
+          <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-14">
             <Reveal variant="fade-up">
-              <p className="text-premium text-xs font-semibold tracking-[0.22em] uppercase">
-                Terry Towels
-              </p>
-              <h1 className="font-heading text-foreground mt-4 text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl">
-                {product.name}
-              </h1>
-              {/* The blend sits directly under the name on every one of these
+              <ProductGallery images={IMAGES} />
+            </Reveal>
+
+            <div className="flex flex-col justify-center">
+              <Reveal variant="fade-up">
+                <p className="text-premium text-xs font-semibold tracking-[0.22em] uppercase">
+                  Terry Towels
+                </p>
+                <h1 className="font-heading text-foreground mt-4 text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl">
+                  {product.name}
+                </h1>
+                {/* The blend sits directly under the name on every one of these
                   pages, not only the two that share a name. It is the first
                   thing on the client's sheet after the product itself. */}
-              <p className="text-accent-gold mt-3 text-[13px] font-semibold tracking-[0.14em] uppercase">
-                {product.blend}
-              </p>
+                <p className="text-accent-gold mt-3 text-[13px] font-semibold tracking-[0.14em] uppercase">
+                  {product.blend}
+                </p>
 
-              <p className="text-muted-foreground mt-5 leading-relaxed text-pretty">
-                Woven in {product.blend.toLowerCase()} with a {product.hem.toLowerCase()} hem, and
-                made in {sizes.length} {sizes.length === 1 ? "size" : "sizes"}. Every figure below
-                comes from our towel sheet.
+                <p className="text-muted-foreground mt-5 leading-relaxed text-pretty">
+                  Woven in {product.blend.toLowerCase()} with a {product.hem.toLowerCase()} hem, and
+                  made in {sizes.length} {sizes.length === 1 ? "size" : "sizes"}. Every figure below
+                  comes from our towel sheet.
+                </p>
+              </Reveal>
+
+              <Reveal variant="fade-up" delay={0.1}>
+                <TerrySpecPicker
+                  blend={product.blend}
+                  hem={product.hem}
+                  sizes={sizes.map(({ size, weight, sku }) => ({
+                    key: size.key,
+                    name: size.name,
+                    dimensions: size.dimensions,
+                    weight,
+                    sku,
+                  }))}
+                />
+              </Reveal>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Specification, and the order list ───────────────────────────── */}
+        {/* scroll-mt clears the sticky header when "Next" jumps here. */}
+        <section
+          id={SPEC_SECTION_ID}
+          className="bg-platinum/25 border-premium/20 scroll-mt-24 border-y py-14 sm:py-20"
+        >
+          <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+            <Reveal variant="fade-up">
+              <h2 className="font-heading text-3xl font-semibold sm:text-4xl">Specification</h2>
+              <p className="text-muted-foreground mt-3 max-w-2xl leading-relaxed">
+                Written to be read against your tender document. Add the sizes you need and the
+                quantities, then send the whole list as one request.
               </p>
             </Reveal>
 
-            <Reveal variant="fade-up" delay={0.1}>
-              <TerrySpecPicker
+            <div className="mt-10">
+              <TerrySpecTable
                 productSlug={product.slug}
                 blend={product.blend}
                 hem={product.hem}
-                sizes={sizes.map(({ size, weight }) => ({
-                  key: size.key,
+                rows={sizes.map(({ size, weight, sku }) => ({
+                  sizeKey: size.key,
                   name: size.name,
                   dimensions: size.dimensions,
                   weight,
+                  sku,
                 }))}
               />
-            </Reveal>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Specification ────────────────────────────────────────────────── */}
-      <section className="bg-platinum/25 border-premium/20 border-y py-14 sm:py-20">
-        <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-          <Reveal variant="fade-up">
-            <h2 className="font-heading text-3xl font-semibold sm:text-4xl">Specification</h2>
-            <p className="text-muted-foreground mt-3 max-w-2xl leading-relaxed">
-              Written to be read against your tender document.
-            </p>
-          </Reveal>
-
-          <Reveal variant="fade-up" delay={0.1} className="mt-10">
-            {/* bg-card, NOT bg-white. The cells use --foreground, which is navy in
-                light and ivory in dark, so a hardcoded white ground turns the
-                whole table invisible the moment the theme flips. --card is the
-                token for exactly this surface: white in light, navy in dark. */}
-            <div className="border-premium/25 bg-card overflow-x-auto rounded-xl border">
-              {/* A real table with row and column headers: a buyer reads a size
-                  across to its weight, and a screen reader needs the pairing
-                  that a grid of divs throws away. */}
-              <table className="w-full min-w-[34rem] text-sm">
-                <caption className="sr-only">
-                  Sizes and weights for {product.name} in {product.blend}
-                </caption>
-                <thead>
-                  <tr className="border-premium/20 border-b">
-                    <th
-                      scope="col"
-                      className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-[0.14em] uppercase"
-                    >
-                      Product type
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-[0.14em] uppercase"
-                    >
-                      Size
-                    </th>
-                    <th
-                      scope="col"
-                      className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-[0.14em] uppercase"
-                    >
-                      Weight
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sizes.map(({ size, weight }) => (
-                    <tr key={size.key} className="border-premium/15 border-b last:border-0">
-                      <th
-                        scope="row"
-                        className="text-foreground px-5 py-3.5 text-left font-medium"
-                      >
-                        {size.name}
-                      </th>
-                      <td className="text-foreground/80 px-5 py-3.5">{size.dimensions}</td>
-                      <td className="text-foreground px-5 py-3.5 font-medium">{weight}</td>
-                    </tr>
-                  ))}
-                  <tr className="border-premium/20 border-t">
-                    <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
-                      Blend
-                    </th>
-                    <td colSpan={2} className="text-foreground px-5 py-3.5">
-                      {product.blend}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
-                      Hem
-                    </th>
-                    <td colSpan={2} className="text-foreground px-5 py-3.5">
-                      {product.hem}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
+          </div>
+        </section>
 
-            <p className="text-muted-foreground mt-5 max-w-2xl text-[13px] leading-relaxed">
-              Sizes not listed are not part of this construction. Colour is matched from a physical
-              sample when we quote.
-            </p>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* ── The rest of the range ────────────────────────────────────────── */}
-      <section className="py-12 sm:py-16">
-        <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-          <h2 className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
-            {hasChooser ? "The other blend" : "Other terry constructions"}
-          </h2>
-          <ul className="mt-5 flex flex-wrap gap-2.5">
-            {(hasChooser ? siblings : TERRY_PRODUCTS)
-              .filter((p) => p.slug !== product.slug)
-              .map((p) => (
-                <li key={p.slug}>
-                  <Link
-                    href={`${TERRY_BASE}/${p.slug}`}
-                    className="border-premium/35 text-foreground/80 hover:border-premium hover:text-foreground focus-visible:ring-ring inline-flex rounded-full border px-4 py-2 text-[13.5px] transition-colors focus-visible:ring-2 focus-visible:outline-none"
-                  >
-                    {p.name}
-                    <span className="text-muted-foreground ml-2">{p.blend}</span>
-                  </Link>
-                </li>
-              ))}
-          </ul>
-        </div>
-      </section>
-    </main>
+        {/* ── The rest of the range ────────────────────────────────────────── */}
+        <section className="py-12 sm:py-16">
+          <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+            <h2 className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
+              {hasChooser ? "The other blend" : "Other terry constructions"}
+            </h2>
+            <ul className="mt-5 flex flex-wrap gap-2.5">
+              {(hasChooser ? siblings : TERRY_PRODUCTS)
+                .filter((p) => p.slug !== product.slug)
+                .map((p) => (
+                  <li key={p.slug}>
+                    <Link
+                      href={`${TERRY_BASE}/${p.slug}`}
+                      className="border-premium/35 text-foreground/80 hover:border-premium hover:text-foreground focus-visible:ring-ring inline-flex rounded-full border px-4 py-2 text-[13.5px] transition-colors focus-visible:ring-2 focus-visible:outline-none"
+                    >
+                      {p.name}
+                      <span className="text-muted-foreground ml-2">{p.blend}</span>
+                    </Link>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </section>
+      </main>
+    </TerryOrderListProvider>
   );
 }
 
@@ -351,7 +305,10 @@ function Crumbs({ trail }: { trail: { label: string; href?: string }[] }) {
                 {crumb.label}
               </Link>
             ) : (
-              <span aria-current={i === all.length - 1 ? "page" : undefined} className="text-foreground font-medium">
+              <span
+                aria-current={i === all.length - 1 ? "page" : undefined}
+                className="text-foreground font-medium"
+              >
                 {crumb.label}
               </span>
             )}

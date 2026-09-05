@@ -35,23 +35,34 @@ export type TerrySize = {
   name: string;
   /** Finished size, exactly as the sheet writes it. */
   dimensions: string;
+  /** Two-letter segment of the SKU. See terrySkuFor. */
+  code: string;
 };
 
-/**
- * The size columns, in sheet order.
- *
- * POOL TOWEL IS HERE AND IS NEVER RENDERED. The sheet carries the column and
- * its 30"x60" heading but not one row has a weight in it, so no product offers
- * it. It stays listed because deleting it would quietly lose the fact that the
- * client has the size — when a weight arrives, it starts working on its own.
- */
+/** The size columns, in sheet order. */
 export const TERRY_SIZES: TerrySize[] = [
-  { key: "wash-cloth", name: "Wash Cloth", dimensions: '13"x13"' },
-  { key: "hand-towel", name: "Hand Towel", dimensions: '16"x27"' },
-  { key: "bath-towel", name: "Bath Towel", dimensions: '27"x54"' },
-  { key: "bath-mat", name: "Bath Matt", dimensions: '20"x30"' },
-  { key: "pool-towel", name: "Pool Towel", dimensions: '30"x60"' },
+  { key: "wash-cloth", name: "Wash Cloth", dimensions: '13"x13"', code: "WC" },
+  { key: "hand-towel", name: "Hand Towel", dimensions: '16"x27"', code: "HT" },
+  { key: "bath-towel", name: "Bath Towel", dimensions: '27"x54"', code: "BT" },
+  { key: "bath-mat", name: "Bath Matt", dimensions: '20"x30"', code: "BM" },
+  { key: "pool-towel", name: "Pool Towel", dimensions: '30"x60"', code: "PT" },
 ];
+
+/**
+ * POOL TOWEL IS OFFERED ON EVERY CONSTRUCTION, AND ITS WEIGHT IS UNKNOWN.
+ *
+ * This is the one place the sheet and the client disagree, so it is worth being
+ * precise about. A BLANK CELL under Wash Cloth or Bath Matt means that
+ * construction is not made in that size — Classic Terry in 80/20 has a hand
+ * towel and a bath towel and nothing else. But the Pool Towel column is blank
+ * for all seven rows while still carrying its 30"x60" heading, which is a
+ * column nobody filled in rather than seven separate decisions not to make it.
+ * The client has since listed Pool Towel among the products to show.
+ *
+ * So it is offered everywhere and its weight reads "On request" — never a
+ * figure borrowed from the bath towel beside it. Send the row and it fills in.
+ */
+const POOL_TOWEL_WEIGHT: string | null = null;
 
 export type TerryProduct = {
   slug: string;
@@ -59,6 +70,8 @@ export type TerryProduct = {
   name: string;
   /** Groups the two same-named entries. Unique per name. */
   family: string;
+  /** Construction segment of the SKU. See terrySkuFor. */
+  code: string;
   blend: string;
   hem: string;
   /** Weight per size. A key that is absent is a size we do not offer. */
@@ -76,6 +89,7 @@ export type TerryProduct = {
 export const TERRY_PRODUCTS: TerryProduct[] = [
   {
     slug: "classic-terry-towels-100-cotton",
+    code: "CT100",
     name: "Classic Terry Towels",
     family: "classic-terry-towels",
     blend: "100% Cotton",
@@ -89,6 +103,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
   },
   {
     slug: "classic-terry-towels-80-20-poly",
+    code: "CT8020",
     name: "Classic Terry Towels",
     family: "classic-terry-towels",
     blend: "80% Cot / 20% Poly",
@@ -100,6 +115,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
   },
   {
     slug: "classic-dobby-towels",
+    code: "CD",
     name: "Classic Dobby Towels",
     family: "classic-dobby-towels",
     blend: "90% Cot / 10% Poly",
@@ -113,6 +129,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
   },
   {
     slug: "dobby-towels",
+    code: "DB",
     name: "Dobby Towels",
     family: "dobby-towels",
     blend: "86% Cot / 14% Poly",
@@ -126,6 +143,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
   },
   {
     slug: "plain-quad-cam-towel",
+    code: "QC",
     name: "Plain Quad Cam Towel",
     family: "plain-quad-cam-towel",
     blend: "100% Cotton",
@@ -139,6 +157,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
   },
   {
     slug: "pique-weave-towel",
+    code: "PW",
     name: "Pique Weave Towel",
     family: "pique-weave-towel",
     blend: "86% Cot / 14% Poly",
@@ -151,6 +170,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
   },
   {
     slug: "piano-key-towel",
+    code: "PK",
     name: "Piano Key Towel",
     family: "piano-key-towel",
     blend: "100% Cotton All Ring",
@@ -200,12 +220,45 @@ export function terryProductHref(product: TerryProduct): string {
     : `${TERRY_BASE}/${product.slug}`;
 }
 
-/** The sizes this product is actually made in, in sheet order. */
-export function terrySizesFor(product: TerryProduct): { size: TerrySize; weight: string }[] {
+export type TerryLine = {
+  size: TerrySize;
+  /** As the sheet writes it, or null where the sheet has no figure. */
+  weight: string | null;
+  sku: string;
+};
+
+/**
+ * The sizes this product is made in, in sheet order, each with its SKU.
+ *
+ * Pool towel is always included with a null weight — see POOL_TOWEL_WEIGHT
+ * above for why it is the one blank cell that does not mean "not made".
+ */
+export function terrySizesFor(product: TerryProduct): TerryLine[] {
   return TERRY_SIZES.flatMap((size) => {
+    if (size.key === "pool-towel") {
+      return [{ size, weight: POOL_TOWEL_WEIGHT, sku: terrySkuFor(product, size) }];
+    }
     const weight = product.weights[size.key];
-    return weight ? [{ size, weight }] : [];
+    return weight ? [{ size, weight, sku: terrySkuFor(product, size) }] : [];
   });
+}
+
+/**
+ * The stock code for one construction in one size.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * THESE CODES ARE OURS, NOT THE CLIENT'S. The towel sheet carries no SKU
+ * column. The scheme below is deterministic and readable — SW-<construction>-
+ * <size>, so SW-PK-BT is a Piano Key bath towel — but if Souwel already runs
+ * stock codes in their own system, THESE ARE THE WRONG ONES and a buyer quoting
+ * SW-PK-BT back at them will not match anything.
+ *
+ * Replace by putting the real code on each product and size in this file; every
+ * page reads it from here, so nothing else changes.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+export function terrySkuFor(product: TerryProduct, size: TerrySize): string {
+  return `SW-${product.code}-${size.code}`;
 }
 
 /**
@@ -231,6 +284,57 @@ export function terryCardSummary(product: TerryProduct): string {
 export function terryEnquiryName(product: TerryProduct, size: TerrySize): string {
   return `${product.name} (${product.blend}) — ${size.name} ${size.dimensions}`;
 }
+
+/* ───────────────────────────────────────────────────────────────────────────
+   The order list, as it travels to the quote form
+   ─────────────────────────────────────────────────────────────────────────── */
+
+/** Supplied by the dozen. Mirrored in TerrySpecPicker and the quote page. */
+export const TERRY_DOZEN = 12;
+
+export const roundUpToDozen = (n: number) => Math.ceil(n / TERRY_DOZEN) * TERRY_DOZEN;
+
+export type TerryOrderLine = { sizeKey: TerrySizeKey; quantity: number };
+
+/**
+ * `?lines=` — the buyer's list, as compactly as it can be written down.
+ *
+ * `bath-towel:504,wash-cloth:120`. Size keys and quantities only: no names, no
+ * weights, no SKUs. Everything a member of staff reads is rebuilt from this
+ * file after the keys are checked, so nothing a visitor can type reaches the
+ * lead. See readTerryRequest in app/(marketing)/quote/page.tsx.
+ */
+export function encodeTerryLines(lines: TerryOrderLine[]): string {
+  return lines.map((l) => `${l.sizeKey}:${l.quantity}`).join(",");
+}
+
+/**
+ * Parses `?lines=`, keeping only pairs that name a size THIS product is made
+ * in. An unknown key, a duplicate or a junk quantity is dropped rather than
+ * repaired — a request that half-parsed is worse than one that arrives empty
+ * and makes the buyer say what they meant.
+ */
+export function parseTerryLines(product: TerryProduct, raw: string | undefined): TerryOrderRow[] {
+  if (!raw) return [];
+  const offered = new Map(terrySizesFor(product).map((l) => [l.size.key, l]));
+  const seen = new Set<string>();
+  const out: TerryOrderRow[] = [];
+
+  for (const part of raw.split(",").slice(0, TERRY_SIZES.length)) {
+    const [key, qty] = part.split(":");
+    const line = offered.get(key as TerrySizeKey);
+    if (!line || seen.has(key)) continue;
+    if (!/^\d{1,7}$/.test(qty ?? "")) continue;
+    const n = Number(qty);
+    if (n <= 0) continue;
+    seen.add(key);
+    out.push({ ...line, quantity: roundUpToDozen(n) });
+  }
+
+  return out;
+}
+
+export type TerryOrderRow = TerryLine & { quantity: number };
 
 /**
  * The one line the Bath Linen card shows for the range as a whole.

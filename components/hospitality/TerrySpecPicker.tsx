@@ -1,29 +1,30 @@
 "use client";
 
 import { useId, useState } from "react";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowDown } from "lucide-react";
+import { TERRY_DOZEN, roundUpToDozen, type TerrySizeKey } from "@/lib/terry-towels";
+import { SPEC_SECTION_ID, useTerryOrderList } from "@/components/hospitality/TerryOrderList";
 import { cn } from "@/lib/utils";
 
 /**
- * Choose the size, then ask for the quote.
+ * Choose a size and a quantity, then go down to the table.
  *
- * THE QUOTE BUTTON IS INERT UNTIL A SIZE IS PICKED, and that is the point of
- * the component. Weight changes with size on every one of these constructions —
- * a Piano Key wash cloth is 1.5 LBS and the bath towel is 18 — so a request
- * that does not name a size is a request Sales has to send back before they can
- * price anything. The choice is made here, while the buyer is looking at the
- * table, rather than typed into a message box two pages later.
+ * THIS NO LONGER ENDS AT THE QUOTE FORM. It ends at the specification table,
+ * because a buyer ordering hotel linen rarely wants one size — they want
+ * washcloths and hand towels and bath towels of the same construction, and the
+ * table is where the rest of that list gets built. "Next" carries the choice
+ * made here into the list and scrolls; the quote request is sent from the
+ * bottom of the table once the list is complete.
+ *
+ * THE BUTTON IS INERT UNTIL BOTH A SIZE AND A QUANTITY ARE SET, and that is
+ * still the point of the component. Weight changes with size on every one of
+ * these constructions — a Piano Key wash cloth is 1.5 LBS and its bath towel is
+ * 18 — so a line with no size named is a line Sales has to send back.
  *
  * ONLY THE SIZES THIS CONSTRUCTION IS MADE IN ARE OFFERED. The list is built
  * from the sheet, so Classic Terry in 80/20 shows two buttons and the 100%
- * cotton version shows four. There is no greyed-out fifth button implying a
- * size we could supply if asked — the sheet does not say that.
- *
- * The disabled state is a real <button disabled>, not a Link styled to look
- * dead. A disabled anchor is still followed by a keyboard and still read as a
- * link by assistive tech; a disabled button is skipped by both, and the note
- * beneath it says what is missing.
+ * cotton version shows five. There is no greyed-out button implying a size we
+ * could supply if asked.
  *
  * ── QUANTITY IS IN DOZENS ────────────────────────────────────────────────────
  *
@@ -33,38 +34,30 @@ import { cn } from "@/lib/utils";
  *
  * It rounds on BLUR, never while typing. Snapping on each keystroke means the
  * "1" of 1200 becomes 12 before the second digit lands, and the buyer fights
- * the field the whole way. Waiting until they leave it lets them type the
- * number they had in mind and then shows what it became.
- *
- * And it says so afterwards. A number that silently changes itself between
- * being typed and being sent is the kind of thing a buyer discovers on the
- * quotation, so the line under the field names the figure it rounded up from.
+ * the field the whole way. And it says so afterwards: a number that silently
+ * changes itself between being typed and being sent is the kind of thing a
+ * buyer discovers on the quotation.
  */
 
-/** Supplied by the dozen. */
-const DOZEN = 12;
-
-const roundUpToDozen = (n: number) => Math.ceil(n / DOZEN) * DOZEN;
-
 export type TerryPickerSize = {
-  key: string;
+  key: TerrySizeKey;
   name: string;
   dimensions: string;
-  weight: string;
+  /** Null where the sheet carries no figure — the pool towel. */
+  weight: string | null;
+  sku: string;
 };
 
 export function TerrySpecPicker({
-  productSlug,
   blend,
   hem,
   sizes,
 }: {
-  productSlug: string;
   blend: string;
   hem: string;
   sizes: TerryPickerSize[];
 }) {
-  const [sizeKey, setSizeKey] = useState<string | null>(null);
+  const { setLine, setSelected, selected } = useTerryOrderList();
   const [quantity, setQuantity] = useState("");
   /** The figure the buyer typed, when rounding changed it. Cleared on edit. */
   const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
@@ -72,15 +65,11 @@ export function TerrySpecPicker({
   const qtyHelpId = useId();
   const helpId = useId();
 
-  const chosen = sizes.find((s) => s.key === sizeKey) ?? null;
+  const chosen = sizes.find((s) => s.key === selected) ?? null;
 
-  // Only a positive whole number is carried through. Anything else is dropped
-  // rather than passed on as-is — the quote page re-checks it, and a value that
-  // will be rejected there should not look accepted here.
   const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const qty = typed !== null && typed > 0 && typed % DOZEN === 0 ? typed : null;
+  const qty = typed !== null && typed > 0 && typed % TERRY_DOZEN === 0 ? typed : null;
 
-  /** Snap to the next dozen when the buyer leaves the field. */
   const snapToDozen = () => {
     if (typed === null || typed <= 0) return;
     const rounded = roundUpToDozen(typed);
@@ -88,10 +77,17 @@ export function TerrySpecPicker({
     setQuantity(String(rounded));
   };
 
-  const href =
-    chosen && qty
-      ? `/quote?terry=${encodeURIComponent(productSlug)}&type=${encodeURIComponent(chosen.key)}&qty=${qty}`
-      : null;
+  const ready = chosen !== null && qty !== null;
+
+  const goToTable = () => {
+    if (!chosen || !qty) return;
+    // Into the list BEFORE the scroll, so the row is already there when the
+    // table arrives rather than appearing under the buyer a frame later.
+    setLine(chosen.key, qty);
+    document
+      .getElementById(SPEC_SECTION_ID)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="border-premium/25 mt-8 rounded-xl border p-5 sm:p-6">
@@ -123,13 +119,13 @@ export function TerrySpecPicker({
         </legend>
         <div className="mt-3 flex flex-wrap gap-2.5">
           {sizes.map((size) => {
-            const active = size.key === sizeKey;
+            const active = size.key === selected;
             return (
               <button
                 key={size.key}
                 type="button"
                 aria-pressed={active}
-                onClick={() => setSizeKey(size.key)}
+                onClick={() => setSelected(size.key)}
                 className={cn(
                   "focus-visible:ring-ring rounded-lg border px-4 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
                   active
@@ -139,6 +135,12 @@ export function TerrySpecPicker({
               >
                 <span className="block text-[14px] font-medium">{size.name}</span>
                 <span className="text-muted-foreground block text-[12.5px]">{size.dimensions}</span>
+                {/* The SKU on the button itself: it is the thing a buyer quotes
+                    back at Sales, and hiding it until the table below would mean
+                    choosing a product without seeing its code. */}
+                <span className="text-muted-foreground/80 mt-0.5 block font-mono text-[11px]">
+                  {size.sku}
+                </span>
               </button>
             );
           })}
@@ -149,7 +151,8 @@ export function TerrySpecPicker({
       <p className="text-muted-foreground mt-4 text-[13.5px]" aria-live="polite">
         {chosen ? (
           <>
-            Weight for {chosen.name}: <span className="text-foreground font-semibold">{chosen.weight}</span>
+            Weight for {chosen.name}:{" "}
+            <span className="text-foreground font-semibold">{chosen.weight ?? "On request"}</span>
           </>
         ) : (
           "Pick a product type to see its weight."
@@ -165,11 +168,10 @@ export function TerrySpecPicker({
           id={qtyId}
           type="number"
           inputMode="numeric"
-          // step and min so the browser's own spinners and validation already
-          // move in twelves — the blur handler is the safety net, not the only
-          // thing teaching the rule.
-          min={DOZEN}
-          step={DOZEN}
+          // step and min so the browser's own spinners already move in twelves —
+          // the blur handler is the safety net, not the only thing teaching it.
+          min={TERRY_DOZEN}
+          step={TERRY_DOZEN}
           required
           aria-describedby={qtyHelpId}
           value={quantity}
@@ -192,34 +194,30 @@ export function TerrySpecPicker({
         </p>
       </div>
 
-      {/* ── Through to the quote ─────────────────────────────────────── */}
+      {/* ── Down to the table ────────────────────────────────────────── */}
       <div className="mt-7">
-        {href ? (
-          <Link
-            href={href}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-12 items-center gap-2 rounded-lg px-7 text-[15px] font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
-          >
-            Request a Quote
-            <ArrowRight aria-hidden className="size-4" />
-          </Link>
-        ) : (
-          <button
-            type="button"
-            disabled
-            aria-describedby={helpId}
-            className="bg-muted text-muted-foreground inline-flex h-12 cursor-not-allowed items-center gap-2 rounded-lg px-7 text-[15px] font-semibold"
-          >
-            Request a Quote
-            <ArrowRight aria-hidden className="size-4" />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={goToTable}
+          disabled={!ready}
+          aria-describedby={helpId}
+          className={cn(
+            "inline-flex h-12 items-center gap-2 rounded-lg px-7 text-[15px] font-semibold",
+            ready
+              ? "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+              : "bg-muted text-muted-foreground cursor-not-allowed"
+          )}
+        >
+          Next
+          <ArrowDown aria-hidden className="size-4" />
+        </button>
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
           {!chosen
             ? "Choose a product type above to continue."
             : !qty
               ? "Enter a quantity in multiples of 12 to continue."
-              : "Priced by quotation against your specification and volume. No account needed to ask."}
+              : "Adds this to your list and takes you to the full table, where you can add more sizes."}
         </p>
       </div>
     </div>
