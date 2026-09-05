@@ -101,7 +101,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
         <h3 className="text-foreground text-[15px] font-semibold">
           Your list{" "}
           <span className="text-muted-foreground font-normal">
-            ({lines.length} {lines.length === 1 ? "line" : "lines"})
+            ({lines.length} {lines.length === 1 ? "product" : "products"} selected)
           </span>
         </h3>
 
