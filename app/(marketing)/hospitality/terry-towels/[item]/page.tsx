@@ -228,7 +228,11 @@ function ProductDetail({ product }: { product: TerryProduct }) {
           </Reveal>
 
           <Reveal variant="fade-up" delay={0.1} className="mt-10">
-            <div className="border-premium/25 overflow-x-auto rounded-xl border bg-white">
+            {/* bg-card, NOT bg-white. The cells use --foreground, which is navy in
+                light and ivory in dark, so a hardcoded white ground turns the
+                whole table invisible the moment the theme flips. --card is the
+                token for exactly this surface: white in light, navy in dark. */}
+            <div className="border-premium/25 bg-card overflow-x-auto rounded-xl border">
               {/* A real table with row and column headers: a buyer reads a size
                   across to its weight, and a screen reader needs the pairing
                   that a grid of divs throws away. */}

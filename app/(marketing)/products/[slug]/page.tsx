@@ -224,7 +224,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <div className="mt-10 grid gap-8 lg:grid-cols-3">
             {product.specifications.map((group, i) => (
               <Reveal key={group.title} variant="fade-up" delay={i * 0.08}>
-                <div className="border-premium/25 h-full rounded-xl border bg-white p-6">
+                <div className="border-premium/25 bg-card h-full rounded-xl border p-6">
                   <h3 className="font-heading text-premium-alt text-xs font-semibold tracking-[0.16em] uppercase">
                     {group.title}
                   </h3>
@@ -427,7 +427,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {product.certifications.map((c) => (
                 <li
                   key={c}
-                  className="border-premium/35 rounded-md border bg-white px-4 py-2 text-sm"
+                  className="border-premium/35 bg-card rounded-md border px-4 py-2 text-sm"
                 >
                   {c}
                 </li>

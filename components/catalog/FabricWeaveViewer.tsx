@@ -271,11 +271,15 @@ export function FabricWeaveViewer() {
   const perInch = Math.round(tc / 2);
   const copy = COPY[weave];
 
+  // The SHELL follows the theme because the control column beside the canvas is
+  // all --foreground and --muted-foreground text. The canvas column keeps its
+  // explicit white below: that is the ground the cloth is drawn and lit
+  // against, not a themed surface.
   return (
-    <div className="border-premium/30 overflow-hidden rounded-2xl border bg-white">
+    <div className="border-premium/30 bg-card overflow-hidden rounded-2xl border">
       <div className="grid lg:grid-cols-5">
         {/* The cloth */}
-        <div className="relative lg:col-span-3">
+        <div className="relative bg-white lg:col-span-3">
           <canvas
             ref={canvasRef}
             // role=img plus a label that states the CURRENT construction: the
