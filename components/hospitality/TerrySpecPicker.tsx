@@ -24,7 +24,27 @@ import { cn } from "@/lib/utils";
  * dead. A disabled anchor is still followed by a keyboard and still read as a
  * link by assistive tech; a disabled button is skipped by both, and the note
  * beneath it says what is missing.
+ *
+ * ── QUANTITY IS IN DOZENS ────────────────────────────────────────────────────
+ *
+ * These are supplied by the dozen, so a quantity that is not a multiple of
+ * twelve cannot be filled as typed. Rather than reject it, the field ROUNDS UP
+ * to the next twelve: 10,000 becomes 10,008.
+ *
+ * It rounds on BLUR, never while typing. Snapping on each keystroke means the
+ * "1" of 1200 becomes 12 before the second digit lands, and the buyer fights
+ * the field the whole way. Waiting until they leave it lets them type the
+ * number they had in mind and then shows what it became.
+ *
+ * And it says so afterwards. A number that silently changes itself between
+ * being typed and being sent is the kind of thing a buyer discovers on the
+ * quotation, so the line under the field names the figure it rounded up from.
  */
+
+/** Supplied by the dozen. */
+const DOZEN = 12;
+
+const roundUpToDozen = (n: number) => Math.ceil(n / DOZEN) * DOZEN;
 
 export type TerryPickerSize = {
   key: string;
@@ -46,7 +66,10 @@ export function TerrySpecPicker({
 }) {
   const [sizeKey, setSizeKey] = useState<string | null>(null);
   const [quantity, setQuantity] = useState("");
+  /** The figure the buyer typed, when rounding changed it. Cleared on edit. */
+  const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
   const qtyId = useId();
+  const qtyHelpId = useId();
   const helpId = useId();
 
   const chosen = sizes.find((s) => s.key === sizeKey) ?? null;
@@ -54,12 +77,21 @@ export function TerrySpecPicker({
   // Only a positive whole number is carried through. Anything else is dropped
   // rather than passed on as-is — the quote page re-checks it, and a value that
   // will be rejected there should not look accepted here.
-  const qty = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
+  const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
+  const qty = typed !== null && typed > 0 && typed % DOZEN === 0 ? typed : null;
 
-  const href = chosen
-    ? `/quote?terry=${encodeURIComponent(productSlug)}&type=${encodeURIComponent(chosen.key)}` +
-      (qty && qty > 0 ? `&qty=${qty}` : "")
-    : null;
+  /** Snap to the next dozen when the buyer leaves the field. */
+  const snapToDozen = () => {
+    if (typed === null || typed <= 0) return;
+    const rounded = roundUpToDozen(typed);
+    setRoundedFrom(rounded === typed ? null : typed);
+    setQuantity(String(rounded));
+  };
+
+  const href =
+    chosen && qty
+      ? `/quote?terry=${encodeURIComponent(productSlug)}&type=${encodeURIComponent(chosen.key)}&qty=${qty}`
+      : null;
 
   return (
     <div className="border-premium/25 mt-8 rounded-xl border p-5 sm:p-6">
@@ -127,18 +159,37 @@ export function TerrySpecPicker({
       {/* ── Quantity ─────────────────────────────────────────────────── */}
       <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
         <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity <span className="text-muted-foreground font-normal">(optional)</span>
+          Quantity <span className="text-muted-foreground font-normal">(required)</span>
         </label>
         <input
           id={qtyId}
           type="number"
           inputMode="numeric"
-          min={1}
+          // step and min so the browser's own spinners and validation already
+          // move in twelves — the blur handler is the safety net, not the only
+          // thing teaching the rule.
+          min={DOZEN}
+          step={DOZEN}
+          required
+          aria-describedby={qtyHelpId}
           value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          placeholder="e.g. 500"
+          onChange={(e) => {
+            setQuantity(e.target.value);
+            setRoundedFrom(null);
+          }}
+          onBlur={snapToDozen}
+          placeholder="e.g. 504"
           className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
         />
+        <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
+          {roundedFrom !== null ? (
+            <span className="text-foreground font-medium">
+              Rounded up from {roundedFrom.toLocaleString("en-US")} — supplied by the dozen.
+            </span>
+          ) : (
+            "Supplied by the dozen, so quantities go up in twelves."
+          )}
+        </p>
       </div>
 
       {/* ── Through to the quote ─────────────────────────────────────── */}
@@ -164,9 +215,11 @@ export function TerrySpecPicker({
         )}
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
-          {chosen
-            ? "Priced by quotation against your specification and volume. No account needed to ask."
-            : "Choose a product type above to continue."}
+          {!chosen
+            ? "Choose a product type above to continue."
+            : !qty
+              ? "Enter a quantity in multiples of 12 to continue."
+              : "Priced by quotation against your specification and volume. No account needed to ask."}
         </p>
       </div>
     </div>

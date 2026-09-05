@@ -17,6 +17,9 @@ export const metadata: Metadata = {
 
 const CATEGORY_NAME = new Map(CATEGORIES.map((c) => [c.slug, c.name]));
 
+/** Terry towels are supplied by the dozen. Mirrors TerrySpecPicker. */
+const DOZEN = 12;
+
 /**
  * The catalogue as a picker needs it — no specification blobs, no imagery.
  *
@@ -41,7 +44,10 @@ const PICKER_PRODUCTS: QuotePickerProduct[] = Object.values(PRODUCTS)
  * put attacker-controlled text straight into the lead a salesperson opens.
  *
  * Quantity is the one number that comes from the visitor, so it is bounded to
- * seven digits of nothing but digits before it is echoed back.
+ * seven digits of nothing but digits before it is echoed back, and rounded up
+ * to a dozen the same way the picker does. These are supplied by the dozen; a
+ * hand-edited URL should not be able to place an order for 10,000 of something
+ * that only exists in twelves.
  */
 function readTerryRequest(params: { terry?: string; type?: string; qty?: string }) {
   if (!params.terry) return null;
@@ -51,7 +57,8 @@ function readTerryRequest(params: { terry?: string; type?: string; qty?: string 
   const match = terrySizesFor(product).find((s) => s.size.key === params.type);
   if (!match) return null;
 
-  const qty = params.qty && /^\d{1,7}$/.test(params.qty) ? Number(params.qty) : null;
+  const typed = params.qty && /^\d{1,7}$/.test(params.qty) ? Number(params.qty) : null;
+  const qty = typed !== null && typed > 0 ? Math.ceil(typed / DOZEN) * DOZEN : null;
 
   const lines = [
     `Blend: ${product.blend}`,
