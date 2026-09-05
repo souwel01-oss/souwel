@@ -35,6 +35,11 @@ import { cn } from "@/lib/utils";
  * A ROW WITH NO WEIGHT IS STILL ORDERABLE. The pool towel has no figure on the
  * client's sheet and reads "On request"; it can be listed, and the quote comes
  * back with the weight rather than the buyer being blocked on it here.
+ *
+ * BLEND AND HEM ARE NOT ROWS HERE. They do not vary by size, and they are
+ * already stated twice above — under the product name and again in the picker's
+ * fixed facts. A third copy at the foot of a table whose every other row is
+ * orderable reads as two more things to add a quantity to.
  */
 
 export type SpecRow = {
@@ -45,17 +50,7 @@ export type SpecRow = {
   sku: string;
 };
 
-export function TerrySpecTable({
-  productSlug,
-  blend,
-  hem,
-  rows,
-}: {
-  productSlug: string;
-  blend: string;
-  hem: string;
-  rows: SpecRow[];
-}) {
+export function TerrySpecTable({ productSlug, rows }: { productSlug: string; rows: SpecRow[] }) {
   const { lines, setLine, removeLine, quantityOf, selected } = useTerryOrderList();
 
   const href =
@@ -97,26 +92,6 @@ export function TerrySpecTable({
                 onAdd={(qty) => setLine(row.sizeKey, qty)}
               />
             ))}
-
-            {/* The two facts that do not vary by size, kept in the same table so
-                a buyer copying it into a tender takes the construction with the
-                sizes rather than leaving it behind on the page. */}
-            <tr className="border-premium/20 border-t">
-              <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
-                Blend
-              </th>
-              <td colSpan={5} className="text-foreground px-5 py-3.5">
-                {blend}
-              </td>
-            </tr>
-            <tr>
-              <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
-                Hem
-              </th>
-              <td colSpan={5} className="text-foreground px-5 py-3.5">
-                {hem}
-              </td>
-            </tr>
           </tbody>
         </table>
       </div>
@@ -230,10 +205,7 @@ function SpecTableRow({
 
   return (
     <tr
-      className={cn(
-        "border-premium/15 border-b last:border-0",
-        highlighted && "bg-primary/[0.06]"
-      )}
+      className={cn("border-premium/15 border-b last:border-0", highlighted && "bg-primary/[0.06]")}
     >
       <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
         {row.name}

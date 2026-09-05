@@ -242,8 +242,6 @@ function ProductDetail({ product }: { product: TerryProduct }) {
             <div className="mt-10">
               <TerrySpecTable
                 productSlug={product.slug}
-                blend={product.blend}
-                hem={product.hem}
                 rows={sizes.map(({ size, weight, sku }) => ({
                   sizeKey: size.key,
                   name: size.name,
