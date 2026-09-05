@@ -67,6 +67,12 @@ export type HospitalityCardProduct = {
   href: string;
   /** "Request a quote", prefilled where we know the product. */
   quoteHref: string;
+  /**
+   * Overrides the button's wording. A line that is a RANGE opens rather than
+   * being quoted — "Request a quote" on a card that leads to seven more
+   * products promises a form the click does not deliver.
+   */
+  ctaLabel?: string;
   /** Composition and finished size, or null when we have no specification. */
   material: string | null;
   colours: CardColour[];
@@ -161,7 +167,7 @@ export function ProductCard({ product }: { product: HospitalityCardProduct }) {
             "motion-reduce:transition-none"
           )}
         >
-          Request a quote
+          {product.ctaLabel ?? "Request a quote"}
         </Link>
       </div>
 

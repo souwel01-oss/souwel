@@ -47,6 +47,17 @@ export type QuoteRequestFormProps = {
    * no line items — see the schema note in the quote action.
    */
   enquiryName?: string;
+  /**
+   * Replaces the default sentence under the enquiry banner.
+   *
+   * The default says we do not publish a specification for the line, which is
+   * true of the twenty bare Hospitality names and false of a Terry Towels
+   * request — that one arrives with its blend, hem, size and weight already
+   * chosen and written into the message below.
+   */
+  enquiryNote?: string;
+  /** Seeds the message box. Overrides the generic "Rough annual volume:" line. */
+  messagePrefill?: string;
   /** Prefill for a signed-in customer, so they are not retyping known details. */
   prefill?: { name: string; email: string; company: string };
 };
@@ -58,6 +69,8 @@ export function QuoteRequestForm({
   products,
   initialSlug,
   enquiryName,
+  enquiryNote,
+  messagePrefill,
   prefill,
 }: QuoteRequestFormProps) {
   const [items, setItems] = useState<LineItem[]>(() => [
@@ -167,9 +180,9 @@ export function QuoteRequestForm({
              identical to the one that would reject them, and the fastest way to
              find out otherwise is to fill it all in and press send. */
           <p className="border-premium/40 bg-premium/10 text-foreground rounded-lg border px-4 py-3 text-[14px] leading-relaxed">
-            You are asking about <span className="font-semibold">{enquiryName}</span>. We do not
-            publish a specification for that line yet, so there is nothing to pick below — just add
-            your volumes in the message and send it.
+            You are asking about <span className="font-semibold">{enquiryName}</span>.{" "}
+            {enquiryNote ??
+              "We do not publish a specification for that line yet, so there is nothing to pick below — just add your volumes in the message and send it."}
           </p>
         ) : null}
 
@@ -298,7 +311,8 @@ export function QuoteRequestForm({
             rows={4}
             maxLength={2000}
             defaultValue={
-              enquiryName ? `We are looking at ${enquiryName}. Rough annual volume: ` : undefined
+              messagePrefill ??
+              (enquiryName ? `We are looking at ${enquiryName}. Rough annual volume: ` : undefined)
             }
             placeholder="Delivery location, target lead time, existing specification you are matching…"
             className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 w-full rounded-lg border px-3.5 py-3 text-[15px] outline-none focus-visible:ring-4"

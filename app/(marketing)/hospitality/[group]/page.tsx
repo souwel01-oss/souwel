@@ -10,6 +10,7 @@ import {
 } from "@/lib/hospitality";
 import { PRODUCTS } from "@/lib/product-data";
 import { NOT_SPECIFIED } from "@/lib/product-data";
+import { TERRY_BASE, terryRangeSummary } from "@/lib/terry-towels";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 
@@ -167,6 +168,24 @@ function toCard(
   group: HospitalityGroup
 ): HospitalityCardProduct {
   const product = item.productSlug ? PRODUCTS[item.productSlug] : undefined;
+
+  // A line with its own destination is a range, not a product: it opens a
+  // listing page instead of a quote form, and there is no single specification
+  // to summarise because the products underneath it each have their own.
+  if (item.href) {
+    return {
+      id: item.slug,
+      name: item.name,
+      href: item.href,
+      quoteHref: item.href,
+      ctaLabel: item.ctaLabel,
+      material: item.href === TERRY_BASE ? terryRangeSummary() : null,
+      colours: [],
+      images: group.fallbackImages.slice(0, 2),
+      badge: null,
+      rating: null,
+    };
+  }
 
   if (!product) {
     return {

@@ -5,6 +5,7 @@ import { PRODUCTS } from "@/lib/product-data";
 import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
+import { getTerryProduct, terryEnquiryName, terrySizesFor } from "@/lib/terry-towels";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -30,10 +31,54 @@ const PICKER_PRODUCTS: QuotePickerProduct[] = Object.values(PRODUCTS)
   }))
   .sort((a, b) => a.categoryName.localeCompare(b.categoryName) || a.name.localeCompare(b.name));
 
+/**
+ * A Terry Towels request, rebuilt from the query string.
+ *
+ * THE SLUG AND THE SIZE KEY ARE THE ONLY THINGS TRUSTED, and only after both
+ * are looked up in lib/terry-towels.ts. Everything a member of staff will read
+ * — the product name, the blend, the hem, the weight — is written here from
+ * that file, not carried in the URL. A `?spec=` parameter holding prose would
+ * put attacker-controlled text straight into the lead a salesperson opens.
+ *
+ * Quantity is the one number that comes from the visitor, so it is bounded to
+ * seven digits of nothing but digits before it is echoed back.
+ */
+function readTerryRequest(params: { terry?: string; type?: string; qty?: string }) {
+  if (!params.terry) return null;
+  const product = getTerryProduct(params.terry);
+  if (!product) return null;
+
+  const match = terrySizesFor(product).find((s) => s.size.key === params.type);
+  if (!match) return null;
+
+  const qty = params.qty && /^\d{1,7}$/.test(params.qty) ? Number(params.qty) : null;
+
+  const lines = [
+    `Blend: ${product.blend}`,
+    `Hem: ${product.hem}`,
+    `Product type: ${match.size.name} ${match.size.dimensions}`,
+    `Weight: ${match.weight}`,
+    ...(qty && qty > 0 ? [`Quantity: ${qty}`] : []),
+  ];
+
+  return {
+    name: terryEnquiryName(product, match.size),
+    // Trailing blank line so the buyer types after the specification rather
+    // than into the middle of it.
+    message: `${lines.join("\n")}\n\n`,
+  };
+}
+
 export default async function QuotePage({
   searchParams,
 }: {
-  searchParams: Promise<{ product?: string; enquiry?: string }>;
+  searchParams: Promise<{
+    product?: string;
+    enquiry?: string;
+    terry?: string;
+    type?: string;
+    qty?: string;
+  }>;
 }) {
   const params = await searchParams;
   // The slug comes from a query string, so it is only a prefill hint until it
@@ -50,6 +95,12 @@ export default async function QuotePage({
   // Anything not in HOSPITALITY_GROUPS is dropped.
   const enquiryName =
     params.enquiry && hospitalityItemByName(params.enquiry) ? params.enquiry : undefined;
+
+  // A Terry Towels request arrives with its specification already chosen, so it
+  // takes precedence over a bare `?enquiry=` name and brings its own note: the
+  // default one says we have no specification for the line, which is exactly
+  // wrong here.
+  const terry = readTerryRequest(params);
 
   const user = await getSessionUser();
   const profile = user
@@ -98,7 +149,13 @@ export default async function QuotePage({
         <QuoteRequestForm
           products={PICKER_PRODUCTS}
           initialSlug={initialSlug}
-          enquiryName={enquiryName}
+          enquiryName={terry?.name ?? enquiryName}
+          enquiryNote={
+            terry
+              ? "Your specification is below. Add anything else you need — delivery location, target lead time — and send it."
+              : undefined
+          }
+          messagePrefill={terry?.message}
           prefill={prefill}
         />
       </div>

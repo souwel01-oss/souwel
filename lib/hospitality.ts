@@ -38,6 +38,21 @@ export type HospitalityItem = {
    * Null means the client sells it but it is not on the supplied sheet.
    */
   productSlug: string | null;
+  /**
+   * An explicit destination, for a line that is a RANGE rather than a product.
+   *
+   * Terry Towels is the only one today: seven constructions on the client's
+   * towel sheet, each made in up to four sizes. It cannot be a `productSlug`
+   * because there is no single product behind it, and it must not fall through
+   * to the anchor-on-the-listing-page default, because the thing it opens is a
+   * listing page of its own. When this is set it wins over both.
+   */
+  href?: string;
+  /**
+   * Call to action for this line's card on the listing page. A range opens;
+   * a product is quoted. Defaults to the quote form.
+   */
+  ctaLabel?: string;
 };
 
 export type HospitalityGroup = {
@@ -101,9 +116,18 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     image: IMG.towels,
     fallbackImages: [IMG.towels, IMG.weave],
     items: [
-      { name: "Washcloths", slug: "washcloths", productSlug: "wash-cloth" },
-      { name: "Hand towels", slug: "hand-towels", productSlug: "hand-towel" },
-      { name: "Bath towels", slug: "bath-towels", productSlug: "bath-towel" },
+      // Terry Towels replaces the three separate washcloth / hand towel / bath
+      // towel lines. Those were one line each with one specification; the
+      // client's towel sheet has seven constructions, each made in up to four
+      // of those sizes, so the size is a choice made INSIDE a construction
+      // rather than the thing being chosen. See lib/terry-towels.ts.
+      {
+        name: "Terry Towels",
+        slug: "terry-towels",
+        productSlug: null,
+        href: "/hospitality/terry-towels",
+        ctaLabel: "View the range",
+      },
       { name: "Bath robes", slug: "bath-robes", productSlug: null },
       { name: "Bath mats", slug: "bath-mats", productSlug: "bath-mat" },
       { name: "Economy bath towels", slug: "economy-bath-towels", productSlug: null },

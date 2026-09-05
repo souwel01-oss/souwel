@@ -218,6 +218,9 @@ export function productHref(categorySlug: string, name: string) {
   const hospitality = hospitalityItemByName(name);
   if (hospitality) {
     const { group, item } = hospitality;
+    // An explicit href wins: the line is a range with a listing page of its
+    // own, not a product and not an anchor on this group's page.
+    if (item.href) return item.href;
     return item.productSlug
       ? `/products/${item.productSlug}`
       : `/hospitality/${group.slug}#${item.slug}`;
