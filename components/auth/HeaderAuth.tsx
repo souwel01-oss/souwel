@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { authClient, useSession } from "@/lib/auth/client";
@@ -29,9 +29,47 @@ import { cn } from "@/lib/utils";
  *
  * NOTHING HERE IS A SECURITY BOUNDARY. Every protected page checks the session
  * on the server (lib/auth/session.ts). This only decides what the header draws.
+ *
+ * ── THE HYDRATION RACE, AND WHY isPending IS FORCED TRUE UNTIL MOUNT ────────
+ *
+ * The server can never resolve this session synchronously — there is no
+ * fetch to await during SSR — so every server-rendered page carries the
+ * skeleton. Better Auth's client-side fetch to /api/auth/get-session is a
+ * same-origin round trip that is often fast enough to resolve WHILE React is
+ * still hydrating, not after. When that happens, the first client render
+ * disagrees with the HTML already on the page — server sent the skeleton,
+ * client wants to paint the real link — and React logs a hydration failure
+ * and discards a chunk of the tree to reconcile it, unrelated components
+ * included.
+ *
+ * useIsMounted() below closes that race by construction, via
+ * useSyncExternalStore rather than a setState-in-effect: React calls
+ * `getServerSnapshot` — always `false` — for both the server render and the
+ * client render that has to match it, and only switches to `getSnapshot`
+ * (`true`) afterward. So the first client render is pinned to the skeleton no
+ * matter how fast the session fetch answers, and the switch to real content
+ * happens as an ordinary post-hydration update — which is allowed to differ
+ * from the initial HTML — instead of during hydration itself, where it is
+ * not. The store never actually changes on its own, so `subscribe` is a
+ * no-op; the false-then-true transition comes entirely from React calling the
+ * two snapshot functions at different points, not from an event this store
+ * fires.
  */
+function subscribeNever() {
+  return () => {};
+}
+function useIsMounted() {
+  return useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  );
+}
+
 export function HeaderAuth({ tone = "light" }: { tone?: "dark" | "light" }) {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending: fetching } = useSession();
+  const mounted = useIsMounted();
+  const isPending = fetching || !mounted;
   const onDark = tone === "dark";
 
   return (
@@ -123,7 +161,9 @@ export function HeaderAuth({ tone = "light" }: { tone?: "dark" | "light" }) {
  * account links are listed inline instead.
  */
 export function DrawerAuth({ onNavigate }: { onNavigate: () => void }) {
-  const { data: session, isPending } = useSession();
+  const { data: session, isPending: fetching } = useSession();
+  const mounted = useIsMounted();
+  const isPending = fetching || !mounted;
 
   if (isPending) {
     return <div aria-hidden className="bg-muted h-11 animate-pulse rounded-md" />;

@@ -22,9 +22,17 @@ import { cn } from "@/lib/utils";
  *
  * 3. FAILS VISIBLE. The initial hidden state is applied by GSAP at runtime, not
  *    by a CSS class. If the JS never runs — old browser, script blocked, a
- *    thrown error upstream — the content is simply there, at full opacity.
- *    An earlier CSS-first version of this could strand a whole section at
+ *    thrown error upstream — the content is simply there, at full opacity. An
+ *    earlier CSS-first version of this could strand a whole section at
  *    opacity 0, which is a far worse failure than no animation.
+ *
+ *    That covers "the JS never runs". It does not, on its own, cover "the JS
+ *    ran, hid the section, and something downstream of that — not this
+ *    component — kept its own entrance tween from ever completing". An
+ *    IntersectionObserver watchdog in the effect below covers that second
+ *    case: once a hidden section is actually near the viewport, its inline
+ *    styles are forcibly cleared after a grace period regardless of whether
+ *    its tween finished on its own. See the comment there for why.
  */
 
 export type RevealVariant =
@@ -126,6 +134,10 @@ export function Reveal({
       const items = stagger ? Array.from(root.children) : [];
       if (stagger && items.length === 0) return;
 
+      // Every element this Reveal is about to hide. The watchdog below needs
+      // this regardless of which branch runs, so it is named once up front.
+      const targets = stagger ? items : [root];
+
       // Tall grids go through ScrollTrigger.batch rather than one tween with a
       // stagger. A single trigger fires when the CONTAINER hits the start line,
       // so on a three-screen grid the last row animates while it is still two
@@ -150,24 +162,71 @@ export function Reveal({
               overwrite: true,
             }),
         });
-        return;
+      } else {
+        // Everything else: one trigger on the wrapper. For a stagger that
+        // means the whole group is treated as a unit, which is what a short
+        // list wants.
+        gsap.fromTo(targets, FROM[variant], {
+          ...TO[variant],
+          stagger: stagger ? staggerAmount : 0,
+          duration,
+          delay,
+          ease,
+          clearProps: CLEAR,
+          scrollTrigger: {
+            trigger: root,
+            start: START,
+            once: true,
+          },
+        });
       }
 
-      // Everything else: one trigger on the wrapper. For a stagger that means
-      // the whole group is treated as a unit, which is what a short list wants.
-      gsap.fromTo(stagger ? items : root, FROM[variant], {
-        ...TO[variant],
-        stagger: stagger ? staggerAmount : 0,
-        duration,
-        delay,
-        ease,
-        clearProps: CLEAR,
-        scrollTrigger: {
-          trigger: root,
-          start: START,
-          once: true,
+      // ── Watchdog: never leave this section hidden by its own entrance ────
+      //
+      // The two branches above both depend on a ScrollTrigger actually firing
+      // and its tween actually completing. That chain has more links than the
+      // component controls — a hydration mismatch elsewhere on the page
+      // forcing React to discard and rebuild a chunk of the tree, a scroll
+      // library racing ScrollTrigger's own listeners, a slow device stretching
+      // a tween across more real time than expected. Any of them can, in
+      // principle, leave `opacity: 0` sitting on a section that is already on
+      // screen. That is exactly the failure the docblock's "fails visible"
+      // guarantee promises NOT to allow, and until now the guarantee only
+      // covered "the JS never runs" — not "the JS ran and something after it
+      // did not finish".
+      //
+      // So: once this section is actually near the viewport, give its own
+      // animation a generous window to finish, then strip every inline style
+      // GSAP could have left behind regardless of whether it did. If the
+      // animation already finished normally, `clearProps` on already-cleared
+      // properties is a no-op — this cannot visibly interrupt a tween that is
+      // running on schedule, only rescue one that has stalled.
+      //
+      // Gated on IntersectionObserver rather than a timer from mount: a
+      // section three screens down should not have its hidden state stripped
+      // before the visitor ever scrolls near it, which would delete the
+      // entrance effect for every visitor, not just the rare broken case.
+      let watchdog: number | undefined;
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (!entry.isIntersecting) return;
+          observer.disconnect();
+          watchdog = window.setTimeout(() => {
+            gsap.killTweensOf(targets);
+            gsap.set(targets, { clearProps: CLEAR });
+          }, 1800);
         },
-      });
+        // Roughly matches START ("top 85%"): near-enough is fine, since this
+        // only decides when the grace period begins counting, not whether the
+        // real animation fires.
+        { rootMargin: "0px 0px -15% 0px" }
+      );
+      observer.observe(root);
+
+      return () => {
+        observer.disconnect();
+        window.clearTimeout(watchdog);
+      };
     },
     { scope, dependencies: [variant, delay, duration, stagger, staggerAmount, batch] }
   );
