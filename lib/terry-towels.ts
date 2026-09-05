@@ -49,20 +49,17 @@ export const TERRY_SIZES: TerrySize[] = [
 ];
 
 /**
- * POOL TOWEL IS OFFERED ON EVERY CONSTRUCTION, AND ITS WEIGHT IS UNKNOWN.
+ * A BLANK CELL MEANS THAT CONSTRUCTION IS NOT MADE IN THAT SIZE, and that is
+ * the whole rule — no exceptions, including the Pool Towel column.
  *
- * This is the one place the sheet and the client disagree, so it is worth being
- * precise about. A BLANK CELL under Wash Cloth or Bath Matt means that
- * construction is not made in that size — Classic Terry in 80/20 has a hand
- * towel and a bath towel and nothing else. But the Pool Towel column is blank
- * for all seven rows while still carrying its 30"x60" heading, which is a
- * column nobody filled in rather than seven separate decisions not to make it.
- * The client has since listed Pool Towel among the products to show.
+ * Pool Towel keeps its entry above because the sheet carries the column and its
+ * 30"x60" heading, so the size exists as a concept and its SKU segment is
+ * settled. But not one of the seven rows has a weight in it, so no construction
+ * offers it today and none of them show it. The moment a weight lands in that
+ * column for a row, that product starts offering it with no other change.
  *
- * So it is offered everywhere and its weight reads "On request" — never a
- * figure borrowed from the bath towel beside it. Send the row and it fills in.
+ * Never borrow a figure from the size beside it to fill a gap.
  */
-const POOL_TOWEL_WEIGHT: string | null = null;
 
 export type TerryProduct = {
   slug: string;
@@ -222,22 +219,19 @@ export function terryProductHref(product: TerryProduct): string {
 
 export type TerryLine = {
   size: TerrySize;
-  /** As the sheet writes it, or null where the sheet has no figure. */
-  weight: string | null;
+  /** Exactly as the sheet writes it. A size with no weight is not returned. */
+  weight: string;
   sku: string;
 };
 
 /**
  * The sizes this product is made in, in sheet order, each with its SKU.
  *
- * Pool towel is always included with a null weight — see POOL_TOWEL_WEIGHT
- * above for why it is the one blank cell that does not mean "not made".
+ * Driven entirely by which cells the sheet fills in, so the seven products
+ * offer four, two, four, four, four, three and four sizes respectively.
  */
 export function terrySizesFor(product: TerryProduct): TerryLine[] {
   return TERRY_SIZES.flatMap((size) => {
-    if (size.key === "pool-towel") {
-      return [{ size, weight: POOL_TOWEL_WEIGHT, sku: terrySkuFor(product, size) }];
-    }
     const weight = product.weights[size.key];
     return weight ? [{ size, weight, sku: terrySkuFor(product, size) }] : [];
   });

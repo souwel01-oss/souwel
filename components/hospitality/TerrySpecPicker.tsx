@@ -22,9 +22,10 @@ import { cn } from "@/lib/utils";
  * 18 — so a line with no size named is a line Sales has to send back.
  *
  * ONLY THE SIZES THIS CONSTRUCTION IS MADE IN ARE OFFERED. The list is built
- * from the sheet, so Classic Terry in 80/20 shows two buttons and the 100%
- * cotton version shows five. There is no greyed-out button implying a size we
- * could supply if asked.
+ * straight from the sheet's filled cells, so Classic Terry in 80/20 shows two
+ * buttons and the 100% cotton version shows four. There is no greyed-out button
+ * implying a size we could supply if asked, and no size appears anywhere the
+ * sheet leaves blank.
  *
  * ── QUANTITY IS IN DOZENS ────────────────────────────────────────────────────
  *
@@ -43,8 +44,7 @@ export type TerryPickerSize = {
   key: TerrySizeKey;
   name: string;
   dimensions: string;
-  /** Null where the sheet carries no figure — the pool towel. */
-  weight: string | null;
+  weight: string;
   sku: string;
 };
 
@@ -152,7 +152,7 @@ export function TerrySpecPicker({
         {chosen ? (
           <>
             Weight for {chosen.name}:{" "}
-            <span className="text-foreground font-semibold">{chosen.weight ?? "On request"}</span>
+            <span className="text-foreground font-semibold">{chosen.weight}</span>
           </>
         ) : (
           "Pick a product type to see its weight."

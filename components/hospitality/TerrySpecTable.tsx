@@ -32,9 +32,9 @@ import { cn } from "@/lib/utils";
  * replaces a quantity — makes a buyer who mistypes 5,000 wonder whether they
  * now have one line or two.
  *
- * A ROW WITH NO WEIGHT IS STILL ORDERABLE. The pool towel has no figure on the
- * client's sheet and reads "On request"; it can be listed, and the quote comes
- * back with the weight rather than the buyer being blocked on it here.
+ * EVERY ROW IS A SIZE THIS CONSTRUCTION IS ACTUALLY MADE IN. The sheet decides
+ * which rows exist — a blank cell is a size we do not make, so it is absent
+ * rather than present and unorderable.
  *
  * BLEND AND HEM ARE NOT ROWS HERE. They do not vary by size, and they are
  * already stated twice above — under the product name and again in the picker's
@@ -46,7 +46,7 @@ export type SpecRow = {
   sizeKey: TerrySizeKey;
   name: string;
   dimensions: string;
-  weight: string | null;
+  weight: string;
   sku: string;
 };
 
@@ -218,9 +218,7 @@ function SpecTableRow({
       </th>
       <td className="text-foreground/80 px-5 py-3.5">{row.dimensions}</td>
       <td className="text-foreground/80 px-5 py-3.5 font-mono text-[12.5px]">{row.sku}</td>
-      <td className="text-foreground px-5 py-3.5 font-medium">
-        {row.weight ?? <span className="text-muted-foreground font-normal">On request</span>}
-      </td>
+      <td className="text-foreground px-5 py-3.5 font-medium">{row.weight}</td>
       <td className="px-5 py-3.5">
         <input
           type="number"

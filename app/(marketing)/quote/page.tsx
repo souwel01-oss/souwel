@@ -58,7 +58,7 @@ function readTerryRequest(params: { terry?: string; lines?: string }) {
     (l) =>
       `- ${l.size.name} ${l.size.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString(
         "en-US"
-      )}, weight ${l.weight ?? "on request"}`
+      )}, weight ${l.weight}`
   );
 
   // The name says the construction; the body says which sizes. Putting every
