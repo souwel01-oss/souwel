@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 import { hasProductPage } from "@/lib/product-slugs";
 import { buildReference } from "@/lib/quote-reference";
+import { ANNUAL_VOLUME_BANDS } from "@/lib/quote-fields";
 
 /**
  * Public "Request a Quote" submission (FR-005).
@@ -64,6 +65,20 @@ const quoteSchema = z
     // more than a regex can usefully describe, and a validator that rejects a
     // real number is worse than one that accepts a bad one.
     phone: z.string().trim().min(6, "Please give us a phone number.").max(40),
+    industry: z.string().trim().min(2, "Please tell us your industry.").max(120),
+    designation: z.string().trim().min(2, "Please give us your designation.").max(120),
+    deliveryLocation: z
+      .string()
+      .trim()
+      .min(2, "Please tell us where this is delivering to.")
+      .max(200),
+    // OPTIONAL, AND CHECKED AGAINST THE LIST RATHER THAN ACCEPTED AS TEXT.
+    // It is a <select>, so anything other than one of the published bands or an
+    // empty string came from something other than the form.
+    annualVolumeUsd: z
+      .union([z.enum(ANNUAL_VOLUME_BANDS), z.literal("")])
+      .optional()
+      .transform((v) => (v ? v : undefined)),
     message: z.string().trim().max(2000).optional(),
     items: z.array(itemSchema).max(MAX_ITEMS),
     /** A product NAME, for a line with no catalogue entry. */
@@ -87,7 +102,19 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
     const first = parsed.error.issues[0];
     return { ok: false, message: first?.message ?? "Please check the form and try again." };
   }
-  const { name, email, company, phone, message, items, enquiry } = parsed.data;
+  const {
+    name,
+    email,
+    company,
+    phone,
+    industry,
+    designation,
+    deliveryLocation,
+    annualVolumeUsd,
+    message,
+    items,
+    enquiry,
+  } = parsed.data;
 
   // Reject slugs that are not real products before touching the database. The
   // slug arrives from a query string, so it is attacker-controlled.
@@ -151,6 +178,13 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
             guestEmail: profile ? null : email,
             guestCompany: profile ? null : company,
             guestPhone: profile ? null : phone,
+            // Not gated on `profile` the way the guest columns are: a
+            // CustomerProfile has nowhere to put these, so dropping them for a
+            // signed-in buyer would lose the answers they just gave.
+            industry,
+            designation,
+            deliveryLocation,
+            annualVolumeUsd: annualVolumeUsd ?? null,
             // The enquiry name leads, because for these lines it IS the
             // request — there are no line items underneath it saying what was
             // asked for.

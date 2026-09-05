@@ -521,6 +521,10 @@ export async function getLeadDetail(quoteId: string) {
       guestEmail: true,
       guestCompany: true,
       guestPhone: true,
+      industry: true,
+      designation: true,
+      deliveryLocation: true,
+      annualVolumeUsd: true,
       customerProfile: {
         select: {
           id: true,

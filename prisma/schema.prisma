@@ -211,6 +211,16 @@ model Quote {
   guestEmail        String?
   guestCompany      String?
   guestPhone        String?
+  // Lead qualification, captured on the quote form for guests AND signed-in
+  // customers. It lives on the Quote rather than CustomerProfile because it
+  // describes THIS enquiry: a buyer's industry and job title are stable, but
+  // the volume they are asking about is not, and a profile column would
+  // overwrite last quarter's answer with this one.
+  industry          String?
+  designation       String?
+  deliveryLocation  String?
+  /** One of the bands in lib/quote-fields.ts. Stored as written, not parsed. */
+  annualVolumeUsd   String?
   status            QuoteStatus @default(REQUESTED)
   customerMessage   String?
   staffResponse     String?

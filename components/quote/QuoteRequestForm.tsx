@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { Field, FormAlert, SubmitButton } from "@/components/auth/fields";
 import { submitQuoteRequest } from "@/app/(marketing)/quote/actions";
+import { ANNUAL_VOLUME_BANDS } from "@/lib/quote-fields";
 import { cn } from "@/lib/utils";
 
 /**
@@ -130,6 +131,10 @@ export function QuoteRequestForm({
         email: String(form.get("email") ?? ""),
         company: String(form.get("company") ?? ""),
         phone: String(form.get("phone") ?? ""),
+        industry: String(form.get("industry") ?? ""),
+        designation: String(form.get("designation") ?? ""),
+        deliveryLocation: String(form.get("deliveryLocation") ?? ""),
+        annualVolumeUsd: String(form.get("annualVolumeUsd") ?? ""),
         message: String(form.get("message") ?? ""),
         enquiry: enquiryName,
         items: chosen.map((i) => ({
@@ -282,22 +287,38 @@ export function QuoteRequestForm({
       </section>
 
       <section className="grid gap-4">
-        <h2 className="text-foreground text-lg font-semibold">Who should we reply to?</h2>
-
+        {/* TWO COLUMNS FROM sm, ONE BELOW IT. Eight fields in two columns on a
+            360px screen gives each about 150px, which a company name and an
+            email address both overflow. The select follows the same rule, and
+            spans the full width on every size: its longest option is wider than
+            half a phone. */}
         <div className="grid gap-4 sm:grid-cols-2">
           <Field
-            label="Your name"
+            label="Your Name"
             name="name"
             autoComplete="name"
             required
             defaultValue={prefill?.name}
           />
           <Field
-            label="Company"
+            label="Company Name"
             name="company"
             autoComplete="organization"
             required
             defaultValue={prefill?.company}
+          />
+          <Field
+            label="Industry"
+            name="industry"
+            required
+            placeholder="Hotels, healthcare, laundry…"
+          />
+          <Field
+            label="Designation"
+            name="designation"
+            autoComplete="organization-title"
+            required
+            placeholder="Procurement Manager"
           />
           <Field
             label="Email"
@@ -308,13 +329,47 @@ export function QuoteRequestForm({
             defaultValue={prefill?.email}
           />
           <Field
-            label="Phone"
+            label="Number"
             name="phone"
             type="tel"
             autoComplete="tel"
             required
             hint="Fastest way to reach you about specifications."
           />
+          <Field
+            label="Delivery Location"
+            name="deliveryLocation"
+            autoComplete="address-level2"
+            required
+            placeholder="City, state or country"
+            className="sm:col-span-2"
+          />
+
+          <div className="grid gap-2 sm:col-span-2">
+            <label
+              htmlFor="quote-volume"
+              className="text-foreground/80 text-[13px] font-semibold"
+            >
+              Annual Purchase Volume in USD{" "}
+              <span className="text-muted-foreground font-normal">(Optional)</span>
+            </label>
+            {/* Styled to match Field's input rather than left as a browser
+                default: a raw <select> beside seven custom inputs is the one
+                control that looks like it belongs to a different form. */}
+            <select
+              id="quote-volume"
+              name="annualVolumeUsd"
+              defaultValue=""
+              className="border-input bg-card text-foreground focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] transition-[border-color,box-shadow] outline-none focus-visible:ring-4"
+            >
+              <option value="">Prefer not to say</option>
+              {ANNUAL_VOLUME_BANDS.map((band) => (
+                <option key={band} value={band}>
+                  {band}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div className="grid gap-2">
@@ -330,7 +385,7 @@ export function QuoteRequestForm({
               messagePrefill ??
               (enquiryName ? `We are looking at ${enquiryName}. Rough annual volume: ` : undefined)
             }
-            placeholder="Delivery location, target lead time, existing specification you are matching…"
+            placeholder="Target lead time, existing specification you are matching…"
             className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 w-full rounded-lg border px-3.5 py-3 text-[15px] outline-none focus-visible:ring-4"
           />
         </div>

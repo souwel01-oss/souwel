@@ -57,6 +57,14 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
           <Row label="Company" value={contact.company} />
           <Row label="Email" value={contact.email} />
           <Row label="Phone" value={contact.phone} />
+          {/* Captured on the quote form, and OMITTED rather than dashed when
+              absent. Every contact-form submission and every lead older than
+              these fields would otherwise carry four em dashes, which is four
+              lines of nothing between the phone number and the account link. */}
+          <Row label="Industry" value={detail.industry} omitWhenEmpty />
+          <Row label="Designation" value={detail.designation} omitWhenEmpty />
+          <Row label="Delivers to" value={detail.deliveryLocation} omitWhenEmpty />
+          <Row label="Annual spend" value={detail.annualVolumeUsd} omitWhenEmpty />
           <div className="flex gap-3">
             <dt className="text-muted-foreground w-24 shrink-0">Account</dt>
             <dd className="min-w-0 flex-1">
@@ -210,7 +218,18 @@ function toDateInput(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-function Row({ label, value }: { label: string; value: string | null }) {
+function Row({
+  label,
+  value,
+  omitWhenEmpty,
+}: {
+  label: string;
+  value: string | null;
+  /** Drop the row entirely instead of showing an em dash. */
+  omitWhenEmpty?: boolean;
+}) {
+  if (omitWhenEmpty && !value) return null;
+
   return (
     <div className="flex gap-3">
       <dt className="text-muted-foreground w-24 shrink-0">{label}</dt>
