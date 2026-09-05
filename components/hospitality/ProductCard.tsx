@@ -73,8 +73,14 @@ export type HospitalityCardProduct = {
    * products promises a form the click does not deliver.
    */
   ctaLabel?: string;
-  /** Composition and finished size, or null when we have no specification. */
-  material: string | null;
+  /**
+   * Composition and finished size, or null when we have no specification.
+   *
+   * An ARRAY when one card stands for several builds of the same product —
+   * Classic Terry Towels comes in two blends, and the card names both rather
+   * than appearing twice in the grid under one title.
+   */
+  material: string | string[] | null;
   colours: CardColour[];
   images: { src: string; alt: string }[];
   /** No data source yet — see the note above. */
@@ -181,13 +187,24 @@ export function ProductCard({ product }: { product: HospitalityCardProduct }) {
           </Link>
         </h3>
 
-        <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
-          {/* Said plainly rather than left blank. Twenty of the thirty-one
-              Hospitality lines are not on the client's product sheet, and a
-              card with an empty spec line reads as a page that failed to load
-              rather than as a product we have not written up yet. */}
-          {product.material ?? "Specification on request"}
-        </p>
+        {Array.isArray(product.material) ? (
+          /* A list, not a joined string: these are alternatives, and running
+             two blends together on one line invites them to be read as one
+             specification with a stray separator in it. */
+          <ul className="text-muted-foreground mt-1 grid gap-0.5 text-[13px] leading-relaxed">
+            {product.material.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-muted-foreground mt-1 text-[13px] leading-relaxed">
+            {/* Said plainly rather than left blank. Twenty of the thirty-one
+                Hospitality lines are not on the client's product sheet, and a
+                card with an empty spec line reads as a page that failed to load
+                rather than as a product we have not written up yet. */}
+            {product.material ?? "Specification on request"}
+          </p>
+        )}
 
         {product.colours.length ? (
           <ul className="mt-3 flex flex-wrap items-center gap-1.5">

@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import {
-  TERRY_PRODUCTS,
-  terryCardSummary,
-  terryProductHref,
-  type TerryProduct,
-} from "@/lib/terry-towels";
+import { terryListingEntries, type TerryListingEntry } from "@/lib/terry-towels";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 
@@ -27,13 +22,11 @@ export const metadata: Metadata = {
  * size is a choice made inside a product rather than the product itself, and
  * this page lists the constructions.
  *
- * SEVEN CARDS FOR SEVEN ROWS, including the two that share the name "Classic
- * Terry Towels". They are different products — one 100% cotton, one an 80/20
- * blend — and the summary line under each card leads with the blend, because
- * that is the only thing separating them at a glance.
- *
- * Both of those two point at the chooser page rather than at their own detail
- * page: see the note on terryProductHref in lib/terry-towels.ts.
+ * ONE CARD PER PRODUCT NAME, NOT PER SHEET ROW. The sheet has seven rows but
+ * six products a buyer would name: Classic Terry Towels appears twice, once per
+ * blend. Its card names both blends inside itself and opens the chooser, where
+ * the two sit side by side. Two cards under one title would have read as a
+ * duplicate long before anyone reached the line of body text separating them.
  */
 
 /** Stand-ins. There is no photography for these seven — see lib/terry-towels.ts. */
@@ -43,7 +36,7 @@ const IMAGES = [
 ];
 
 export default function TerryTowelsPage() {
-  const cards = TERRY_PRODUCTS.map(toCard);
+  const cards = terryListingEntries().map(toCard);
 
   return (
     <main className="bg-background">
@@ -82,7 +75,7 @@ export default function TerryTowelsPage() {
               Terry Towels
             </h1>
             <p className="text-muted-foreground mt-5 max-w-2xl text-[15.5px] leading-relaxed text-pretty">
-              Seven constructions, each made in the sizes a property actually orders. Choose the
+              Seven constructions across six ranges, each made in the sizes a property actually orders. Choose the
               construction first — it decides how the towel feels and how it holds up in the laundry
               — then the size and weight on the product page.
             </p>
@@ -150,15 +143,15 @@ export default function TerryTowelsPage() {
  * would produce a request that Sales has to bounce back with "which size?", so
  * the card opens the page where that choice is made.
  */
-function toCard(product: TerryProduct): HospitalityCardProduct {
-  const href = terryProductHref(product);
+function toCard(entry: TerryListingEntry): HospitalityCardProduct {
   return {
-    id: product.slug,
-    name: product.name,
-    href,
-    quoteHref: href,
+    id: entry.key,
+    name: entry.name,
+    href: entry.href,
+    quoteHref: entry.href,
     ctaLabel: "View details",
-    material: terryCardSummary(product),
+    // One line for a single build, one per blend where the name covers several.
+    material: entry.lines.length > 1 ? entry.lines : entry.lines[0],
     colours: [],
     images: IMAGES,
     badge: null,

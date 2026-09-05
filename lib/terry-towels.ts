@@ -242,3 +242,48 @@ export function terryRangeSummary(): string {
   const sizes = new Set(TERRY_PRODUCTS.flatMap((p) => Object.keys(p.weights)));
   return `${TERRY_PRODUCTS.length} constructions · ${sizes.size} sizes`;
 }
+
+/**
+ * The range listing, one card per FAMILY rather than one per sheet row.
+ *
+ * The sheet has seven rows but only six products a buyer would name: Classic
+ * Terry Towels appears twice, once per blend. Two cards carrying the same title
+ * in one grid reads as a duplicate — the difference between them is a line of
+ * body text, which is not where a buyer looks first. So the family gets one
+ * card and both blends are listed inside it, and the choice is made on the
+ * chooser page where the two are side by side.
+ *
+ * A single-member family keeps the fuller summary — blend, hem and the sizes it
+ * is made in. A multi-member one lists blend and hem per member instead: the
+ * sizes differ between them, so one combined size list would describe neither.
+ */
+export type TerryListingEntry = {
+  key: string;
+  name: string;
+  href: string;
+  /** One line per member. A single-member family has exactly one. */
+  lines: string[];
+};
+
+export function terryListingEntries(): TerryListingEntry[] {
+  const seen = new Set<string>();
+  const entries: TerryListingEntry[] = [];
+
+  for (const product of TERRY_PRODUCTS) {
+    if (seen.has(product.family)) continue;
+    seen.add(product.family);
+
+    const members = getTerryFamily(product.family);
+    entries.push({
+      key: product.family,
+      name: product.name,
+      href: terryProductHref(product),
+      lines:
+        members.length > 1
+          ? members.map((m) => `${m.blend} · ${m.hem} hem`)
+          : [terryCardSummary(product)],
+    });
+  }
+
+  return entries;
+}
