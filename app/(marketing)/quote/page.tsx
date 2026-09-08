@@ -6,6 +6,7 @@ import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
 import { getTerryProduct, parseTerryLines } from "@/lib/terry-towels";
+import { getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -76,6 +77,42 @@ function readTerryRequest(params: { terry?: string; lines?: string }) {
   };
 }
 
+/**
+ * A Bed Linen request, rebuilt from the query string. Same trust rule as
+ * readTerryRequest above: only the product slug and the bed-size keys in
+ * `?lines=` are ever looked at, and only after both are checked against
+ * lib/bed-linen.ts. Everything a member of staff reads is written here from
+ * that file, never carried as prose in the URL.
+ */
+function readBedLinenRequest(params: { bed?: string; lines?: string }) {
+  if (!params.bed) return null;
+  const product = getBedLinenProduct(params.bed);
+  if (!product) return null;
+
+  const lines = parseBedLinenLines(product, params.lines);
+  if (lines.length === 0) return null;
+
+  const body = lines.map(
+    (l) =>
+      `- ${l.size.name} ${l.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString("en-US")}`
+  );
+
+  const facts = [
+    product.threadCount ? `Thread count: ${product.threadCount}` : null,
+    product.design ? `Design: ${product.design}` : null,
+    product.quality ? `Quality: ${product.quality}` : null,
+    product.blend ? `Blend: ${product.blend}` : null,
+    product.hem ? `Hem: ${product.hem}` : null,
+  ].filter((v): v is string => Boolean(v));
+
+  const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "size" : "sizes"}`;
+
+  return {
+    name,
+    message: [...facts, "", ...body, "", ""].join("\n"),
+  };
+}
+
 export default async function QuotePage({
   searchParams,
 }: {
@@ -83,6 +120,7 @@ export default async function QuotePage({
     product?: string;
     enquiry?: string;
     terry?: string;
+    bed?: string;
     lines?: string;
   }>;
 }) {
@@ -102,11 +140,15 @@ export default async function QuotePage({
   const enquiryName =
     params.enquiry && hospitalityItemByName(params.enquiry) ? params.enquiry : undefined;
 
-  // A Terry Towels request arrives with its specification already chosen, so it
-  // takes precedence over a bare `?enquiry=` name and brings its own note: the
-  // default one says we have no specification for the line, which is exactly
-  // wrong here.
+  // A Terry Towels or Bed Linen request arrives with its specification
+  // already chosen, so either takes precedence over a bare `?enquiry=` name
+  // and brings its own note: the default one says we have no specification
+  // for the line, which is exactly wrong here. Only one of the two is ever
+  // present on a real link — a product page only ever builds one kind — so
+  // Terry is checked first and Bed Linen only asked for if it found nothing.
   const terry = readTerryRequest(params);
+  const bedLinen = terry ? null : readBedLinenRequest(params);
+  const range = terry ?? bedLinen;
 
   const user = await getSessionUser();
   const profile = user
@@ -155,13 +197,13 @@ export default async function QuotePage({
         <QuoteRequestForm
           products={PICKER_PRODUCTS}
           initialSlug={initialSlug}
-          enquiryName={terry?.name ?? enquiryName}
+          enquiryName={range?.name ?? enquiryName}
           enquiryNote={
-            terry
+            range
               ? "Your list and its specification are below. Fill in your details and send it."
               : undefined
           }
-          messagePrefill={terry?.message}
+          messagePrefill={range?.message}
           prefill={prefill}
         />
       </div>

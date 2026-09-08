@@ -269,12 +269,12 @@ export function CategoryMegaMenu({
 
                     THE COLUMN GAP IS TIGHTER HERE THAN ANYWHERE ELSE ON THE
                     SITE, and it still is not enough. Five columns across this
-                    panel leave 153px each at gap-x-5; three labels are longer
-                    than that and wrap to two lines — "Duvet insert /
-                    comforter" and both "Kitchen towels –" lines — as does the
-                    "Pool, Fitness, Spa & Salon" heading. That is the price of
-                    one row and it is the client's call, so it is left alone
-                    rather than paid for by shrinking the type.
+                    panel leave 153px each at gap-x-5; a couple of labels are
+                    longer than that and wrap to two lines — both "Kitchen
+                    towels –" lines — as does the "Pool, Fitness, Spa & Salon"
+                    heading. That is the price of one row and it is the
+                    client's call, so it is left alone rather than paid for by
+                    shrinking the type.
 
                     Do not try to reclaim the width from the rail beside it:
                     dropping the aside to two columns buys about 20px per

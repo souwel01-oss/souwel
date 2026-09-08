@@ -105,14 +105,55 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
       "Everything that goes on the bed, from the sheet against the mattress to the cover a guest sees. Specified once and supplied to the same build across every property in a group.",
     image: IMG.bed,
     fallbackImages: [IMG.bed, IMG.duvet, IMG.pillow],
+    // Six lines, matching the client's "HOSPITALITY SHEETS" sheet exactly —
+    // see lib/bed-linen.ts. Flat sheets, fitted sheets, pillow case and duvet
+    // cover each cover several sheet rows (different thread count, design or
+    // quality) and so open a listing of their own; mattress protector and
+    // pillow protector are one row each and open straight to a product page,
+    // the same way Terry Towels' single-member families do.
     items: [
-      { name: "Flat sheets", slug: "flat-sheets", productSlug: null },
-      { name: "Fitted sheets", slug: "fitted-sheets", productSlug: null },
-      { name: "Pillow case", slug: "pillow-case", productSlug: null },
-      { name: "Duvet cover", slug: "duvet-cover", productSlug: null },
-      { name: "Duvet insert / comforter", slug: "duvet-insert-comforter", productSlug: null },
-      { name: "Mattress protector", slug: "mattress-protector", productSlug: null },
-      { name: "Pillow protector", slug: "pillow-protector", productSlug: null },
+      {
+        name: "Flat sheets",
+        slug: "flat-sheets",
+        productSlug: null,
+        href: "/hospitality/bed-linen/flat-sheets",
+        ctaLabel: "View the range",
+      },
+      {
+        name: "Fitted sheets",
+        slug: "fitted-sheets",
+        productSlug: null,
+        href: "/hospitality/bed-linen/fitted-sheets",
+        ctaLabel: "View the range",
+      },
+      {
+        name: "Pillow case",
+        slug: "pillow-case",
+        productSlug: null,
+        href: "/hospitality/bed-linen/pillow-case",
+        ctaLabel: "View the range",
+      },
+      {
+        name: "Duvet cover",
+        slug: "duvet-cover",
+        productSlug: null,
+        href: "/hospitality/bed-linen/duvet-cover",
+        ctaLabel: "View the range",
+      },
+      {
+        name: "Mattress protector",
+        slug: "mattress-protector",
+        productSlug: null,
+        href: "/hospitality/bed-linen/mattress-protector",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Pillow protector",
+        slug: "pillow-protector",
+        productSlug: null,
+        href: "/hospitality/bed-linen/pillow-protector",
+        ctaLabel: "View details",
+      },
     ],
   },
   {
