@@ -89,8 +89,8 @@ export type ProductGroup = {
  * components/marketing/CategoryMegaMenu.tsx; five is what the panel fits.
  */
 const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> = {
-  "bed-linen": { col: 1, row: 1 },
-  "bath-linen": { col: 2, row: 1 },
+  "bath-linen": { col: 1, row: 1 },
+  "bed-linen": { col: 2, row: 1 },
   "kitchen-linen": { col: 3, row: 1 },
   "table-linen": { col: 4, row: 1 },
   "pool-fitness-spa-salon": { col: 5, row: 1 },
@@ -125,7 +125,9 @@ const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> =
 export const CATEGORY_PRODUCTS: Partial<Record<string, ProductGroup[]>> = {
   hospitality: HOSPITALITY_GROUPS.map((g) => ({
     title: g.title,
-    items: g.items.map((i) => i.name),
+    // menuLabel, when a line has one, wins for the nav's list only — the
+    // Bath Linen listing page and everywhere else keep reading `name`.
+    items: g.items.map((i) => i.menuLabel ?? i.name),
     ...HOSPITALITY_MENU_PLACEMENT[g.slug],
   }))
     // ROW-MAJOR, so the DOM order is the order the grid is read in. The blocks

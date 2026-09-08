@@ -53,6 +53,14 @@ export type HospitalityItem = {
    * a product is quoted. Defaults to the quote form.
    */
   ctaLabel?: string;
+  /**
+   * Overrides `name` in the mega-menu and mobile drawer only. Defaults to
+   * `name` everywhere else — the Bath Linen listing card, the breadcrumb, the
+   * /hospitality/terry-towels page itself all keep saying "Terry Towels";
+   * only the nav's list of names is shorter. Indexed into BY_NAME below
+   * alongside `name`, so a link built from this label still resolves.
+   */
+  menuLabel?: string;
 };
 
 export type HospitalityGroup = {
@@ -127,6 +135,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         productSlug: null,
         href: "/hospitality/terry-towels",
         ctaLabel: "View the range",
+        menuLabel: "Towel",
       },
       { name: "Bath robes", slug: "bath-robes", productSlug: null },
       { name: "Bath mats", slug: "bath-mats", productSlug: "bath-mat" },
@@ -268,7 +277,14 @@ export function swatchColour(name: string): string | null {
  */
 const BY_NAME = new Map<string, { group: HospitalityGroup; item: HospitalityItem }>(
   HOSPITALITY_GROUPS.flatMap((group) =>
-    group.items.map((item) => [item.name, { group, item }] as const)
+    group.items.flatMap((item) => {
+      const entry = [item.name, { group, item }] as const;
+      // A menuLabel is a second way to spell the same item — the mega-menu
+      // renders it instead of `name`, and productHref calls this lookup with
+      // whatever string it rendered. Without this second key, a link built
+      // from the shortened label would fail to resolve.
+      return item.menuLabel ? [entry, [item.menuLabel, { group, item }] as const] : [entry];
+    })
   )
 );
 
