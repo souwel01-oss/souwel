@@ -173,9 +173,9 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     ],
   },
   {
-    // The only row with an Extra Wide King. Its finished size is written
-    // 114"X125 on the sheet — the closing inch mark is missing there, and it
-    // is left as the sheet has it rather than tidied into data we were not given.
+    // The only row with an Extra Wide King. The sheet's cell reads 114"X125
+    // with no closing inch mark; the client confirmed that is a typo in the
+    // sheet and that the size is 114"X125", so it is written that way here.
     slug: "flat-sheet-t300-solid-60-40",
     name: "Flat Sheet — T300 Solid, 60/40",
     family: "flat-sheets",
@@ -188,7 +188,7 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     lines: [
       { sizes: ["queen"], dimensions: '90"X120"', sku: "QSD90120A30" },
       { sizes: ["king"], dimensions: '108"X120"', sku: "KSD108120A30" },
-      { sizes: ["extra-wide-king"], dimensions: '114"X125', sku: "KSD114125A30XW" },
+      { sizes: ["extra-wide-king"], dimensions: '114"X125"', sku: "KSD114125A30XW" },
     ],
   },
   {
