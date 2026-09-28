@@ -8,6 +8,7 @@ import { hospitalityItemByName } from "@/lib/hospitality";
 import { getTerryProduct, parseTerryLines } from "@/lib/terry-towels";
 import { bedSizeLabel, getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
 import { getSpaSalonProduct, parseSpaSalonLines } from "@/lib/spa-salon";
+import { getFbProduct, parseFbLines } from "@/lib/food-beverage";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -143,6 +144,40 @@ function readSpaSalonRequest(params: { spa?: string; lines?: string }) {
   return { name, message: [...facts, "", ...body, "", ""].join("\n") };
 }
 
+/**
+ * A Food & Beverage request, rebuilt from the query string. Same trust rule
+ * as the three above: only the product slug and the stock codes in `?lines=`
+ * are looked at, and only after both are checked against lib/food-beverage.ts.
+ */
+function readFbRequest(params: { fb?: string; lines?: string }) {
+  if (!params.fb) return null;
+  const product = getFbProduct(params.fb);
+  if (!product) return null;
+
+  const lines = parseFbLines(product, params.lines);
+  if (lines.length === 0) return null;
+
+  const manySizes = product.sizes.length > 1;
+  const body = lines.map(
+    (l) =>
+      `- ${l.colour}${manySizes ? ` ${l.size}` : ""} (${l.sku}) — qty ${l.quantity.toLocaleString(
+        "en-US"
+      )}`
+  );
+
+  const facts = [
+    product.description ? `Description: ${product.description}` : null,
+    `Blend: ${product.blend}`,
+    product.weight ? `Weight: ${product.weight}` : null,
+    manySizes ? null : `Size: ${product.sizes[0].size}`,
+    manySizes ? null : (product.sizes[0].packing ? `Packing: ${product.sizes[0].packing}` : null),
+  ].filter((v): v is string => Boolean(v));
+
+  const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "line" : "lines"}`;
+
+  return { name, message: [...facts, "", ...body, "", ""].join("\n") };
+}
+
 export default async function QuotePage({
   searchParams,
 }: {
@@ -152,6 +187,7 @@ export default async function QuotePage({
     terry?: string;
     bed?: string;
     spa?: string;
+    fb?: string;
     lines?: string;
   }>;
 }) {
@@ -178,7 +214,10 @@ export default async function QuotePage({
   // present on a real link — a product page only ever builds one kind — so
   // Terry is checked first and Bed Linen only asked for if it found nothing.
   const range =
-    readTerryRequest(params) ?? readBedLinenRequest(params) ?? readSpaSalonRequest(params);
+    readTerryRequest(params) ??
+    readBedLinenRequest(params) ??
+    readSpaSalonRequest(params) ??
+    readFbRequest(params);
 
   const user = await getSessionUser();
   const profile = user

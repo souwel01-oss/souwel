@@ -191,37 +191,122 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
       "Table dressing for a room that turns over several times a night. Both fibres are here because they launder differently and a banqueting operation usually runs each for a different service.",
     image: IMG.napkins,
     fallbackImages: [IMG.napkins, IMG.weave],
+    // FOUR OF THESE SIX ARE ALSO ON THE FOOD & BEVERAGE SHEET, and they are
+    // the same products — napery is table linen and it is also what the F&B
+    // operation orders. Rather than list them twice with one copy specified
+    // and one not, the overlapping lines point at the Food & Beverage product
+    // page from here too. Worth asking the client whether they would rather
+    // this group were folded into Food & Beverage altogether.
     items: [
       { name: "Plain napkins", slug: "plain-napkins", productSlug: null },
-      { name: "Bistro napkins", slug: "bistro-napkins", productSlug: "bistro-napkin" },
-      { name: "Momi napkins", slug: "momi-napkins", productSlug: null },
-      { name: "Polyester napkin", slug: "polyester-napkin", productSlug: "napkin" },
+      {
+        name: "Bistro stripe napkins",
+        slug: "bistro-napkins",
+        productSlug: "bistro-napkin",
+        href: "/hospitality/food-beverage/bistro-napkin",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Momi napkins",
+        slug: "momi-napkins",
+        productSlug: null,
+        href: "/hospitality/food-beverage/mommie-napkin",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Polyester napkin",
+        slug: "polyester-napkin",
+        productSlug: "napkin",
+        href: "/hospitality/food-beverage/napkins",
+        ctaLabel: "View details",
+      },
       { name: "100% cotton napkin", slug: "cotton-napkin", productSlug: null },
-      { name: "Table cloths", slug: "table-cloths", productSlug: null },
+      {
+        name: "Table cloths",
+        slug: "table-cloths",
+        productSlug: null,
+        href: "/hospitality/food-beverage/table-cloth",
+        ctaLabel: "View details",
+      },
     ],
   },
   {
-    slug: "kitchen-linen",
-    title: "Kitchen Linen",
-    description: "Service cloths marked by stripe, so a kitchen can colour-code by station.",
+    // Renamed from "Kitchen Linen" at the client's request, and re-stocked
+    // from their Food & Beverage sheet — see lib/food-beverage.ts. The nine
+    // lines below are exactly that sheet's items. Two lines the old Kitchen
+    // Linen list carried, "Dish towels" and "Kitchen towels – checks", are
+    // not on it and so are not here; their catalogue pages still exist.
+    slug: "food-beverage",
+    title: "Food & Beverage",
+    description: "Service cloths, napery and aprons for the kitchen, the pass and the floor.",
     intro:
-      "The working cloths behind the pass. Every line carries its own stripe, which is how a kitchen keeps the glass cloth out of the general pile and how a rental operation tells one account's stock from another's.",
+      "Everything the food and beverage operation handles, from the bar mop behind the pass to the table cloth in front of the guest. Every line carries its own stock code, and most run in a choice of colours so a kitchen can colour-code by station.",
     image: IMG.barmops,
-    fallbackImages: [IMG.barmops, IMG.weave],
+    fallbackImages: [IMG.barmops, IMG.napkins],
     items: [
-      { name: "Dish towels", slug: "dish-towels", productSlug: "dish-towel" },
       {
-        name: "Kitchen towels – checks",
-        slug: "kitchen-towels-checks",
-        productSlug: "kitchen-towel-checks",
+        name: "Bar mops",
+        slug: "bar-mop",
+        productSlug: "bar-mop",
+        href: "/hospitality/food-beverage/bar-mop",
+        ctaLabel: "View the range",
       },
       {
         name: "Kitchen towels – herringbone",
-        slug: "kitchen-towels-herringbone",
+        slug: "kitchen-towel",
         productSlug: "kitchen-towel-herringbone",
+        href: "/hospitality/food-beverage/kitchen-towel",
+        ctaLabel: "View details",
       },
-      { name: "Glass/tea towels", slug: "glass-tea-towels", productSlug: "glass-towel" },
-      { name: "Bar mops", slug: "bar-mops", productSlug: "bar-mop" },
+      {
+        name: "Flour sacks",
+        slug: "flour-sack",
+        productSlug: null,
+        href: "/hospitality/food-beverage/flour-sack",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Glass towels",
+        slug: "glass-towel",
+        productSlug: "glass-towel",
+        href: "/hospitality/food-beverage/glass-towel",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Bistro napkins",
+        slug: "bistro-napkin",
+        productSlug: "bistro-napkin",
+        href: "/hospitality/food-beverage/bistro-napkin",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Mommie napkins",
+        slug: "mommie-napkin",
+        productSlug: null,
+        href: "/hospitality/food-beverage/mommie-napkin",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Aprons",
+        slug: "aprons",
+        productSlug: null,
+        href: "/hospitality/food-beverage/aprons",
+        ctaLabel: "View the range",
+      },
+      {
+        name: "Napkins",
+        slug: "napkins",
+        productSlug: null,
+        href: "/hospitality/food-beverage/napkins",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Table cloths",
+        slug: "table-cloth",
+        productSlug: null,
+        href: "/hospitality/food-beverage/table-cloth",
+        ctaLabel: "View details",
+      },
     ],
   },
   {
@@ -324,6 +409,7 @@ const SWATCHES: [string, string][] = [
   ["teal", "#1F7A8C"],
   ["purple", "#6B4E8E"],
   ["burgundy", "#6D1A2A"],
+  ["navy", "#0A2540"],
   // The salon sheet spells it "Bergundy". The colour name is the client's to
   // correct, not ours, so the spelling is kept and the swatch matched to it.
   ["bergundy", "#6D1A2A"],

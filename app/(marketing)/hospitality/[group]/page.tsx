@@ -7,16 +7,17 @@ import { HospitalityGroupListing } from "@/components/hospitality/HospitalityGro
  * Product listing page for every Hospitality range that does not have a
  * literal route of its own.
  *
- * TWO GROUPS DO. Bed Linen needs family listing pages and product detail
- * pages nested under it (lib/bed-linen.ts); Pool, Fitness, Spa & Salon needs
- * product detail pages (lib/spa-salon.ts). A literal directory shadows this
- * dynamic [group] sibling for its whole path, INCLUDING the bare
- * "/hospitality/<slug>" URL, so each of those has its own page.tsx and is
- * excluded here — generating one from both places would be two pages claiming
- * the same route. The rendering is shared either way:
- * components/hospitality/HospitalityGroupListing.tsx is what all three call.
+ * THREE GROUPS DO. Bed Linen and Food & Beverage need family listing pages
+ * and product detail pages nested under them (lib/bed-linen.ts,
+ * lib/food-beverage.ts); Pool, Fitness, Spa & Salon needs product detail
+ * pages (lib/spa-salon.ts). A literal directory shadows this dynamic [group]
+ * sibling for its whole path, INCLUDING the bare "/hospitality/<slug>" URL,
+ * so each of those has its own page.tsx and is excluded here — generating one
+ * from both places would be two pages claiming the same route. The rendering
+ * is shared either way: components/hospitality/HospitalityGroupListing.tsx is
+ * what every one of them calls.
  */
-const OWN_ROUTE = new Set(["bed-linen", "pool-fitness-spa-salon"]);
+const OWN_ROUTE = new Set(["bed-linen", "pool-fitness-spa-salon", "food-beverage"]);
 
 export function generateStaticParams() {
   return HOSPITALITY_GROUPS.filter((g) => !OWN_ROUTE.has(g.slug)).map((g) => ({ group: g.slug }));

@@ -91,7 +91,7 @@ export type ProductGroup = {
 const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> = {
   "bath-linen": { col: 1, row: 1 },
   "bed-linen": { col: 2, row: 1 },
-  "kitchen-linen": { col: 3, row: 1 },
+  "food-beverage": { col: 3, row: 1 },
   "table-linen": { col: 4, row: 1 },
   "pool-fitness-spa-salon": { col: 5, row: 1 },
 };

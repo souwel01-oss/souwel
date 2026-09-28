@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { terryListingEntries, type TerryListingEntry } from "@/lib/terry-towels";
+import { HOSPITALITY_GROUPS } from "@/lib/hospitality";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 
@@ -111,14 +112,10 @@ export default function TerryTowelsPage() {
           <h2 className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
             The rest of the hospitality range
           </h2>
+          {/* Derived rather than typed out: a hardcoded copy of this list is
+              how "Kitchen Linen" survived here after the client renamed it. */}
           <ul className="mt-5 flex flex-wrap gap-2.5">
-            {[
-              { slug: "bed-linen", title: "Bed Linen" },
-              { slug: "bath-linen", title: "Bath Linen" },
-              { slug: "table-linen", title: "Table Linen" },
-              { slug: "kitchen-linen", title: "Kitchen Linen" },
-              { slug: "pool-fitness-spa-salon", title: "Pool, Fitness, Spa & Salon" },
-            ].map((g) => (
+            {HOSPITALITY_GROUPS.map((g) => (
               <li key={g.slug}>
                 <Link
                   href={`/hospitality/${g.slug}`}
