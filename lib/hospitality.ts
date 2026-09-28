@@ -310,57 +310,49 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     ],
   },
   {
-    slug: "pool-fitness-spa-salon",
-    title: "Pool, Fitness, Spa & Salon",
-    description: "Towelling for the wet areas, where colour and bleach resistance matter most.",
+    // Renamed from "Pool, Fitness, Spa & Salon" at the client's request, and
+    // narrowed to exactly the four lines their salon sheet specifies — see
+    // lib/spa-salon.ts. Each is one size in several colours, so each is a
+    // single product page rather than a listing.
+    //
+    // Three lines the old group carried are gone with the rename: Cabana pool
+    // towels, which is on the BATH TOWELS sheet and keeps its product page in
+    // the Towel range, plus Economy pool towels and Fitness towels, which are
+    // on no sheet we have been sent.
+    slug: "spa-salon",
+    title: "Spa Salon",
+    description: "Towelling for the salon floor and the spa, in the shades they are ordered in.",
     intro:
-      "The leisure floor asks more of a towel than a bathroom does: chlorine, sun, tint and heat. These lines are specified for that, and several are supplied multi-colour rather than white.",
+      "The salon and spa floor asks more of a towel than a bathroom does: tint, bleach, heat and a colour that has to survive all three. Every line here is specified for that, and each carries its own stock code per colour.",
     image: IMG.towels,
     fallbackImages: [IMG.towels, IMG.weave],
     items: [
       {
-        // On the client's BATH TOWELS sheet rather than a pool one, so its
-        // specification lives with the towel range — but it is a pool towel
-        // and this is where a buyer looks for it, so the line points at the
-        // same product page from both places rather than being listed twice
-        // or sent to an empty quote form.
-        name: "Cabana pool towels",
-        slug: "cabana-pool-towels",
+        name: "Salon towels",
+        slug: "salon-towel",
         productSlug: null,
-        href: "/hospitality/terry-towels/cabana-pool-towels",
+        href: "/hospitality/spa-salon/salon-towel",
         ctaLabel: "View details",
       },
-      { name: "Economy pool towels", slug: "economy-pool-towels", productSlug: null },
-      // The four lines the client's salon sheet specifies — see
-      // lib/spa-salon.ts. Each is one size in several colours, so each is a
-      // single product page rather than a listing.
       {
         name: "Bath sheets",
-        slug: "bath-sheets",
+        slug: "bath-sheet",
         productSlug: null,
-        href: "/hospitality/pool-fitness-spa-salon/bath-sheet",
+        href: "/hospitality/spa-salon/bath-sheet",
         ctaLabel: "View details",
       },
-      {
-        name: "Spa/salon towels",
-        slug: "spa-salon-towels",
-        productSlug: "saloon-towel",
-        href: "/hospitality/pool-fitness-spa-salon/salon-towel",
-        ctaLabel: "View details",
-      },
-      { name: "Fitness towels", slug: "fitness-towels", productSlug: null },
       {
         name: "Hair wash/dye towels",
-        slug: "hair-wash-dye-towels",
+        slug: "hair-wash-dye-towel",
         productSlug: null,
-        href: "/hospitality/pool-fitness-spa-salon/hair-wash-dye-towel",
+        href: "/hospitality/spa-salon/hair-wash-dye-towel",
         ctaLabel: "View details",
       },
       {
         name: "Spa sheets",
-        slug: "spa-sheets",
+        slug: "spa-sheet",
         productSlug: null,
-        href: "/hospitality/pool-fitness-spa-salon/spa-sheet",
+        href: "/hospitality/spa-salon/spa-sheet",
         ctaLabel: "View details",
       },
     ],
@@ -410,9 +402,6 @@ const SWATCHES: [string, string][] = [
   ["purple", "#6B4E8E"],
   ["burgundy", "#6D1A2A"],
   ["navy", "#0A2540"],
-  // The salon sheet spells it "Bergundy". The colour name is the client's to
-  // correct, not ours, so the spelling is kept and the swatch matched to it.
-  ["bergundy", "#6D1A2A"],
   ["black", "#1A1A1A"],
   ["grey", "#8C9296"],
   ["gray", "#8C9296"],

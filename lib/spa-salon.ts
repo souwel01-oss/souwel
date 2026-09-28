@@ -13,8 +13,12 @@
  * So the colour is the orderable line and the code is its identity — a salon
  * towel in black and the same towel in grey are two different things to order.
  *
- * COLOURS ARE SPELT AS THE SHEET SPELLS THEM, "Bergundy" included. A stock
- * code and the colour it is filed under are the client's to correct, not ours.
+ * ONE SPELLING CORRECTED, ON THE CLIENT'S INSTRUCTION. The sheet writes the
+ * shade "Bergundy"; the Food & Beverage sheet writes the same shade
+ * "Burgundy", and the client confirmed that is the right one. So the colour
+ * reads Burgundy here. The STOCK CODE is untouched — it is still ST1628BGDY,
+ * because a code is an identifier rather than a word, and correcting it would
+ * be inventing a code that does not exist in their system.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -53,7 +57,7 @@ export const SPA_SALON_PRODUCTS: SpaSalonProduct[] = [
     colours: [
       { colour: "Black", sku: "ST1628BLK" },
       { colour: "Grey", sku: "ST1628GRY" },
-      { colour: "Bergundy", sku: "ST1628BGDY" },
+      { colour: "Burgundy", sku: "ST1628BGDY" },
       { colour: "Beige", sku: "ST1628BGE" },
       { colour: "Ivory", sku: "ST1628IVRY" },
     ],
@@ -100,7 +104,7 @@ export const SPA_SALON_PRODUCTS: SpaSalonProduct[] = [
 ];
 
 /** Where the range lives. One constant so the links cannot drift. */
-export const SPA_SALON_BASE = "/hospitality/pool-fitness-spa-salon";
+export const SPA_SALON_BASE = "/hospitality/spa-salon";
 
 const BY_SLUG = new Map(SPA_SALON_PRODUCTS.map((p) => [p.slug, p]));
 

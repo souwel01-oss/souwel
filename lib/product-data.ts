@@ -610,41 +610,6 @@ const AUTHORED: AuthoredProduct[] = [
     certifications: [],
   },
   {
-    slug: "saloon-towel",
-    name: "Saloon Towel",
-    categorySlug: "hospitality",
-    sectors: ["hospitality"],
-    uom: "DZ",
-    shortDescription: "All-cotton multi-colour saloon towel, 16″×28″.",
-    description:
-      "The salon and spa towel: 100% cotton, 16″×28″, 3 lbs to the dozen, hemmed, and supplied multi-colour rather than as a single shade.",
-    heroImageUrl: "/images/products/towels.jpg",
-    heroImageAlt: "Stack of folded white towels",
-    galleryImageUrls: [
-      { src: "/images/products/towels.jpg", alt: "Stack of folded white towels" },
-      { src: "/images/products/other-textile.jpg", alt: "Close-up of plain white woven textile" },
-    ],
-    variants: [
-      {
-        colour: "Multi colour",
-        size: '16"×28"',
-        weight: "3 lbs",
-        blend: "100% cotton",
-        stitching: "Hemmed",
-      },
-    ],
-    customisation: [
-      { title: "Colours and finishes", detail: "Supplied in Multi colour." },
-      { title: "Sizes and builds", detail: 'Finished at 16"×28".' },
-      {
-        title: "How it ships",
-        detail: "Sold by the dozen. Volumes and lead times are confirmed on the quote.",
-      },
-    ],
-    care: [],
-    certifications: [],
-  },
-  {
     slug: "huck-towel",
     name: "Huck Towel",
     categorySlug: "health-care",

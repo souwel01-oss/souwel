@@ -4,14 +4,14 @@ import { getHospitalityGroup } from "@/lib/hospitality";
 import { HospitalityGroupListing } from "@/components/hospitality/HospitalityGroupListing";
 
 export const metadata: Metadata = {
-  title: "Pool, Fitness, Spa & Salon — Hospitality",
+  title: "Spa Salon — Hospitality",
   description:
     "Towelling for the wet areas and the salon floor — salon towels, bath sheets, hair wash and dye towels and spa sheets, with stock codes and colours for each.",
-  alternates: { canonical: "/hospitality/pool-fitness-spa-salon" },
+  alternates: { canonical: "/hospitality/spa-salon" },
 };
 
 /**
- * The Pool, Fitness, Spa & Salon range's own top-level page.
+ * The Spa Salon range's own top-level page.
  *
  * A LITERAL ROUTE, NOT THE DYNAMIC [group] ONE, for the same reason Bed Linen
  * has one: four of its lines now have product pages nested underneath this
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
  * it through the same shared component.
  */
 export default function PoolFitnessSpaSalonPage() {
-  const group = getHospitalityGroup("pool-fitness-spa-salon");
+  const group = getHospitalityGroup("spa-salon");
   if (!group) notFound();
 
   return <HospitalityGroupListing group={group} />;

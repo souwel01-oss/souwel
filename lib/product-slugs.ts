@@ -33,7 +33,6 @@ export const PRODUCT_PAGE_SLUGS = [
   "bath-towel",
   "wash-cloth",
   // Hospitality
-  "saloon-towel",
   "napkin",
   "bistro-napkin",
   "kitchen-towel-herringbone",

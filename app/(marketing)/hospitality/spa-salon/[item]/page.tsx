@@ -48,7 +48,7 @@ export async function generateMetadata({
   if (!product) return { title: "Not found" };
 
   return {
-    title: `${product.name} — Pool, Fitness, Spa & Salon`,
+    title: `${product.name} — Spa Salon`,
     description: `${product.name} at ${product.size}${
       product.weight ? `, ${product.weight}` : ""
     }, in ${product.colours.map((c) => c.colour.toLowerCase()).join(", ")}.`,
@@ -101,7 +101,7 @@ function ProductDetail({ product }: { product: SpaSalonProduct }) {
             <div className="flex flex-col justify-center">
               <Reveal variant="fade-up">
                 <p className="text-premium text-xs font-semibold tracking-[0.22em] uppercase">
-                  Pool, Fitness, Spa &amp; Salon
+                  Spa Salon
                 </p>
                 <h1 className="font-heading text-foreground mt-4 text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl">
                   {product.name}
@@ -178,7 +178,7 @@ function Crumbs({ label }: { label: string }) {
   const trail = [
     { label: "Home", href: "/" },
     { label: "Hospitality", href: "/hospitality" },
-    { label: "Pool, Fitness, Spa & Salon", href: SPA_SALON_BASE },
+    { label: "Spa Salon", href: SPA_SALON_BASE },
     { label },
   ];
 
