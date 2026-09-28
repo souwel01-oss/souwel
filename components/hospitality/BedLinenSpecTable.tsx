@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
 import { BED_LINEN_BASE, encodeBedLinenLines } from "@/lib/bed-linen";
-import { useBedLinenOrderList } from "@/components/hospitality/BedLinenOrderList";
+import { useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -36,7 +36,7 @@ export function BedLinenSpecTable({
   casePack: number | null;
   rows: BedLinenSpecRow[];
 }) {
-  const { lines, setLine, removeLine, quantityOf, selected } = useBedLinenOrderList();
+  const { lines, setLine, removeLine, quantityOf, selected } = useRangeOrderList();
 
   const href =
     lines.length > 0

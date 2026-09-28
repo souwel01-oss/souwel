@@ -3,9 +3,9 @@
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import {
-  BED_LINEN_SPEC_SECTION_ID,
-  useBedLinenOrderList,
-} from "@/components/hospitality/BedLinenOrderList";
+  SPEC_SECTION_ID,
+  useRangeOrderList,
+} from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -50,7 +50,7 @@ export function BedLinenSpecPicker({
   casePack: number | null;
   sizes: BedLinenPickerSize[];
 }) {
-  const { setLine, setSelected, selected } = useBedLinenOrderList();
+  const { setLine, setSelected, selected } = useRangeOrderList();
   const [quantity, setQuantity] = useState("");
   const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
   const qtyId = useId();
@@ -76,7 +76,7 @@ export function BedLinenSpecPicker({
     if (!chosen || !qty) return;
     setLine(chosen.sku, qty);
     document
-      .getElementById(BED_LINEN_SPEC_SECTION_ID)
+      .getElementById(SPEC_SECTION_ID)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 

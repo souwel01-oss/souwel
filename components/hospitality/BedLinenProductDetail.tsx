@@ -12,9 +12,9 @@ import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { BedLinenSpecPicker } from "@/components/hospitality/BedLinenSpecPicker";
 import { BedLinenSpecTable } from "@/components/hospitality/BedLinenSpecTable";
 import {
-  BED_LINEN_SPEC_SECTION_ID,
-  BedLinenOrderListProvider,
-} from "@/components/hospitality/BedLinenOrderList";
+  SPEC_SECTION_ID,
+  RangeOrderListProvider,
+} from "@/components/hospitality/RangeOrderList";
 import { Reveal } from "@/components/animation/Reveal";
 
 /**
@@ -55,7 +55,7 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
   ].filter((f): f is { label: string; value: string } => Boolean(f.value));
 
   return (
-    <BedLinenOrderListProvider>
+    <RangeOrderListProvider>
       <main className="bg-background">
         <section className="border-premium/20 border-b">
           <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">
@@ -106,7 +106,7 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
 
         {/* ── Specification, and the order list ───────────────────────────── */}
         <section
-          id={BED_LINEN_SPEC_SECTION_ID}
+          id={SPEC_SECTION_ID}
           className="bg-platinum/25 border-premium/20 scroll-mt-24 border-y py-14 sm:py-20"
         >
           <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
@@ -162,7 +162,7 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
           </div>
         </section>
       </main>
-    </BedLinenOrderListProvider>
+    </RangeOrderListProvider>
   );
 }
 

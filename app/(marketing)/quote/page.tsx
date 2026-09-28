@@ -7,6 +7,7 @@ import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
 import { getTerryProduct, parseTerryLines } from "@/lib/terry-towels";
 import { bedSizeLabel, getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
+import { getSpaSalonProduct, parseSpaSalonLines } from "@/lib/spa-salon";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -113,6 +114,35 @@ function readBedLinenRequest(params: { bed?: string; lines?: string }) {
   };
 }
 
+/**
+ * A Spa & Salon request, rebuilt from the query string. Same trust rule as
+ * the two above: only the product slug and the stock codes in `?lines=` are
+ * looked at, and only after both are checked against lib/spa-salon.ts.
+ */
+function readSpaSalonRequest(params: { spa?: string; lines?: string }) {
+  if (!params.spa) return null;
+  const product = getSpaSalonProduct(params.spa);
+  if (!product) return null;
+
+  const lines = parseSpaSalonLines(product, params.lines);
+  if (lines.length === 0) return null;
+
+  const body = lines.map(
+    (l) => `- ${l.colour} (${l.sku}) — qty ${l.quantity.toLocaleString("en-US")}`
+  );
+
+  const facts = [
+    product.threadCount ? `Thread count: ${product.threadCount}` : null,
+    `Size: ${product.size}`,
+    product.weight ? `Weight: ${product.weight}` : null,
+    `Pack: ${product.pack} pcs`,
+  ].filter((v): v is string => Boolean(v));
+
+  const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "colour" : "colours"}`;
+
+  return { name, message: [...facts, "", ...body, "", ""].join("\n") };
+}
+
 export default async function QuotePage({
   searchParams,
 }: {
@@ -121,6 +151,7 @@ export default async function QuotePage({
     enquiry?: string;
     terry?: string;
     bed?: string;
+    spa?: string;
     lines?: string;
   }>;
 }) {
@@ -146,9 +177,8 @@ export default async function QuotePage({
   // for the line, which is exactly wrong here. Only one of the two is ever
   // present on a real link — a product page only ever builds one kind — so
   // Terry is checked first and Bed Linen only asked for if it found nothing.
-  const terry = readTerryRequest(params);
-  const bedLinen = terry ? null : readBedLinenRequest(params);
-  const range = terry ?? bedLinen;
+  const range =
+    readTerryRequest(params) ?? readBedLinenRequest(params) ?? readSpaSalonRequest(params);
 
   const user = await getSessionUser();
   const profile = user

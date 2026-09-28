@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import { TERRY_DOZEN, roundUpToDozen } from "@/lib/terry-towels";
-import { SPEC_SECTION_ID, useTerryOrderList } from "@/components/hospitality/TerryOrderList";
+import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -62,7 +62,7 @@ export function TerrySpecPicker({
   note?: string;
   sizes: TerryPickerSize[];
 }) {
-  const { setLine, setSelected, selected } = useTerryOrderList();
+  const { setLine, setSelected, selected } = useRangeOrderList();
   const [quantity, setQuantity] = useState("");
   /** The figure the buyer typed, when rounding changed it. Cleared on edit. */
   const [roundedFrom, setRoundedFrom] = useState<number | null>(null);

@@ -4,19 +4,22 @@ import { HOSPITALITY_GROUPS, getHospitalityGroup } from "@/lib/hospitality";
 import { HospitalityGroupListing } from "@/components/hospitality/HospitalityGroupListing";
 
 /**
- * Product listing page for every Hospitality range EXCEPT Bed Linen.
+ * Product listing page for every Hospitality range that does not have a
+ * literal route of its own.
  *
- * BED LINEN HAS ITS OWN LITERAL ROUTE, app/(marketing)/hospitality/bed-linen/,
- * because it needs a family listing page and product detail pages nested
- * under it (see lib/bed-linen.ts). A literal directory shadows this dynamic
- * [group] sibling for its whole path, including the bare "/hospitality/
- * bed-linen" URL, so "bed-linen" is excluded from generateStaticParams here —
- * generating it from both places would be two pages claiming the same route.
- * The actual rendering is shared: components/hospitality/HospitalityGroupListing.tsx
- * is what both routes call.
+ * TWO GROUPS DO. Bed Linen needs family listing pages and product detail
+ * pages nested under it (lib/bed-linen.ts); Pool, Fitness, Spa & Salon needs
+ * product detail pages (lib/spa-salon.ts). A literal directory shadows this
+ * dynamic [group] sibling for its whole path, INCLUDING the bare
+ * "/hospitality/<slug>" URL, so each of those has its own page.tsx and is
+ * excluded here — generating one from both places would be two pages claiming
+ * the same route. The rendering is shared either way:
+ * components/hospitality/HospitalityGroupListing.tsx is what all three call.
  */
+const OWN_ROUTE = new Set(["bed-linen", "pool-fitness-spa-salon"]);
+
 export function generateStaticParams() {
-  return HOSPITALITY_GROUPS.filter((g) => g.slug !== "bed-linen").map((g) => ({ group: g.slug }));
+  return HOSPITALITY_GROUPS.filter((g) => !OWN_ROUTE.has(g.slug)).map((g) => ({ group: g.slug }));
 }
 
 export async function generateMetadata({
@@ -25,7 +28,7 @@ export async function generateMetadata({
   params: Promise<{ group: string }>;
 }): Promise<Metadata> {
   const { group: slug } = await params;
-  const group = slug !== "bed-linen" ? getHospitalityGroup(slug) : undefined;
+  const group = OWN_ROUTE.has(slug) ? undefined : getHospitalityGroup(slug);
   if (!group) return { title: "Not found" };
 
   return {
@@ -41,10 +44,10 @@ export default async function HospitalityListingPage({
   params: Promise<{ group: string }>;
 }) {
   const { group: slug } = await params;
-  // Bed Linen is served by the literal route now; this dynamic segment
-  // should never actually be asked for it, but notFound() rather than
-  // rendering it twice if it ever is.
-  const group = slug !== "bed-linen" ? getHospitalityGroup(slug) : undefined;
+  // The two groups above are served by their own literal routes now; this
+  // dynamic segment should never actually be asked for them, but notFound()
+  // rather than rendering one twice if it ever is.
+  const group = OWN_ROUTE.has(slug) ? undefined : getHospitalityGroup(slug);
   if (!group) notFound();
 
   return <HospitalityGroupListing group={group} />;

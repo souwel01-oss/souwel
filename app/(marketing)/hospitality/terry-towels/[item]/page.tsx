@@ -18,7 +18,7 @@ import { ProductCard, type HospitalityCardProduct } from "@/components/hospitali
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { TerrySpecPicker } from "@/components/hospitality/TerrySpecPicker";
 import { TerrySpecTable } from "@/components/hospitality/TerrySpecTable";
-import { SPEC_SECTION_ID, TerryOrderListProvider } from "@/components/hospitality/TerryOrderList";
+import { SPEC_SECTION_ID, RangeOrderListProvider } from "@/components/hospitality/RangeOrderList";
 import { Reveal } from "@/components/animation/Reveal";
 
 /**
@@ -165,7 +165,7 @@ function ProductDetail({ product }: { product: TerryProduct }) {
     // the table further down share one list. The prose and the gallery inside
     // it stay server-rendered — a provider does not pull its children into the
     // client bundle.
-    <TerryOrderListProvider>
+    <RangeOrderListProvider>
       <main className="bg-background">
         <section className="border-premium/20 border-b">
           <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">
@@ -281,7 +281,7 @@ function ProductDetail({ product }: { product: TerryProduct }) {
           </div>
         </section>
       </main>
-    </TerryOrderListProvider>
+    </RangeOrderListProvider>
   );
 }
 

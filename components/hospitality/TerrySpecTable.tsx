@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
 import { TERRY_DOZEN, TERRY_BASE, encodeTerryLines, roundUpToDozen } from "@/lib/terry-towels";
-import { useTerryOrderList } from "@/components/hospitality/TerryOrderList";
+import { useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -47,7 +47,7 @@ export type SpecRow = {
 };
 
 export function TerrySpecTable({ productSlug, rows }: { productSlug: string; rows: SpecRow[] }) {
-  const { lines, setLine, removeLine, quantityOf, selected } = useTerryOrderList();
+  const { lines, setLine, removeLine, quantityOf, selected } = useRangeOrderList();
 
   const href =
     lines.length > 0

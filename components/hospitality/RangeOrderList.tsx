@@ -3,28 +3,34 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 /**
- * The list a buyer builds on a Terry Towels product page.
+ * The list a buyer builds on a product page, shared by every range.
  *
  * WHY A CONTEXT AND NOT PROPS. Two controls share this state and they sit at
- * opposite ends of the page: the picker in the hero, which chooses a size and
+ * opposite ends of the page: the picker in the hero, which chooses a line and
  * sends the buyer down with "Next", and the specification table further down,
- * where quantities are entered per size. Threading state between them would
+ * where quantities are entered per line. Threading state between them would
  * mean hoisting the entire page into one client component, and the page is a
- * server component holding a breadcrumb, a gallery and two prose sections that
- * have no reason to ship to the browser.
+ * server component holding a breadcrumb, a gallery and two prose sections
+ * that have no reason to ship to the browser.
  *
  * A provider around both keeps the page server-rendered and lets the two
  * controls agree — the picker's choice is already in the list by the time the
  * table comes into view, which is what the brief asks for.
  *
- * QUANTITIES ARE STORED ALREADY ROUNDED. Every caller rounds to a dozen before
- * it gets here, so nothing downstream has to wonder whether a number has been
- * through that yet.
+ * KEYED ON THE CLIENT'S STOCK CODE. Every one of the client's sheets prints
+ * one code per orderable line, and a line is not always one size: a pillow
+ * case at 42"X36" covers three bed sizes under one code, Cabana Pool Towels
+ * is one size in two colours under two, and the whole Spa & Salon range is
+ * one size per product with a code per colour. The SKU is the only key that
+ * is one-per-line by construction, which is also why it is what the quote
+ * link carries.
  *
- * KEYED ON THE CLIENT'S STOCK CODE, NOT A SIZE. The sheet prints one code per
- * orderable line, and a line is not always one size — Cabana Pool Towels is
- * one pool towel in two colours with two codes. The SKU is the only key that
- * is one-per-line by construction.
+ * ONE PROVIDER, THREE RANGES. Terry, Bed Linen and Spa & Salon each render
+ * their own picker and table, but the list behind them is the same list with
+ * the same rules, so it is written once. QUANTITIES ARE STORED ALREADY
+ * ROUNDED — each range rounds by its own rule (a dozen for towels, the case
+ * pack for bed linen, the pack for salon) before calling setLine, so nothing
+ * downstream has to wonder whether a number has been through that yet.
  */
 
 export type OrderLine = { sku: string; quantity: number };
@@ -42,7 +48,7 @@ type OrderListValue = {
 
 const Ctx = createContext<OrderListValue | null>(null);
 
-export function TerryOrderListProvider({ children }: { children: React.ReactNode }) {
+export function RangeOrderListProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<OrderLine[]>([]);
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -74,13 +80,19 @@ export function TerryOrderListProvider({ children }: { children: React.ReactNode
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 
-export function useTerryOrderList(): OrderListValue {
+export function useRangeOrderList(): OrderListValue {
   const ctx = useContext(Ctx);
   if (!ctx) {
-    throw new Error("useTerryOrderList must be used inside <TerryOrderListProvider>");
+    throw new Error("useRangeOrderList must be used inside <RangeOrderListProvider>");
   }
   return ctx;
 }
 
-/** Where "Next" sends the buyer, and what the table anchors itself to. */
+/**
+ * Where "Next" sends the buyer, and what the table anchors itself to.
+ *
+ * One id for every range because a page only ever renders one of these
+ * sections — there is no page on which a terry table and a bed linen table
+ * could collide.
+ */
 export const SPEC_SECTION_ID = "specification";

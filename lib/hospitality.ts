@@ -246,10 +246,38 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         ctaLabel: "View details",
       },
       { name: "Economy pool towels", slug: "economy-pool-towels", productSlug: null },
-      { name: "Bath sheets", slug: "bath-sheets", productSlug: null },
-      { name: "Spa/salon towels", slug: "spa-salon-towels", productSlug: "saloon-towel" },
+      // The four lines the client's salon sheet specifies — see
+      // lib/spa-salon.ts. Each is one size in several colours, so each is a
+      // single product page rather than a listing.
+      {
+        name: "Bath sheets",
+        slug: "bath-sheets",
+        productSlug: null,
+        href: "/hospitality/pool-fitness-spa-salon/bath-sheet",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Spa/salon towels",
+        slug: "spa-salon-towels",
+        productSlug: "saloon-towel",
+        href: "/hospitality/pool-fitness-spa-salon/salon-towel",
+        ctaLabel: "View details",
+      },
       { name: "Fitness towels", slug: "fitness-towels", productSlug: null },
-      { name: "Hair wash/dye towels", slug: "hair-wash-dye-towels", productSlug: null },
+      {
+        name: "Hair wash/dye towels",
+        slug: "hair-wash-dye-towels",
+        productSlug: null,
+        href: "/hospitality/pool-fitness-spa-salon/hair-wash-dye-towel",
+        ctaLabel: "View details",
+      },
+      {
+        name: "Spa sheets",
+        slug: "spa-sheets",
+        productSlug: null,
+        href: "/hospitality/pool-fitness-spa-salon/spa-sheet",
+        ctaLabel: "View details",
+      },
     ],
   },
 ];
@@ -296,6 +324,9 @@ const SWATCHES: [string, string][] = [
   ["teal", "#1F7A8C"],
   ["purple", "#6B4E8E"],
   ["burgundy", "#6D1A2A"],
+  // The salon sheet spells it "Bergundy". The colour name is the client's to
+  // correct, not ours, so the spelling is kept and the swatch matched to it.
+  ["bergundy", "#6D1A2A"],
   ["black", "#1A1A1A"],
   ["grey", "#8C9296"],
   ["gray", "#8C9296"],
