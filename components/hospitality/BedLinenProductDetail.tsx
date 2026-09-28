@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import {
+  BALANCE_HEM_NOTE,
   BED_LINEN_BASE,
-  bedLinenSizesFor,
+  bedSizeLabel,
   getBedLinenFamily,
+  hasBalanceHem,
   type BedLinenProduct,
 } from "@/lib/bed-linen";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
@@ -36,16 +38,20 @@ export const IMAGES = [
 ];
 
 export function ProductDetail({ product }: { product: BedLinenProduct }) {
-  const sizes = bedLinenSizesFor(product);
+  const sizes = product.lines.map((line) => ({
+    sku: line.sku,
+    label: bedSizeLabel(line),
+    dimensions: line.dimensions,
+  }));
   const siblings = getBedLinenFamily(product.family);
   const hasListing = siblings.length > 1;
 
   const facts = [
     { label: "Thread Count", value: product.threadCount },
     { label: "Design", value: product.design },
-    { label: "Quality", value: product.quality },
     { label: "Blend", value: product.blend },
     { label: "Hem", value: product.hem },
+    { label: "Pcs/Case", value: product.pcsPerCase ? String(product.pcsPerCase) : null },
   ].filter((f): f is { label: string; value: string } => Boolean(f.value));
 
   return (
@@ -81,21 +87,17 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
                 </h1>
 
                 <p className="text-muted-foreground mt-5 leading-relaxed text-pretty">
-                  Made in {sizes.length} {sizes.length === 1 ? "bed size" : "bed sizes"}. Every
-                  figure below comes from our hospitality sheet.
+                  Supplied in {sizes.length} {sizes.length === 1 ? "size" : "sizes"}, each with its
+                  own stock code. Every figure below comes from our hospitality sheet.
                 </p>
               </Reveal>
 
               <Reveal variant="fade-up" delay={0.1}>
                 <BedLinenSpecPicker
                   facts={facts}
+                  note={hasBalanceHem(product) ? BALANCE_HEM_NOTE : undefined}
                   casePack={product.pcsPerCase}
-                  sizes={sizes.map(({ size, dimensions, sku }) => ({
-                    key: size.key,
-                    name: size.name,
-                    dimensions,
-                    sku,
-                  }))}
+                  sizes={sizes}
                 />
               </Reveal>
             </div>
@@ -120,12 +122,7 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
               <BedLinenSpecTable
                 productSlug={product.slug}
                 casePack={product.pcsPerCase}
-                rows={sizes.map(({ size, dimensions, sku }) => ({
-                  sizeKey: size.key,
-                  name: size.name,
-                  dimensions,
-                  sku,
-                }))}
+                rows={sizes}
               />
             </div>
           </div>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   BED_LINEN_PRODUCTS,
-  bedLinenSizesFor,
+  bedSizesCovered,
   getBedLinenFamily,
   getBedLinenProduct,
 } from "@/lib/bed-linen";
@@ -35,12 +35,13 @@ export async function generateMetadata({
   const product = getBedLinenProduct(slug);
   if (!product) return { title: "Not found" };
 
-  const sizes = bedLinenSizesFor(product);
   return {
     title: `${product.name} — Bed Linen`,
     description: `${product.name}${product.blend ? ` in ${product.blend}` : ""}${
       product.hem ? ` with a ${product.hem.toLowerCase()} hem` : ""
-    }, made in ${sizes.map((s) => s.size.name.toLowerCase()).join(", ")}.`,
+    }, made in ${bedSizesCovered(product)
+      .map((s) => s.toLowerCase())
+      .join(", ")}.`,
     alternates: { canonical: `/hospitality/bed-linen/${product.family}/${product.slug}` },
   };
 }

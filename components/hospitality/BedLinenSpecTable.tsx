@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
-import { BED_LINEN_BASE, encodeBedLinenLines, type BedSizeKey } from "@/lib/bed-linen";
+import { BED_LINEN_BASE, encodeBedLinenLines } from "@/lib/bed-linen";
 import { useBedLinenOrderList } from "@/components/hospitality/BedLinenOrderList";
 import { cn } from "@/lib/utils";
 
@@ -11,18 +11,20 @@ import { cn } from "@/lib/utils";
  * The specification table, with a quantity box and "Add to List" on every row.
  *
  * Mirrors components/hospitality/TerrySpecTable.tsx — see that file's docblock
- * for the full reasoning. The one structural difference: Terry has a separate
- * "Product type" (wash cloth, hand towel, …) and "Size" (its dimensions)
- * because a towel's size class and its measurement are two different facts.
- * A bed size IS its own name (Twin, Full, Queen, King), so this table has one
- * column for it plus one for the measurement, not two.
+ * for the full reasoning. Two differences, both from the sheet rather than
+ * from taste:
+ *
+ *  - A row is one line on the hospitality sheet, so a row can cover several
+ *    bed sizes ("Twin / Full / Queen") where the sheet prints one size and
+ *    one code across those columns.
+ *  - The SKU column carries the CLIENT'S OWN stock code, not one of ours, so
+ *    a buyer can paste it straight into their own system.
  */
 
 export type BedLinenSpecRow = {
-  sizeKey: BedSizeKey;
-  name: string;
-  dimensions: string;
   sku: string;
+  label: string;
+  dimensions: string;
 };
 
 export function BedLinenSpecTable({
@@ -43,14 +45,14 @@ export function BedLinenSpecTable({
         )}`
       : null;
 
-  const byKey = new Map(rows.map((r) => [r.sizeKey, r]));
+  const bySku = new Map(rows.map((r) => [r.sku, r]));
 
   return (
     <>
       <div className="border-premium/25 bg-card overflow-x-auto rounded-xl border">
         <table className="w-full min-w-[40rem] text-sm">
           <caption className="sr-only">
-            Bed sizes and stock codes for this product, with a quantity box per row
+            Sizes and stock codes for this product, with a quantity box per row
           </caption>
           <thead>
             <tr className="border-premium/20 border-b">
@@ -68,12 +70,12 @@ export function BedLinenSpecTable({
           <tbody>
             {rows.map((row) => (
               <SpecTableRow
-                key={row.sizeKey}
+                key={row.sku}
                 row={row}
                 casePack={casePack}
-                listed={quantityOf(row.sizeKey)}
-                highlighted={row.sizeKey === selected}
-                onAdd={(qty) => setLine(row.sizeKey, qty)}
+                listed={quantityOf(row.sku)}
+                highlighted={row.sku === selected}
+                onAdd={(qty) => setLine(row.sku, qty)}
               />
             ))}
           </tbody>
@@ -96,14 +98,14 @@ export function BedLinenSpecTable({
         ) : (
           <ul className="mt-4 grid gap-2.5">
             {lines.map((line) => {
-              const row = byKey.get(line.sizeKey);
+              const row = bySku.get(line.sku);
               if (!row) return null;
               return (
                 <li
-                  key={line.sizeKey}
+                  key={line.sku}
                   className="border-border flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border px-4 py-3 text-[13.5px]"
                 >
-                  <span className="text-foreground font-medium">{row.name}</span>
+                  <span className="text-foreground font-medium">{row.label}</span>
                   <span className="text-muted-foreground">{row.dimensions}</span>
                   <span className="text-muted-foreground font-mono text-[12px]">{row.sku}</span>
                   <span className="text-foreground ml-auto font-semibold tabular-nums">
@@ -111,8 +113,8 @@ export function BedLinenSpecTable({
                   </span>
                   <button
                     type="button"
-                    onClick={() => removeLine(line.sizeKey)}
-                    aria-label={`Remove ${row.name} from your list`}
+                    onClick={() => removeLine(line.sku)}
+                    aria-label={`Remove ${row.label} from your list`}
                     className="text-muted-foreground hover:text-destructive focus-visible:ring-ring rounded-md p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                   >
                     <Trash2 aria-hidden className="size-4" />
@@ -193,7 +195,7 @@ function SpecTableRow({
       className={cn("border-premium/15 border-b last:border-0", highlighted && "bg-primary/[0.06]")}
     >
       <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
-        {row.name}
+        {row.label}
         {listed !== null ? (
           <span className="text-primary-strong dark:text-primary ml-2 inline-flex items-center gap-1 align-middle text-[11.5px] font-semibold">
             <Check aria-hidden className="size-3" />
@@ -217,7 +219,7 @@ function SpecTableRow({
               add();
             }
           }}
-          aria-label={`Quantity of ${row.name}`}
+          aria-label={`Quantity of ${row.label}`}
           placeholder="Qty"
           className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-10 w-28 rounded-lg border px-3 text-[14px] outline-none focus-visible:ring-4"
         />

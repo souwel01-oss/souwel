@@ -2,7 +2,6 @@
 
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
-import type { BedSizeKey } from "@/lib/bed-linen";
 import {
   BED_LINEN_SPEC_SECTION_ID,
   useBedLinenOrderList,
@@ -10,38 +9,44 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Choose a bed size and a quantity, then go down to the table.
+ * Choose a size and a quantity, then go down to the table.
  *
  * Mirrors components/hospitality/TerrySpecPicker.tsx — same "Next" button that
  * seeds the list and scrolls rather than requesting a quote directly, same
- * rule that only the bed sizes this product is actually made in are offered.
- * See that file's docblock for the reasoning behind both.
+ * rule that only the sizes this product is actually made in are offered. See
+ * that file's docblock for the reasoning behind both.
+ *
+ * A BUTTON IS ONE LINE ON THE SHEET, NOT ONE BED SIZE. Where the sheet prints
+ * one size and one stock code across several columns — 42"X36" for twin, full
+ * and queen — that is one button reading "Twin / Full / Queen", because it is
+ * one product with one code. Three buttons would imply three things to order.
  *
  * ── QUANTITY ROUNDS TO THIS PRODUCT'S OWN CASE PACK ─────────────────────────
  *
  * Terry Towels round to a dozen because towels are sold by the dozen. Bed
  * linen is sold by the case, and the case size is not one number across the
- * range — it is 24 for sheets, 72 for pillow cases, 12 for duvet covers, all
- * taken from the sheet's own PCS/CASE column. `casePack` carries that figure
- * in; where the sheet gives none (Mattress Protector, Pillow Protector) this
- * component asks for a plain required quantity instead, because there is no
- * case size on the sheet to round to.
+ * range — 24 for sheets, 72 for pillow cases, 12 for duvet covers, all from
+ * the sheet's own PCS/CASE column.
  */
 
 export type BedLinenPickerSize = {
-  key: BedSizeKey;
-  name: string;
-  dimensions: string;
+  /** The client's stock code — the line's identity everywhere. */
   sku: string;
+  /** "Queen", or "Twin / Full / Queen" where the sheet merges the columns. */
+  label: string;
+  dimensions: string;
 };
 
 export function BedLinenSpecPicker({
   facts,
+  note,
   casePack,
   sizes,
 }: {
-  /** Fixed facts shown above the choice — thread count, design, quality, blend, hem. */
+  /** Fixed facts shown above the choice — thread count, design, blend, hem. */
   facts: { label: string; value: string }[];
+  /** The sheet's own footnote for this product, where it has one. */
+  note?: string;
   casePack: number | null;
   sizes: BedLinenPickerSize[];
 }) {
@@ -52,7 +57,7 @@ export function BedLinenSpecPicker({
   const qtyHelpId = useId();
   const helpId = useId();
 
-  const chosen = sizes.find((s) => s.key === selected) ?? null;
+  const chosen = sizes.find((s) => s.sku === selected) ?? null;
 
   const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
   const validStep = typed !== null && typed > 0 && (!casePack || typed % casePack === 0);
@@ -69,7 +74,7 @@ export function BedLinenSpecPicker({
 
   const goToTable = () => {
     if (!chosen || !qty) return;
-    setLine(chosen.key, qty);
+    setLine(chosen.sku, qty);
     document
       .getElementById(BED_LINEN_SPEC_SECTION_ID)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -82,7 +87,7 @@ export function BedLinenSpecPicker({
       </p>
 
       {/* Fixed facts, shown before the choice — everything the sheet gives
-          this product that does not vary by bed size. */}
+          this product that does not vary by size. */}
       <dl className="mt-4 flex flex-wrap gap-x-8 gap-y-3">
         {facts.map((fact) => (
           <div key={fact.label}>
@@ -94,20 +99,22 @@ export function BedLinenSpecPicker({
         ))}
       </dl>
 
-      {/* ── Bed size ─────────────────────────────────────────────────── */}
+      {note ? <p className="text-muted-foreground mt-4 text-[12.5px] leading-relaxed">{note}</p> : null}
+
+      {/* ── Size ─────────────────────────────────────────────────────── */}
       <fieldset className="mt-6">
         <legend className="text-foreground/80 text-[13px] font-semibold">
           Size <span className="text-muted-foreground font-normal">(required)</span>
         </legend>
         <div className="mt-3 flex flex-wrap gap-2.5">
           {sizes.map((size) => {
-            const active = size.key === selected;
+            const active = size.sku === selected;
             return (
               <button
-                key={size.key}
+                key={size.sku}
                 type="button"
                 aria-pressed={active}
-                onClick={() => setSelected(size.key)}
+                onClick={() => setSelected(size.sku)}
                 className={cn(
                   "focus-visible:ring-ring rounded-lg border px-4 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
                   active
@@ -115,8 +122,11 @@ export function BedLinenSpecPicker({
                     : "border-border text-foreground/80 hover:border-premium hover:text-foreground"
                 )}
               >
-                <span className="block text-[14px] font-medium">{size.name}</span>
+                <span className="block text-[14px] font-medium">{size.label}</span>
                 <span className="text-muted-foreground block text-[12.5px]">{size.dimensions}</span>
+                {/* The stock code on the button itself: it is what a buyer
+                    quotes back at Sales, so it should be visible at the moment
+                    the choice is made rather than only in the table below. */}
                 <span className="text-muted-foreground/80 mt-0.5 block font-mono text-[11px]">
                   {size.sku}
                 </span>

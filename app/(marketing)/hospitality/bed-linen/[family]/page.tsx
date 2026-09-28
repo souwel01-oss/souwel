@@ -6,7 +6,6 @@ import {
   bedLinenFamilySlugs,
   bedLinenCardSummary,
   bedLinenProductHref,
-  bedLinenSizesFor,
   getBedLinenFamily,
   type BedLinenProduct,
 } from "@/lib/bed-linen";
@@ -47,7 +46,7 @@ export async function generateMetadata({
     const product = members[0];
     return {
       title: `${product.familyLabel} — Bed Linen`,
-      description: `${product.name}, made in ${bedLinenSizesFor(product).length} bed sizes. Specification from our hospitality sheet.`,
+      description: `${product.name}, supplied in ${product.lines.length} sizes. Specification and stock codes from our hospitality sheet.`,
       alternates: { canonical: `/hospitality/bed-linen/${family}` },
     };
   }

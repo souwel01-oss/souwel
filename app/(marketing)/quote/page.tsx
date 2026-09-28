@@ -6,7 +6,7 @@ import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
 import { getTerryProduct, parseTerryLines } from "@/lib/terry-towels";
-import { getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
+import { bedSizeLabel, getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -94,15 +94,15 @@ function readBedLinenRequest(params: { bed?: string; lines?: string }) {
 
   const body = lines.map(
     (l) =>
-      `- ${l.size.name} ${l.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString("en-US")}`
+      `- ${bedSizeLabel(l)} ${l.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString("en-US")}`
   );
 
   const facts = [
     product.threadCount ? `Thread count: ${product.threadCount}` : null,
     product.design ? `Design: ${product.design}` : null,
-    product.quality ? `Quality: ${product.quality}` : null,
     product.blend ? `Blend: ${product.blend}` : null,
     product.hem ? `Hem: ${product.hem}` : null,
+    product.pcsPerCase ? `Pcs/case: ${product.pcsPerCase}` : null,
   ].filter((v): v is string => Boolean(v));
 
   const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "size" : "sizes"}`;

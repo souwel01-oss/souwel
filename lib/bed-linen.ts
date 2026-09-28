@@ -1,347 +1,416 @@
 /**
- * The Bed Linen range, transcribed from the client's "HOSPITALITY SHEETS" sheet.
+ * The Bed Linen range, transcribed from the client's "HOSPITALITY SHEETS".
  *
  * ─────────────────────────────────────────────────────────────────────────────
  * THIS FILE IS A TRANSCRIPTION, NOT A WRITE-UP, same discipline as
- * lib/terry-towels.ts: every thread count, design, quality, blend, hem, case
- * pack and finished size below is copied from the sheet. Nothing here was
- * inferred, rounded, converted or filled in from a neighbouring row.
+ * lib/terry-towels.ts: every thread count, design, blend, hem, case pack,
+ * finished size and stock code below is copied from the sheet. Nothing here is
+ * inferred, rounded, converted or borrowed from a neighbouring row.
  *
- * ONE WRINKLE THE TERRY SHEET DID NOT HAVE. The sheet's TWIN/FULL/QUEEN/KING
- * columns use merged cells — one finished size printed once, spanning two or
- * three bed sizes that share it. A copy-pasted text extraction of a merged
- * cell keeps the value but loses which columns it spanned, so a handful of
- * rows below were reconstructed by matching their sizes against a sibling row
- * that IS fully populated (the two Flat Sheet T200 rows, the two Fitted Sheet
- * T200 rows) rather than guessed outright. Every row below says which case it
- * is. The one row with no sibling to check against — Pillow Protector — is
- * flagged as the least certain of the set; send the source spreadsheet if
- * that one needs correcting.
+ * THE STOCK CODES ARE THE CLIENT'S OWN. Unlike the towel sheet, this one
+ * carries a SKU column beside every size, so there is nothing invented here to
+ * replace later — a buyer quoting KSD108115S20 back at Souwel is quoting
+ * Souwel's own code. Each code is tied to one product in one size, which is
+ * why it is also what the order list and the quote link are keyed on.
+ *
+ * MERGED CELLS ARE MODELLED AS MERGED, NOT SPLIT. Several rows print one size
+ * and one SKU across two or three bed-size columns — a pillow case is 42"X36"
+ * whether the bed is twin, full or queen, and there is a single code for it.
+ * Those are one `lines` entry naming every column it covers, so the page
+ * offers the buyer the one real product rather than three copies of it under
+ * different names.
+ *
+ * A BLANK CELL IS A SIZE NOT MADE. Where the sheet leaves a bed size empty for
+ * a row, that row simply has no line for it and the size is never offered.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
-export type BedSizeKey = "twin" | "full" | "queen" | "king";
+export type BedSizeKey = "twin" | "full" | "queen" | "king" | "extra-wide-king";
 
 export type BedSize = {
   key: BedSizeKey;
   /** The sheet's own column heading. */
   name: string;
-  /** Two-letter segment of the SKU. See bedLinenSkuFor. */
-  code: string;
 };
 
 /** The size columns, in sheet order. */
 export const BED_SIZES: BedSize[] = [
-  { key: "twin", name: "Twin", code: "TW" },
-  { key: "full", name: "Full", code: "FL" },
-  { key: "queen", name: "Queen", code: "QN" },
-  { key: "king", name: "King", code: "KG" },
+  { key: "twin", name: "Twin" },
+  { key: "full", name: "Full" },
+  { key: "queen", name: "Queen" },
+  { key: "king", name: "King" },
+  // Only one row on the sheet fills this in — Flat Sheet T300 Solid.
+  { key: "extra-wide-king", name: "Extra Wide King" },
 ];
+
+/**
+ * One orderable line: a finished size, its stock code, and every bed-size
+ * column the sheet prints it across.
+ */
+export type BedLinenSizeLine = {
+  /** One entry per column this line covers. Several where the sheet merges. */
+  sizes: BedSizeKey[];
+  /** Finished size, exactly as the sheet writes it. */
+  dimensions: string;
+  /** The client's own stock code for this product in this size. */
+  sku: string;
+};
 
 export type BedLinenProduct = {
   slug: string;
   /**
-   * As the sheet's ITEM column names it, with the sheet's own Thread Count /
-   * Design / Quality columns folded in to tell the four (or three) rows under
-   * one item apart — the same technique already used elsewhere in
-   * lib/hospitality.ts for "Kitchen towels – checks" vs "– herringbone".
+   * The sheet's ITEM value with its own Thread Count / Design / Blend columns
+   * folded in, because ITEM alone says "FLAT SHEET" on seven different rows.
    * Nothing here is written that is not one of the sheet's own cells.
    */
   name: string;
-  /** Groups the rows that share an ITEM value — drives the family listing page. */
+  /** Groups the rows sharing an ITEM value — drives the family listing page. */
   family: string;
   /** As the client writes it, for the family's page heading and breadcrumb. */
   familyLabel: string;
-  /** Construction segment of the SKU. See bedLinenSkuFor. */
-  code: string;
   threadCount: string | null;
   design: string | null;
-  quality: string | null;
   blend: string | null;
   hem: string | null;
-  /** PCS/CASE. Null where the sheet gives no figure — Mattress and Pillow Protector. */
+  /** PCS/CASE, and what a quantity on this product rounds up to. */
   pcsPerCase: number | null;
-  /** Finished size per bed size. A key that is absent is a bed size not made. */
-  sizes: Partial<Record<BedSizeKey, string>>;
+  lines: BedLinenSizeLine[];
 };
 
+/**
+ * The sheet's own footnote, shown on any product whose hem is BALANCE*.
+ * Quoted exactly as the "NOTED" block at the foot of the sheet writes it.
+ */
+export const BALANCE_HEM_NOTE = "Balanced hems allow either end of the sheet to be the top.";
+
+/** Nineteen rows, in sheet order. */
 export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
-  /* ── Flat Sheets ─────────────────────────────────────────────────────── */
+  /* ── Flat Sheets — seven rows ────────────────────────────────────────── */
   {
-    slug: "flat-sheet-t200-percale-dpi-sht",
-    name: "Flat Sheet — T200/T250 Percale (DPI-SHT)",
+    slug: "flat-sheet-t200-solid-55-45",
+    name: "Flat Sheet — T200 Solid, 55/45",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
-    code: "FS1",
-    threadCount: "T200 / T250",
-    design: "Plain - Percale",
-    quality: "DPI - SHT",
+    threadCount: "T200",
+    design: "Solid",
     blend: "55/45",
     hem: '2"',
     pcsPerCase: 24,
-    sizes: { twin: '66"x108"', full: '81"x115"', queen: '90"x115"', king: '108"x115"' },
+    lines: [
+      { sizes: ["twin"], dimensions: '66"X108"', sku: "TSD66108S20" },
+      { sizes: ["full"], dimensions: '81"X115"', sku: "FSD81115S20" },
+      { sizes: ["queen"], dimensions: '90"X115"', sku: "QSD90115S20" },
+      { sizes: ["king"], dimensions: '108"X115"', sku: "KSD108115S20" },
+    ],
   },
   {
-    slug: "flat-sheet-t200-percale-spk-air",
-    name: "Flat Sheet — T200/T250 Percale (SPK-AIR)",
+    slug: "flat-sheet-t250-solid-55-45",
+    name: "Flat Sheet — T250 Solid, 55/45",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
-    code: "FS2",
-    threadCount: "T200 / T250",
-    design: "Plain - Percale",
-    quality: "SPK - AIR",
+    threadCount: "T250",
+    design: "Solid",
+    blend: "55/45",
+    hem: '2"',
+    pcsPerCase: 24,
+    lines: [
+      { sizes: ["twin"], dimensions: '66"X108"', sku: "TSD66108S25" },
+      { sizes: ["full"], dimensions: '81"X115"', sku: "FSD81115S25" },
+      { sizes: ["queen"], dimensions: '90"X115"', sku: "QSD90115S25" },
+      { sizes: ["king"], dimensions: '108"X115"', sku: "KSD108115S25" },
+    ],
+  },
+  {
+    slug: "flat-sheet-t200-solid-60-40",
+    name: "Flat Sheet — T200 Solid, 60/40",
+    family: "flat-sheets",
+    familyLabel: "Flat Sheets",
+    threadCount: "T200",
+    design: "Solid",
     blend: "60/40",
     hem: "Balance*",
     pcsPerCase: 24,
-    sizes: { twin: '66"x108"', full: '81"x115"', queen: '90"x115"', king: '108"x115"' },
+    lines: [
+      { sizes: ["twin"], dimensions: '66"X108"', sku: "TSB66108A20" },
+      { sizes: ["full"], dimensions: '81"X115"', sku: "FSB81115A20" },
+      { sizes: ["queen"], dimensions: '90"X115"', sku: "QSB90115A20" },
+      { sizes: ["king"], dimensions: '108"X115"', sku: "KSB108115A20" },
+    ],
   },
   {
-    // TWIN and FULL are blank on the sheet for both T300 Flat Sheet rows —
-    // only Queen and King are filled in, matching the pattern already
-    // confirmed for Fitted Sheet T300 below (the higher thread count is
-    // stocked in fewer sizes). No reconstruction needed here.
-    slug: "flat-sheet-t300-plain-dpi-sht",
-    name: "Flat Sheet — T300 Plain (DPI-SHT)",
+    slug: "flat-sheet-t250-solid-60-40",
+    name: "Flat Sheet — T250 Solid, 60/40",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
-    code: "FS3",
+    threadCount: "T250",
+    design: "Solid",
+    blend: "60/40",
+    hem: "Balance*",
+    pcsPerCase: 24,
+    lines: [
+      { sizes: ["twin"], dimensions: '66"X108"', sku: "TSB66108A25" },
+      { sizes: ["full"], dimensions: '81"X115"', sku: "FSB81115A25" },
+      { sizes: ["queen"], dimensions: '90"X115"', sku: "QSB90115A25" },
+      { sizes: ["king"], dimensions: '108"X115"', sku: "KSB108115A25" },
+    ],
+  },
+  {
+    // The one row on the sheet that is not a cotton/polyester ratio — its
+    // blend cell spells the fibres out. Twin is blank for this row.
+    slug: "flat-sheet-t210-poly-modal",
+    name: "Flat Sheet — T210 Solid, 52% Polyester / 48% Modal",
+    family: "flat-sheets",
+    familyLabel: "Flat Sheets",
+    threadCount: "T210",
+    design: "Solid",
+    blend: "52% Polyester / 48% Modal",
+    hem: "Balance*",
+    pcsPerCase: 24,
+    lines: [
+      { sizes: ["full"], dimensions: '81"X115"', sku: "FPM81115A21" },
+      { sizes: ["queen"], dimensions: '90"X115"', sku: "QPM90115A21" },
+      { sizes: ["king"], dimensions: '108"X115"', sku: "KPM108115A21" },
+    ],
+  },
+  {
+    // The only row with an Extra Wide King. Its finished size is written
+    // 114"X125 on the sheet — the closing inch mark is missing there, and it
+    // is left as the sheet has it rather than tidied into data we were not given.
+    slug: "flat-sheet-t300-solid-60-40",
+    name: "Flat Sheet — T300 Solid, 60/40",
+    family: "flat-sheets",
+    familyLabel: "Flat Sheets",
     threadCount: "T300",
-    design: "Plain",
-    quality: "DPI - SHT",
+    design: "Solid",
     blend: "60/40",
     hem: '2"',
     pcsPerCase: 24,
-    sizes: { queen: '90"x120"', king: '108"x120"' },
+    lines: [
+      { sizes: ["queen"], dimensions: '90"X120"', sku: "QSD90120A30" },
+      { sizes: ["king"], dimensions: '108"X120"', sku: "KSD108120A30" },
+      { sizes: ["extra-wide-king"], dimensions: '114"X125', sku: "KSD114125A30XW" },
+    ],
   },
   {
-    slug: "flat-sheet-t300-satin-stripe-spk-air",
-    name: "Flat Sheet — T300 Satin Stripe (SPK-AIR)",
+    slug: "flat-sheet-t300-satin-stripes",
+    name: "Flat Sheet — T300 Satin Stripes, 60/40",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
-    code: "FS4",
     threadCount: "T300",
     design: "Satin Stripes",
-    quality: "SPK - AIR",
     blend: "60/40",
     hem: "Balance*",
     pcsPerCase: 24,
-    sizes: { queen: '90"x120"', king: '108"x120"' },
+    lines: [
+      { sizes: ["queen"], dimensions: '90"X120"', sku: "QB90120A30STRP" },
+      { sizes: ["king"], dimensions: '108"X120"', sku: "KB108120A30STRP" },
+    ],
   },
 
-  /* ── Fitted Sheets ───────────────────────────────────────────────────── */
+  /* ── Fitted Sheets — three rows ──────────────────────────────────────── */
   {
-    slug: "fitted-sheet-t200-dpi-sht",
-    name: "Fitted Sheet — T200 (DPI-SHT)",
+    slug: "fitted-sheet-t200-55-45",
+    name: "Fitted Sheet — T200 Plain, 55/45",
     family: "fitted-sheets",
     familyLabel: "Fitted Sheets",
-    code: "FT1",
     threadCount: "T200",
     design: "Plain",
-    quality: "DPI - SHT",
     blend: "55/45",
     hem: "Elastic",
     pcsPerCase: 24,
-    sizes: {
-      twin: '39"x80"x9"',
-      full: '54"x80"x11"',
-      queen: '60"x80"x11"',
-      king: '78"x80"x11"',
-    },
+    lines: [
+      { sizes: ["twin"], dimensions: '39"X80"X9"', sku: "TDE39809S20FTD" },
+      { sizes: ["full"], dimensions: '54"X80"X11"', sku: "FDE548011S20FTD" },
+      { sizes: ["queen"], dimensions: '60"X80"X11"', sku: "QDE608011S20FTD" },
+      { sizes: ["king"], dimensions: '78"X80"X11"', sku: "KDE788011S20FTD" },
+    ],
   },
   {
-    slug: "fitted-sheet-t200-spk-air",
-    name: "Fitted Sheet — T200 (SPK-AIR)",
+    slug: "fitted-sheet-t200-60-40",
+    name: "Fitted Sheet — T200 Plain, 60/40",
     family: "fitted-sheets",
     familyLabel: "Fitted Sheets",
-    code: "FT2",
     threadCount: "T200",
     design: "Plain",
-    quality: "SPK - AIR",
     blend: "60/40",
     hem: "Elastic",
     pcsPerCase: 24,
-    sizes: {
-      twin: '39"x80"x9"',
-      full: '54"x80"x11"',
-      queen: '60"x80"x11"',
-      king: '78"x80"x11"',
-    },
+    lines: [
+      { sizes: ["twin"], dimensions: '39"X80"X9"', sku: "TSE39809A20FTD" },
+      { sizes: ["full"], dimensions: '54"X80"X11"', sku: "FSE548011A20FTD" },
+      { sizes: ["queen"], dimensions: '60"X80"X11"', sku: "QSE608011A20FTD" },
+      { sizes: ["king"], dimensions: '78"X80"X11"', sku: "KSE788011A20FTD" },
+    ],
   },
   {
-    // RECONSTRUCTED. The sheet gives three sizes for this row: 54"x80"x14",
-    // 60"x80"x14" and 78"x80"x14". Those three WIDTHS (54, 60, 78) are exactly
-    // the Full/Queen/King widths of the T200 row above — only the depth (14"
-    // instead of 11") differs — so Twin is the missing one, not Full. High
-    // confidence: this is a number match against a sibling row, not a guess.
-    slug: "fitted-sheet-t300-dpi-sht",
-    name: "Fitted Sheet — T300 (DPI-SHT)",
+    slug: "fitted-sheet-t300-55-45",
+    name: "Fitted Sheet — T300 Plain, 55/45",
     family: "fitted-sheets",
     familyLabel: "Fitted Sheets",
-    code: "FT3",
     threadCount: "T300",
     design: "Plain",
-    quality: "DPI - SHT",
-    blend: "60/40",
+    blend: "55/45",
     hem: "Elastic",
     pcsPerCase: 24,
-    sizes: { full: '54"x80"x14"', queen: '60"x80"x14"', king: '78"x80"x14"' },
+    lines: [
+      { sizes: ["full"], dimensions: '54"X80"X14"', sku: "FDE548011A30FTD" },
+      { sizes: ["queen"], dimensions: '60"X80"X14"', sku: "QDE608011A30FTD" },
+      { sizes: ["king"], dimensions: '78"X80"X14"', sku: "KDE788011A30FTD" },
+    ],
   },
 
-  /* ── Pillow Case ─────────────────────────────────────────────────────── */
+  /* ── Pillow Case — four rows ─────────────────────────────────────────── */
   {
-    // RECONSTRUCTED. The sheet gives two sizes, 42"x36" and 42"x46", printed
-    // in a cell merged across Twin/Full/Queen and a separate King cell — a
-    // single "standard" pillow case size shared by three bed sizes, then a
-    // larger one for King. Applied identically to both T200 Percale rows.
-    slug: "pillow-case-t200-percale-dpi-sht",
-    name: "Pillow Case — T200 Percale (DPI-SHT)",
+    // 42"X36" is printed once across Twin, Full and Queen with a single code:
+    // one pillow case that suits all three beds, not three products.
+    slug: "pillow-case-t200-percale-55-45",
+    name: "Pillow Case — T200 Plain Percale, 55/45",
     family: "pillow-case",
     familyLabel: "Pillow Case",
-    code: "PC1",
     threadCount: "T200",
     design: "Plain - Percale",
-    quality: "DPI - SHT",
     blend: "55/45",
     hem: "Open End",
     pcsPerCase: 72,
-    sizes: { twin: '42"x36"', full: '42"x36"', queen: '42"x36"', king: '42"x46"' },
+    lines: [
+      { sizes: ["twin", "full", "queen"], dimensions: '42"X36"', sku: "PD4236S20" },
+      { sizes: ["king"], dimensions: '42"X46"', sku: "KPD4246S20" },
+    ],
   },
   {
-    slug: "pillow-case-t200-percale-spk-air",
-    name: "Pillow Case — T200 Percale (SPK-AIR)",
+    slug: "pillow-case-t250-percale-60-40",
+    name: "Pillow Case — T250 Plain Percale, 60/40",
     family: "pillow-case",
     familyLabel: "Pillow Case",
-    code: "PC2",
-    threadCount: "T200",
+    threadCount: "T250",
     design: "Plain - Percale",
-    quality: "SPK - AIR",
     blend: "60/40",
     hem: "Open End",
     pcsPerCase: 72,
-    sizes: { twin: '42"x36"', full: '42"x36"', queen: '42"x36"', king: '42"x46"' },
+    lines: [
+      { sizes: ["twin", "full", "queen"], dimensions: '42"X36"', sku: "P4236A25" },
+      { sizes: ["king"], dimensions: '42"X46"', sku: "KP4246A25" },
+    ],
   },
   {
-    // RECONSTRUCTED. Three sizes given: 42"x36", 42"x40", 42"x46". Read as
-    // Twin/Full sharing the merged 42"x36" (the same standard size as the
-    // T200 rows above), Queen stepping up to its own 42"x40", King at 42"x46".
-    slug: "pillow-case-t300-plain-dpi-sht",
-    name: "Pillow Case — T300 Plain (DPI-SHT)",
+    // Here the merge covers Twin and Full only — Queen steps up to its own
+    // 42"X40" with its own code.
+    slug: "pillow-case-t300-plain-60-40",
+    name: "Pillow Case — T300 Plain, 60/40",
     family: "pillow-case",
     familyLabel: "Pillow Case",
-    code: "PC3",
     threadCount: "T300",
     design: "Plain",
-    quality: "DPI - SHT",
     blend: "60/40",
     hem: "Open End",
     pcsPerCase: 72,
-    sizes: { twin: '42"x36"', full: '42"x36"', queen: '42"x40"', king: '42"x46"' },
+    lines: [
+      { sizes: ["twin", "full"], dimensions: '42"X36"', sku: "PD4236S30" },
+      { sizes: ["queen"], dimensions: '42"X40"', sku: "QPD4240S30" },
+      { sizes: ["king"], dimensions: '42"X46"', sku: "KPD4246S30" },
+    ],
   },
   {
-    // RECONSTRUCTED. Two sizes given, 42"x40" and 42"x46" — exactly the
-    // Queen/King figures from the T300 Plain row above — so Twin/Full are
-    // blank here rather than sharing the 42"x36" standard size.
-    slug: "pillow-case-t300-satin-stripe-spk-air",
-    name: "Pillow Case — T300 Satin Stripe (SPK-AIR)",
+    slug: "pillow-case-t300-satin-stripes",
+    name: "Pillow Case — T300 Satin Stripes, 60/40",
     family: "pillow-case",
     familyLabel: "Pillow Case",
-    code: "PC4",
     threadCount: "T300",
     design: "Satin Stripes",
-    quality: "SPK - AIR",
     blend: "60/40",
     hem: "EZ Fit",
     pcsPerCase: 72,
-    sizes: { queen: '42"x40"', king: '42"x46"' },
+    lines: [
+      { sizes: ["queen"], dimensions: '42"X40"', sku: "QPEZ4240A30STRP" },
+      { sizes: ["king"], dimensions: '42"X46"', sku: "KPEZ4246A30STRP" },
+    ],
   },
 
-  /* ── Duvet Cover ─────────────────────────────────────────────────────── */
+  /* ── Duvet Cover — three rows ────────────────────────────────────────── */
   {
-    // RECONSTRUCTED. Three sizes given: 82"x94", 96"x94", 105"x94". The last
-    // two match the T300 rows below exactly, so those are Queen/King and
-    // 82"x94" — one size smaller — is Full. Twin is blank, consistent with
-    // the client not carrying a duvet insert/comforter line for it either.
-    slug: "duvet-cover-t200-dpi-sht",
-    name: "Duvet Cover — T200 (DPI-SHT)",
+    slug: "duvet-cover-t200-plain",
+    name: "Duvet Cover — T200 Plain, 55/40",
     family: "duvet-cover",
     familyLabel: "Duvet Cover",
-    code: "DC1",
     threadCount: "T200",
     design: "Plain",
-    quality: "DPI - SHT",
     blend: "55/40",
     hem: "Center Open",
     pcsPerCase: 12,
-    sizes: { full: '82"x94"', queen: '96"x94"', king: '105"x94"' },
+    lines: [
+      { sizes: ["full"], dimensions: '82"X94"', sku: "FSD8294S20DVT" },
+      { sizes: ["queen"], dimensions: '96"X94"', sku: "QSD9694S20DVT" },
+      { sizes: ["king"], dimensions: '105"X94"', sku: "KSD10594S20DVT" },
+    ],
   },
   {
-    slug: "duvet-cover-t300-dpi-sht",
-    name: "Duvet Cover — T300 Plain (DPI-SHT)",
+    slug: "duvet-cover-t300-plain",
+    name: "Duvet Cover — T300 Plain, 60/40",
     family: "duvet-cover",
     familyLabel: "Duvet Cover",
-    code: "DC2",
     threadCount: "T300",
     design: "Plain",
-    quality: "DPI - SHT",
     blend: "60/40",
     hem: "Center Open",
     pcsPerCase: 12,
-    sizes: { queen: '96"x94"', king: '105"x94"' },
+    lines: [
+      { sizes: ["queen"], dimensions: '96"X94"', sku: "QSD9694S30DVT" },
+      { sizes: ["king"], dimensions: '105"X94"', sku: "KSD10594S30DVT" },
+    ],
   },
   {
-    slug: "duvet-cover-t300-satin-stripe-spk-air",
-    name: "Duvet Cover — T300 Satin Stripe (SPK-AIR)",
+    slug: "duvet-cover-t300-satin-stripes",
+    name: "Duvet Cover — T300 Satin Stripes, 60/40",
     family: "duvet-cover",
     familyLabel: "Duvet Cover",
-    code: "DC3",
     threadCount: "T300",
     design: "Satin Stripes",
-    quality: "SPK - AIR",
     blend: "60/40",
     hem: "Center Open",
     pcsPerCase: 12,
-    sizes: { queen: '96"x94"', king: '105"x94"' },
+    lines: [
+      { sizes: ["queen"], dimensions: '96"X94"', sku: "Q9694A30DVTSTRP" },
+      { sizes: ["king"], dimensions: '105"X94"', sku: "K10594A30DVTSTRP" },
+    ],
   },
 
-  /* ── Mattress Protector ──────────────────────────────────────────────── */
+  /* ── Mattress Protector — one row ────────────────────────────────────── */
   {
-    // The sheet gives no thread count, design, quality, blend, hem or
-    // PCS/CASE for this row at all — only the four finished sizes.
+    // The sheet gives no design and no hem for this row; its thread count
+    // cell carries the fill as well.
     slug: "mattress-protector",
     name: "Mattress Protector",
     family: "mattress-protector",
     familyLabel: "Mattress Protector",
-    code: "MP",
-    threadCount: null,
+    threadCount: "T140 with polyester fill",
     design: null,
-    quality: null,
-    blend: null,
+    blend: "55/45",
     hem: null,
-    pcsPerCase: null,
-    sizes: { twin: '39"x80"', full: '54"x80"', queen: '60"x80"', king: '78"x80"' },
+    pcsPerCase: 12,
+    lines: [
+      { sizes: ["twin"], dimensions: '39"X80"X14"', sku: "TMP3980WP" },
+      { sizes: ["full"], dimensions: '54"X80"X14"', sku: "FMP5480WP" },
+      { sizes: ["queen"], dimensions: '60"X80"X14"', sku: "QMP6080WP" },
+      { sizes: ["king"], dimensions: '78"X80"X14"', sku: "KMP7880WP" },
+    ],
   },
 
-  /* ── Pillow Protector ────────────────────────────────────────────────── */
+  /* ── Pillow Protector — one row ──────────────────────────────────────── */
   {
-    // RECONSTRUCTED, AND THE LEAST CERTAIN ROW IN THIS FILE. Three sizes are
-    // given — 21"x27", 21"x30", 21"x37" — but this is the only Pillow
-    // Protector row on the sheet, so there is no sibling row to match numbers
-    // against the way every other reconstruction above could. Read here as
-    // Twin/Full sharing 21"x27" (the same merged-cell shape Pillow Case
-    // uses), Queen at 21"x30", King at 21"x37". Confirm against the source
-        // spreadsheet before this one is quoted.
     slug: "pillow-protector",
     name: "Pillow Protector",
     family: "pillow-protector",
     familyLabel: "Pillow Protector",
-    code: "PP",
     threadCount: "T180",
     design: null,
-    quality: "DPI - SHT",
     blend: "55/45",
     hem: "Hidden Zipper",
-    pcsPerCase: null,
-    sizes: { twin: '21"x27"', full: '21"x27"', queen: '21"x30"', king: '21"x37"' },
+    pcsPerCase: 24,
+    lines: [
+      { sizes: ["twin", "full"], dimensions: '21"X27"', sku: "PPD2127HZ" },
+      { sizes: ["queen"], dimensions: '21"X30"', sku: "QPP2130HZ" },
+      { sizes: ["king"], dimensions: '21"X37"', sku: "KPP2137HZ" },
+    ],
   },
 ];
 
@@ -375,9 +444,9 @@ export function bedLinenFamilySlugs(): string[] {
  * Where a click on this product's card, or the mega-menu, should land.
  *
  * A FAMILY WITH ONE MEMBER HAS NO LISTING PAGE — Mattress Protector and
- * Pillow Protector open their product detail page directly, because a
- * listing page holding exactly one card is a click that exists only to be
- * clicked through.
+ * Pillow Protector open their product detail page directly, because a listing
+ * page holding exactly one card is a click that exists only to be clicked
+ * through.
  */
 export function bedLinenProductHref(product: BedLinenProduct): string {
   return getBedLinenFamily(product.family).length > 1
@@ -385,69 +454,49 @@ export function bedLinenProductHref(product: BedLinenProduct): string {
     : `${BED_LINEN_BASE}/${product.family}`;
 }
 
-export type BedLinenLine = {
-  size: BedSize;
-  /** Exactly as the sheet writes it. A bed size with no entry is not returned. */
-  dimensions: string;
-  sku: string;
-};
-
 /**
- * The bed sizes this product is made in, in sheet order, each with its SKU.
- *
- * Driven entirely by which cells the sheet fills in (or, for the rows
- * documented above, which cells the merge could be attributed to) — never by
- * borrowing a figure from the size beside it.
+ * How one line is labelled — "Queen", or "Twin / Full / Queen" where the
+ * sheet prints one size across several columns. Always in sheet order,
+ * whatever order the keys were written in.
  */
-export function bedLinenSizesFor(product: BedLinenProduct): BedLinenLine[] {
-  return BED_SIZES.flatMap((size) => {
-    const dimensions = product.sizes[size.key];
-    return dimensions ? [{ size, dimensions, sku: bedLinenSkuFor(product, size) }] : [];
-  });
+export function bedSizeLabel(line: BedLinenSizeLine): string {
+  return BED_SIZES.filter((s) => line.sizes.includes(s.key))
+    .map((s) => s.name)
+    .join(" / ");
 }
 
-/**
- * The stock code for one product in one bed size.
- *
- * ─────────────────────────────────────────────────────────────────────────────
- * THESE CODES ARE OURS, NOT THE CLIENT'S — same caveat as terrySkuFor in
- * lib/terry-towels.ts. The sheet carries no SKU column. Replace by putting the
- * real code on each product and size in this file; every page reads it from
- * here, so nothing else changes.
- * ─────────────────────────────────────────────────────────────────────────────
- */
-export function bedLinenSkuFor(product: BedLinenProduct, size: BedSize): string {
-  return `SW-${product.code}-${size.code}`;
+/** The bed sizes this product is made in at all, in sheet order. */
+export function bedSizesCovered(product: BedLinenProduct): string[] {
+  const covered = new Set(product.lines.flatMap((l) => l.sizes));
+  return BED_SIZES.filter((s) => covered.has(s.key)).map((s) => s.name);
 }
 
 /** The one-line summary a listing card shows under the title. */
 export function bedLinenCardSummary(product: BedLinenProduct): string {
-  const sizes = bedLinenSizesFor(product)
-    .map((s) => s.size.name)
-    .join(", ");
   const facts = [product.blend, product.hem ? `${product.hem} hem` : null].filter(
     (v): v is string => Boolean(v)
   );
-  return [...facts, sizes].filter(Boolean).join(" · ");
+  return [...facts, bedSizesCovered(product).join(", ")].filter(Boolean).join(" · ");
 }
 
 /**
  * The one-line summary the /hospitality/bed-linen card shows for a family as
- * a whole — used where the mega-menu item is a range (a listing or, for a
- * single-member family, a product) rather than a single specified line.
- *
- * A single-member family reuses its product's own card summary. A
- * multi-member one names how many builds are on the sheet and the union of
- * every bed size any of them is made in, derived rather than typed twice.
+ * a whole. Derived, never typed twice — a count written down goes stale the
+ * first time the client sends another row.
  */
 export function bedLinenFamilyCardSummary(family: string): string | null {
   const members = getBedLinenFamily(family);
   if (members.length === 0) return null;
   if (members.length === 1) return bedLinenCardSummary(members[0]);
 
-  const sizes = new Set(members.flatMap((p) => Object.keys(p.sizes)));
-  const order = BED_SIZES.filter((s) => sizes.has(s.key)).map((s) => s.name);
-  return `${members.length} builds · ${order.join(", ")}`;
+  const covered = new Set(members.flatMap((p) => p.lines.flatMap((l) => l.sizes)));
+  const sizes = BED_SIZES.filter((s) => covered.has(s.key)).map((s) => s.name);
+  return `${members.length} builds · ${sizes.join(", ")}`;
+}
+
+/** Whether this product carries the sheet's balanced-hem footnote. */
+export function hasBalanceHem(product: BedLinenProduct): boolean {
+  return (product.hem ?? "").toLowerCase().startsWith("balance");
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -456,48 +505,52 @@ export function bedLinenFamilyCardSummary(family: string): string | null {
 
 /**
  * Rounds a quantity up to this product's own case pack (PCS/CASE on the
- * sheet — 24 for sheets, 72 for pillow cases, 12 for duvet covers). Returns
- * the quantity unchanged where the sheet gives no case pack, which is true
- * only for Mattress Protector and Pillow Protector — there is no figure on
- * the sheet to round to, so none is invented.
+ * sheet — 24 for sheets, 72 for pillow cases, 12 for duvet covers and
+ * mattress protectors, 24 for pillow protectors). Returns the quantity
+ * unchanged where the sheet gives no case pack, so none is invented.
  */
 export function roundUpToCase(product: BedLinenProduct, n: number): number {
   const pack = product.pcsPerCase;
   return pack ? Math.ceil(n / pack) * pack : n;
 }
 
-export type BedLinenOrderLine = { sizeKey: BedSizeKey; quantity: number };
-
-/** `?lines=` — the buyer's list. "queen:96,king:48". See encodeTerryLines. */
-export function encodeBedLinenLines(lines: BedLinenOrderLine[]): string {
-  return lines.map((l) => `${l.sizeKey}:${l.quantity}`).join(",");
-}
-
-export type BedLinenOrderRow = BedLinenLine & { quantity: number };
+export type BedLinenOrderLine = { sku: string; quantity: number };
 
 /**
- * Parses `?lines=`, keeping only pairs that name a bed size THIS product is
- * made in. See parseTerryLines in lib/terry-towels.ts for the reasoning —
- * the same rule applies here: an unknown key, a duplicate or a junk quantity
- * is dropped rather than repaired.
+ * `?lines=` — the buyer's list, keyed on the client's own stock codes.
+ * "QSD90115S20:96,KSD108115S20:48". Codes and quantities only: no names, no
+ * sizes. Everything a member of staff reads is rebuilt from this file after
+ * the codes are checked, so nothing a visitor can type reaches the lead.
+ */
+export function encodeBedLinenLines(lines: BedLinenOrderLine[]): string {
+  return lines.map((l) => `${l.sku}:${l.quantity}`).join(",");
+}
+
+export type BedLinenOrderRow = BedLinenSizeLine & { quantity: number };
+
+/**
+ * Parses `?lines=`, keeping only codes THIS product is actually made in. An
+ * unknown code, a duplicate or a junk quantity is dropped rather than
+ * repaired — a request that half-parsed is worse than one that arrives empty
+ * and makes the buyer say what they meant.
  */
 export function parseBedLinenLines(
   product: BedLinenProduct,
   raw: string | undefined
 ): BedLinenOrderRow[] {
   if (!raw) return [];
-  const offered = new Map(bedLinenSizesFor(product).map((l) => [l.size.key, l]));
+  const offered = new Map(product.lines.map((l) => [l.sku, l]));
   const seen = new Set<string>();
   const out: BedLinenOrderRow[] = [];
 
-  for (const part of raw.split(",").slice(0, BED_SIZES.length)) {
-    const [key, qty] = part.split(":");
-    const line = offered.get(key as BedSizeKey);
-    if (!line || seen.has(key)) continue;
+  for (const part of raw.split(",").slice(0, product.lines.length)) {
+    const [sku, qty] = part.split(":");
+    const line = offered.get(sku);
+    if (!line || seen.has(sku)) continue;
     if (!/^\d{1,7}$/.test(qty ?? "")) continue;
     const n = Number(qty);
     if (n <= 0) continue;
-    seen.add(key);
+    seen.add(sku);
     out.push({ ...line, quantity: roundUpToCase(product, n) });
   }
 
