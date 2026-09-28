@@ -3,7 +3,13 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
-import { TERRY_DOZEN, TERRY_BASE, encodeTerryLines, roundUpToDozen } from "@/lib/terry-towels";
+import {
+  TERRY_DOZEN,
+  TERRY_BASE,
+  encodeTerryLines,
+  roundUpToDozen,
+  terryWeightLabel,
+} from "@/lib/terry-towels";
 import { useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -42,6 +48,8 @@ export type SpecRow = {
   name: string;
   dimensions: string;
   weight: string;
+  /** What that figure is per. Null where it is a density, not a bundle. */
+  weightPer: "dozen" | null;
   /** Dozens per case, where the sheet gives one for this size. */
   dozenPerCase: number | null;
 };
@@ -214,7 +222,9 @@ function SpecTableRow({
       </th>
       <td className="text-foreground/80 px-5 py-3.5">{row.dimensions}</td>
       <td className="text-foreground/80 px-5 py-3.5 font-mono text-[12.5px]">{row.sku}</td>
-      <td className="text-foreground px-5 py-3.5 font-medium">{row.weight}</td>
+      <td className="text-foreground px-5 py-3.5 font-medium whitespace-nowrap">
+        {terryWeightLabel(row)}
+      </td>
       <td className="text-foreground/80 px-5 py-3.5 whitespace-nowrap">
         {row.dozenPerCase ? `${row.dozenPerCase} dz` : "—"}
       </td>

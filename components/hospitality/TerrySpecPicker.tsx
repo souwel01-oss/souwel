@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
-import { TERRY_DOZEN, roundUpToDozen } from "@/lib/terry-towels";
+import { TERRY_DOZEN, roundUpToDozen, terryWeightLabel } from "@/lib/terry-towels";
 import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,8 @@ export type TerryPickerSize = {
   name: string;
   dimensions: string;
   weight: string;
+  /** What that figure is per. Null where it is a density, not a bundle. */
+  weightPer: "dozen" | null;
   /** Dozens per case, where the sheet gives one for this size. */
   dozenPerCase: number | null;
 };
@@ -161,10 +163,8 @@ export function TerrySpecPicker({
         {chosen ? (
           <>
             Weight for {chosen.name}:{" "}
-            <span className="text-foreground font-semibold">{chosen.weight}</span>
-            {chosen.dozenPerCase ? (
-              <> · packed {chosen.dozenPerCase} dozen per case</>
-            ) : null}
+            <span className="text-foreground font-semibold">{terryWeightLabel(chosen)}</span>
+            {chosen.dozenPerCase ? <> · packed {chosen.dozenPerCase} dozen per case</> : null}
           </>
         ) : (
           "Pick a product type to see its weight."

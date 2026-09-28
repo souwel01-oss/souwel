@@ -214,11 +214,12 @@ function ProductDetail({ product }: { product: TerryProduct }) {
                   blend={product.blend}
                   hem={product.hem}
                   note={hasBathMat(product) ? BATH_MAT_NOTE : undefined}
-                  sizes={sizes.map(({ sku, name, dimensions, weight, dozenPerCase }) => ({
+                  sizes={sizes.map(({ sku, name, dimensions, weight, weightPer, dozenPerCase }) => ({
                     sku,
                     name,
                     dimensions,
                     weight,
+                    weightPer,
                     dozenPerCase,
                   }))}
                 />
@@ -245,11 +246,12 @@ function ProductDetail({ product }: { product: TerryProduct }) {
             <div className="mt-10">
               <TerrySpecTable
                 productSlug={product.slug}
-                rows={sizes.map(({ sku, name, dimensions, weight, dozenPerCase }) => ({
+                rows={sizes.map(({ sku, name, dimensions, weight, weightPer, dozenPerCase }) => ({
                   sku,
                   name,
                   dimensions,
                   weight,
+                  weightPer,
                   dozenPerCase,
                 }))}
               />

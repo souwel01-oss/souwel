@@ -5,7 +5,7 @@ import { PRODUCTS } from "@/lib/product-data";
 import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
-import { getTerryProduct, parseTerryLines } from "@/lib/terry-towels";
+import { getTerryProduct, parseTerryLines, terryWeightLabel } from "@/lib/terry-towels";
 import { bedSizeLabel, getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
 import { getSpaSalonProduct, parseSpaSalonLines } from "@/lib/spa-salon";
 import { getFbProduct, parseFbLines } from "@/lib/food-beverage";
@@ -61,7 +61,7 @@ function readTerryRequest(params: { terry?: string; lines?: string }) {
     (l) =>
       `- ${l.name} ${l.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString(
         "en-US"
-      )}, weight ${l.weight}`
+      )}, weight ${terryWeightLabel(l)}`
   );
 
   // The name says the construction; the body says which sizes. Putting every

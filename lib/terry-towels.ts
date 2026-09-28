@@ -16,10 +16,17 @@
  *
  * WEIGHTS ARE VERBATIM, INCLUDING THE UNIT. The sheet writes "1 LBS",
  * "12.5 LBS", "6.4 LBS", and "600 GSM" for the one row it measures that way.
- * It does NOT say what the LBS weight is per — a single towel, a dozen, a
- * case. The trade convention is per dozen and 12.5 lbs for one bath towel is
- * obviously wrong, but the sheet does not say so, so neither do we. Ask the
- * client and add the basis here when they answer.
+ *
+ * THE POUND FIGURES ARE PER DOZEN — the sheet itself does not say so, and the
+ * client confirmed it when asked. That is why they are stored verbatim and
+ * the basis is carried separately on `weightPer`: the figure is the client's,
+ * the sentence around it is ours. Every surface prints the two together,
+ * because "12.5 LBS" on its own reads as the weight of one bath towel, which
+ * would be absurd, and a buyer costing a tender off it would be out by twelve.
+ *
+ * THE GSM FIGURE IS NOT PER DOZEN. Grams per square metre is a density of
+ * cloth, not a weight of a bundle, so the Sauna Bath Towel's `weightPer` is
+ * null and it prints alone.
  *
  * A MISSING SIZE IS A MISSING SIZE. Where the sheet's cell is blank there is
  * no line for it and the size is not offered. Cabana Pool Towels is a pool
@@ -73,9 +80,20 @@ export type TerryLine = {
   dimensions: string;
   /** Verbatim from the sheet, including the unit it chose. */
   weight: string;
+  /** What that figure is per. Null where it is a density rather than a bundle. */
+  weightPer: "dozen" | null;
   /** Dozens per case, where the sheet's column heading gives one. */
   dozenPerCase: number | null;
 };
+
+/**
+ * The weight as it should be read aloud — "12.5 LBS per dozen", or just
+ * "600 GSM" where the figure is a density. Used by the picker, the table and
+ * the quote message so the three cannot describe the same number differently.
+ */
+export function terryWeightLabel(line: { weight: string; weightPer: "dozen" | null }): string {
+  return line.weightPer === "dozen" ? `${line.weight} per dozen` : line.weight;
+}
 
 export type TerryProduct = {
   slug: string;
@@ -104,6 +122,9 @@ function std(sizeKey: TerrySizeKey, weight: string, sku: string): TerryLine {
     name: size.name,
     dimensions: size.dimensions,
     weight,
+    // Every figure in the sheet's five size columns is a pound weight, and
+    // every pound weight on this sheet is per dozen.
+    weightPer: "dozen",
     dozenPerCase: size.dozenPerCase,
   };
 }
@@ -242,6 +263,8 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
         name: "Sauna Bath Towel",
         dimensions: "40X80",
         weight: "600 GSM",
+        // A density, not a bundle weight — see the note at the top.
+        weightPer: null,
         dozenPerCase: null,
       },
     ],
