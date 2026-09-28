@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
-import { TERRY_DOZEN, roundUpToDozen, type TerrySizeKey } from "@/lib/terry-towels";
+import { TERRY_DOZEN, roundUpToDozen } from "@/lib/terry-towels";
 import { SPEC_SECTION_ID, useTerryOrderList } from "@/components/hospitality/TerryOrderList";
 import { cn } from "@/lib/utils";
 
@@ -41,20 +41,25 @@ import { cn } from "@/lib/utils";
  */
 
 export type TerryPickerSize = {
-  key: TerrySizeKey;
+  /** The client's stock code — the line's identity everywhere. */
+  sku: string;
   name: string;
   dimensions: string;
   weight: string;
-  sku: string;
+  /** Dozens per case, where the sheet gives one for this size. */
+  dozenPerCase: number | null;
 };
 
 export function TerrySpecPicker({
   blend,
   hem,
+  note,
   sizes,
 }: {
   blend: string;
   hem: string;
+  /** The sheet's own footnote for this product, where it has one. */
+  note?: string;
   sizes: TerryPickerSize[];
 }) {
   const { setLine, setSelected, selected } = useTerryOrderList();
@@ -65,7 +70,7 @@ export function TerrySpecPicker({
   const qtyHelpId = useId();
   const helpId = useId();
 
-  const chosen = sizes.find((s) => s.key === selected) ?? null;
+  const chosen = sizes.find((s) => s.sku === selected) ?? null;
 
   const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
   const qty = typed !== null && typed > 0 && typed % TERRY_DOZEN === 0 ? typed : null;
@@ -83,7 +88,7 @@ export function TerrySpecPicker({
     if (!chosen || !qty) return;
     // Into the list BEFORE the scroll, so the row is already there when the
     // table arrives rather than appearing under the buyer a frame later.
-    setLine(chosen.key, qty);
+    setLine(chosen.sku, qty);
     document
       .getElementById(SPEC_SECTION_ID)
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -112,6 +117,10 @@ export function TerrySpecPicker({
         </div>
       </dl>
 
+      {note ? (
+        <p className="text-muted-foreground mt-4 text-[12.5px] leading-relaxed">{note}</p>
+      ) : null}
+
       {/* ── Product type ─────────────────────────────────────────────── */}
       <fieldset className="mt-6">
         <legend className="text-foreground/80 text-[13px] font-semibold">
@@ -119,13 +128,13 @@ export function TerrySpecPicker({
         </legend>
         <div className="mt-3 flex flex-wrap gap-2.5">
           {sizes.map((size) => {
-            const active = size.key === selected;
+            const active = size.sku === selected;
             return (
               <button
-                key={size.key}
+                key={size.sku}
                 type="button"
                 aria-pressed={active}
-                onClick={() => setSelected(size.key)}
+                onClick={() => setSelected(size.sku)}
                 className={cn(
                   "focus-visible:ring-ring rounded-lg border px-4 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
                   active
@@ -153,6 +162,9 @@ export function TerrySpecPicker({
           <>
             Weight for {chosen.name}:{" "}
             <span className="text-foreground font-semibold">{chosen.weight}</span>
+            {chosen.dozenPerCase ? (
+              <> · packed {chosen.dozenPerCase} dozen per case</>
+            ) : null}
           </>
         ) : (
           "Pick a product type to see its weight."

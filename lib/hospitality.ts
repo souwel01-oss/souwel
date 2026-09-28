@@ -233,7 +233,18 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     image: IMG.towels,
     fallbackImages: [IMG.towels, IMG.weave],
     items: [
-      { name: "Cabana pool towels", slug: "cabana-pool-towels", productSlug: null },
+      {
+        // On the client's BATH TOWELS sheet rather than a pool one, so its
+        // specification lives with the towel range — but it is a pool towel
+        // and this is where a buyer looks for it, so the line points at the
+        // same product page from both places rather than being listed twice
+        // or sent to an empty quote form.
+        name: "Cabana pool towels",
+        slug: "cabana-pool-towels",
+        productSlug: null,
+        href: "/hospitality/terry-towels/cabana-pool-towels",
+        ctaLabel: "View details",
+      },
       { name: "Economy pool towels", slug: "economy-pool-towels", productSlug: null },
       { name: "Bath sheets", slug: "bath-sheets", productSlug: null },
       { name: "Spa/salon towels", slug: "spa-salon-towels", productSlug: "saloon-towel" },

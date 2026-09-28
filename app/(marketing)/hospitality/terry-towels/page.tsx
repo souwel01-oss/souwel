@@ -8,7 +8,7 @@ import { Reveal } from "@/components/animation/Reveal";
 export const metadata: Metadata = {
   title: "Terry Towels — Hospitality",
   description:
-    "Seven terry constructions for hotel and resort bathrooms — classic terry, dobby, quad cam, pique weave and piano key — each made in wash cloth, hand towel, bath towel and bath matt.",
+    "Nine terry constructions for hotel and resort bathrooms — classic terry, dobby, quad cam, pique weave, piano key, cabana pool and sauna — with stock codes, weights and case packs for every size.",
   alternates: { canonical: "/hospitality/terry-towels" },
 };
 
@@ -75,9 +75,9 @@ export default function TerryTowelsPage() {
               Terry Towels
             </h1>
             <p className="text-muted-foreground mt-5 max-w-2xl text-[15.5px] leading-relaxed text-pretty">
-              Seven constructions across six ranges, each made in the sizes a property actually orders. Choose the
-              construction first — it decides how the towel feels and how it holds up in the laundry
-              — then the size and weight on the product page.
+              Every construction on our towel sheet, each made in the sizes a property actually
+              orders. Choose the construction first — it decides how the towel feels and how it
+              holds up in the laundry — then the size, weight and stock code on the product page.
             </p>
           </Reveal>
         </div>
@@ -98,9 +98,9 @@ export default function TerryTowelsPage() {
           </Reveal>
 
           <p className="text-muted-foreground border-border mt-12 border-t pt-6 text-[13px] leading-relaxed">
-            Weights are quoted as they appear on our towel sheet. Sizes shown are the ones each
-            construction is made in — where a size is not listed against a construction, it is not
-            part of that build.
+            Weights and stock codes are quoted as they appear on our towel sheet. Sizes shown are
+            the ones each construction is made in — where a size is not listed against a
+            construction, it is not part of that build.
           </p>
         </div>
       </section>

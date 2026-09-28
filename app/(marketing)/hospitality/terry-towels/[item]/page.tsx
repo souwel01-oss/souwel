@@ -3,13 +3,15 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import {
+  BATH_MAT_NOTE,
   TERRY_BASE,
   TERRY_PRODUCTS,
   getTerryFamily,
   getTerryProduct,
+  hasBathMat,
   terryCardSummary,
   terryFamiliesNeedingChooser,
-  terrySizesFor,
+  terrySizeNames,
   type TerryProduct,
 } from "@/lib/terry-towels";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
@@ -66,10 +68,10 @@ export async function generateMetadata({
 
   return {
     title: `${product.name} — ${product.blend}`,
-    description: `${product.name} in ${product.blend} with a ${product.hem.toLowerCase()} hem, made in ${terrySizesFor(
+    description: `${product.name} in ${product.blend} with a ${product.hem.toLowerCase()} hem, made in ${terrySizeNames(
       product
     )
-      .map((s) => s.size.name.toLowerCase())
+      .map((s) => s.toLowerCase())
       .join(", ")}.`,
     alternates: { canonical: `${TERRY_BASE}/${product.slug}` },
   };
@@ -154,7 +156,7 @@ function FamilyChooser({ family }: { family: TerryProduct[] }) {
    ────────────────────────────────────────────────────────────────────────── */
 
 function ProductDetail({ product }: { product: TerryProduct }) {
-  const sizes = terrySizesFor(product);
+  const sizes = product.lines;
   const siblings = getTerryFamily(product.family);
   const hasChooser = siblings.length > 1;
 
@@ -211,12 +213,13 @@ function ProductDetail({ product }: { product: TerryProduct }) {
                 <TerrySpecPicker
                   blend={product.blend}
                   hem={product.hem}
-                  sizes={sizes.map(({ size, weight, sku }) => ({
-                    key: size.key,
-                    name: size.name,
-                    dimensions: size.dimensions,
-                    weight,
+                  note={hasBathMat(product) ? BATH_MAT_NOTE : undefined}
+                  sizes={sizes.map(({ sku, name, dimensions, weight, dozenPerCase }) => ({
                     sku,
+                    name,
+                    dimensions,
+                    weight,
+                    dozenPerCase,
                   }))}
                 />
               </Reveal>
@@ -242,12 +245,12 @@ function ProductDetail({ product }: { product: TerryProduct }) {
             <div className="mt-10">
               <TerrySpecTable
                 productSlug={product.slug}
-                rows={sizes.map(({ size, weight, sku }) => ({
-                  sizeKey: size.key,
-                  name: size.name,
-                  dimensions: size.dimensions,
-                  weight,
+                rows={sizes.map(({ sku, name, dimensions, weight, dozenPerCase }) => ({
                   sku,
+                  name,
+                  dimensions,
+                  weight,
+                  dozenPerCase,
                 }))}
               />
             </div>

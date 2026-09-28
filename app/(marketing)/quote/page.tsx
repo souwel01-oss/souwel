@@ -57,7 +57,7 @@ function readTerryRequest(params: { terry?: string; lines?: string }) {
 
   const body = lines.map(
     (l) =>
-      `- ${l.size.name} ${l.size.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString(
+      `- ${l.name} ${l.dimensions} (${l.sku}) — qty ${l.quantity.toLocaleString(
         "en-US"
       )}, weight ${l.weight}`
   );

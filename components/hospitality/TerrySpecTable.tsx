@@ -3,13 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
-import {
-  TERRY_DOZEN,
-  TERRY_BASE,
-  encodeTerryLines,
-  roundUpToDozen,
-  type TerrySizeKey,
-} from "@/lib/terry-towels";
+import { TERRY_DOZEN, TERRY_BASE, encodeTerryLines, roundUpToDozen } from "@/lib/terry-towels";
 import { useTerryOrderList } from "@/components/hospitality/TerryOrderList";
 import { cn } from "@/lib/utils";
 
@@ -43,11 +37,13 @@ import { cn } from "@/lib/utils";
  */
 
 export type SpecRow = {
-  sizeKey: TerrySizeKey;
+  /** The client's own stock code — the row's identity everywhere. */
+  sku: string;
   name: string;
   dimensions: string;
   weight: string;
-  sku: string;
+  /** Dozens per case, where the sheet gives one for this size. */
+  dozenPerCase: number | null;
 };
 
 export function TerrySpecTable({ productSlug, rows }: { productSlug: string; rows: SpecRow[] }) {
@@ -60,7 +56,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
         )}`
       : null;
 
-  const byKey = new Map(rows.map((r) => [r.sizeKey, r]));
+  const bySku = new Map(rows.map((r) => [r.sku, r]));
 
   return (
     <>
@@ -71,7 +67,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
           </caption>
           <thead>
             <tr className="border-premium/20 border-b">
-              {["Product type", "Size", "SKU", "Weight", "Quantity", ""].map((h, i) => (
+              {["Product type", "Size", "SKU", "Weight", "Per case", "Quantity", ""].map((h, i) => (
                 <th
                   key={h || i}
                   scope="col"
@@ -85,11 +81,11 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
           <tbody>
             {rows.map((row) => (
               <SpecTableRow
-                key={row.sizeKey}
+                key={row.sku}
                 row={row}
-                listed={quantityOf(row.sizeKey)}
-                highlighted={row.sizeKey === selected}
-                onAdd={(qty) => setLine(row.sizeKey, qty)}
+                listed={quantityOf(row.sku)}
+                highlighted={row.sku === selected}
+                onAdd={(qty) => setLine(row.sku, qty)}
               />
             ))}
           </tbody>
@@ -112,11 +108,11 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
         ) : (
           <ul className="mt-4 grid gap-2.5">
             {lines.map((line) => {
-              const row = byKey.get(line.sizeKey);
+              const row = bySku.get(line.sku);
               if (!row) return null;
               return (
                 <li
-                  key={line.sizeKey}
+                  key={line.sku}
                   className="border-border flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border px-4 py-3 text-[13.5px]"
                 >
                   <span className="text-foreground font-medium">{row.name}</span>
@@ -127,7 +123,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
                   </span>
                   <button
                     type="button"
-                    onClick={() => removeLine(line.sizeKey)}
+                    onClick={() => removeLine(line.sku)}
                     aria-label={`Remove ${row.name} from your list`}
                     className="text-muted-foreground hover:text-destructive focus-visible:ring-ring rounded-md p-1 transition-colors focus-visible:ring-2 focus-visible:outline-none"
                   >
@@ -219,6 +215,9 @@ function SpecTableRow({
       <td className="text-foreground/80 px-5 py-3.5">{row.dimensions}</td>
       <td className="text-foreground/80 px-5 py-3.5 font-mono text-[12.5px]">{row.sku}</td>
       <td className="text-foreground px-5 py-3.5 font-medium">{row.weight}</td>
+      <td className="text-foreground/80 px-5 py-3.5 whitespace-nowrap">
+        {row.dozenPerCase ? `${row.dozenPerCase} dz` : "—"}
+      </td>
       <td className="px-5 py-3.5">
         <input
           type="number"

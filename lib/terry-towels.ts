@@ -1,30 +1,36 @@
 /**
- * The Terry Towels range, transcribed from the client's towel sheet.
+ * The Towel range, transcribed from the client's "BATH TOWELS" sheet.
  *
  * ─────────────────────────────────────────────────────────────────────────────
- * THIS FILE IS A TRANSCRIPTION, NOT A WRITE-UP. Every blend, hem and weight
- * below is copied from "product details - Sheet1". Nothing here was inferred,
- * rounded, converted or filled in, and nothing should be: the sheet is what a
- * buyer will be quoted against.
+ * THIS FILE IS A TRANSCRIPTION, NOT A WRITE-UP. Every blend, hem, weight and
+ * stock code below is copied from that sheet. Nothing here was inferred,
+ * rounded, converted or filled in from a neighbouring row.
  *
- * Two consequences worth knowing before editing:
+ * THE STOCK CODES ARE THE CLIENT'S OWN. An earlier version of this file
+ * generated SW-<construction>-<size> codes because the extract we had carried
+ * no SKU column. The full sheet does — one code per construction per size —
+ * so those invented codes are gone and a buyer quoting BT2754CRH back at
+ * Souwel is quoting Souwel's own code. The code is also what the order list
+ * and the quote link are keyed on, because it is the one value that is
+ * one-per-orderable-line by construction.
  *
- * 1. WEIGHTS ARE VERBATIM, INCLUDING THE UNIT. The sheet writes "1 LBS",
- *    "12.5 LBS", "6.4 LBS". It does NOT say what the weight is per — a single
- *    towel, a dozen, a case. The trade convention is per dozen and 12.5 lbs for
- *    one bath towel is obviously wrong, but the sheet does not say so, so
- *    neither do we. Ask the client and add the basis here when they answer.
+ * WEIGHTS ARE VERBATIM, INCLUDING THE UNIT. The sheet writes "1 LBS",
+ * "12.5 LBS", "6.4 LBS", and "600 GSM" for the one row it measures that way.
+ * It does NOT say what the LBS weight is per — a single towel, a dozen, a
+ * case. The trade convention is per dozen and 12.5 lbs for one bath towel is
+ * obviously wrong, but the sheet does not say so, so neither do we. Ask the
+ * client and add the basis here when they answer.
  *
- * 2. A MISSING SIZE IS A MISSING SIZE. Where the sheet's cell is blank the key
- *    is absent from `weights`, and the size is not offered on the product page.
- *    Classic Terry Towels in 80/20 has a hand towel and a bath towel and
- *    nothing else. Do not borrow the figure from the row above to fill a gap.
+ * A MISSING SIZE IS A MISSING SIZE. Where the sheet's cell is blank there is
+ * no line for it and the size is not offered. Cabana Pool Towels is a pool
+ * towel and nothing else; Sauna Bath Towel is its own 40X80 and nothing else.
+ * Never borrow the figure from the row above to fill a gap.
  * ─────────────────────────────────────────────────────────────────────────────
  *
  * TWO ROWS SHARE THE NAME "CLASSIC TERRY TOWELS" and are different products —
  * one is 100% cotton, the other an 80/20 blend. They are modelled as two
- * products with one `family`, which is what drives the chooser page that stands
- * between the range listing and either detail page.
+ * products with one `family`, which is what drives the chooser page that
+ * stands between the range listing and either detail page.
  */
 
 export type TerrySizeKey = "wash-cloth" | "hand-towel" | "bath-towel" | "bath-mat" | "pool-towel";
@@ -35,149 +41,210 @@ export type TerrySize = {
   name: string;
   /** Finished size, exactly as the sheet writes it. */
   dimensions: string;
-  /** Two-letter segment of the SKU. See terrySkuFor. */
-  code: string;
+  /** Dozens per case, from the note above the sheet's column heading. */
+  dozenPerCase: number;
 };
 
 /** The size columns, in sheet order. */
 export const TERRY_SIZES: TerrySize[] = [
-  { key: "wash-cloth", name: "Wash Cloth", dimensions: '13"x13"', code: "WC" },
-  { key: "hand-towel", name: "Hand Towel", dimensions: '16"x27"', code: "HT" },
-  { key: "bath-towel", name: "Bath Towel", dimensions: '27"x54"', code: "BT" },
-  { key: "bath-mat", name: "Bath Matt", dimensions: '20"x30"', code: "BM" },
-  { key: "pool-towel", name: "Pool Towel", dimensions: '30"x60"', code: "PT" },
+  { key: "wash-cloth", name: "Wash Cloth", dimensions: '13"X13"', dozenPerCase: 15 },
+  { key: "hand-towel", name: "Hand Towel", dimensions: '16"X27"', dozenPerCase: 10 },
+  { key: "bath-towel", name: "Bath Towel", dimensions: '27"X54"', dozenPerCase: 3 },
+  { key: "bath-mat", name: "Bath Matt", dimensions: '20"X30"', dozenPerCase: 4 },
+  { key: "pool-towel", name: "Pool Towel", dimensions: '30"X60"', dozenPerCase: 2 },
 ];
 
 /**
- * A BLANK CELL MEANS THAT CONSTRUCTION IS NOT MADE IN THAT SIZE, and that is
- * the whole rule — no exceptions, including the Pool Towel column.
- *
- * Pool Towel keeps its entry above because the sheet carries the column and its
- * 30"x60" heading, so the size exists as a concept and its SKU segment is
- * settled. But not one of the seven rows has a weight in it, so no construction
- * offers it today and none of them show it. The moment a weight lands in that
- * column for a row, that product starts offering it with no other change.
- *
- * Never borrow a figure from the size beside it to fill a gap.
+ * The sheet prints "100% COTTON" above the BATH MATT column, not against any
+ * one row — the mat is cotton whatever the towel beside it is woven from.
+ * Which is also why both Classic Terry constructions carry the SAME bath mat
+ * code, BM2030CRH: it is literally the same mat.
  */
+export const BATH_MAT_NOTE = "Bath matts are 100% cotton on every construction.";
+
+/** One orderable line: a size, its weight, and the client's code for it. */
+export type TerryLine = {
+  /** The client's own stock code. Unique within the product. */
+  sku: string;
+  /** The sheet column this sits in, or null for a bespoke one-off size. */
+  sizeKey: TerrySizeKey | null;
+  /** "Bath Towel", or "Pool Towel — Blue" where the sheet names a colour. */
+  name: string;
+  dimensions: string;
+  /** Verbatim from the sheet, including the unit it chose. */
+  weight: string;
+  /** Dozens per case, where the sheet's column heading gives one. */
+  dozenPerCase: number | null;
+};
 
 export type TerryProduct = {
   slug: string;
   /** As the sheet names it. Two products share this string on purpose. */
   name: string;
-  /** Groups the two same-named entries. Unique per name. */
+  /** Groups the same-named entries. Unique per name. */
   family: string;
-  /** Construction segment of the SKU. See terrySkuFor. */
-  code: string;
   blend: string;
   hem: string;
-  /** Weight per size. A key that is absent is a size we do not offer. */
-  weights: Partial<Record<TerrySizeKey, string>>;
+  lines: TerryLine[];
 };
 
+const SIZE = new Map(TERRY_SIZES.map((s) => [s.key, s]));
+
 /**
- * The seven rows of the sheet, in sheet order.
+ * A line in one of the sheet's five standard size columns. The name,
+ * finished size and case pack all belong to the COLUMN, so they are read from
+ * TERRY_SIZES rather than retyped against every row — nine rows × four sizes
+ * of hand-copied dimensions is nine chances to mistype one.
+ */
+function std(sizeKey: TerrySizeKey, weight: string, sku: string): TerryLine {
+  const size = SIZE.get(sizeKey)!;
+  return {
+    sku,
+    sizeKey,
+    name: size.name,
+    dimensions: size.dimensions,
+    weight,
+    dozenPerCase: size.dozenPerCase,
+  };
+}
+
+/**
+ * The nine rows of the sheet, in sheet order.
  *
- * NO PHOTOGRAPHY EXISTS FOR THESE SEVEN. The cards and detail pages fall back
- * to the range imagery, the same way the rest of the Hospitality listing does.
- * A card with a real weight table and a stand-in photograph is honest; an
+ * NO PHOTOGRAPHY EXISTS FOR THESE. The cards and detail pages fall back to
+ * the range imagery, the same way the rest of the Hospitality listing does. A
+ * card with a real weight table and a stand-in photograph is honest; an
  * invented weight would not be.
  */
 export const TERRY_PRODUCTS: TerryProduct[] = [
   {
     slug: "classic-terry-towels-100-cotton",
-    code: "CT100",
     name: "Classic Terry Towels",
     family: "classic-terry-towels",
     blend: "100% Cotton",
     hem: "Reinforced",
-    weights: {
-      "wash-cloth": "1 LBS",
-      "hand-towel": "3 LBS",
-      "bath-towel": "12.5 LBS",
-      "bath-mat": "6.4 LBS",
-    },
+    lines: [
+      std("wash-cloth", "1 LBS", "WC1313CRH"),
+      std("hand-towel", "3 LBS", "HT1627CRH"),
+      std("bath-towel", "12.5 LBS", "BT2754CRH"),
+      std("bath-mat", "6.4 LBS", "BM2030CRH"),
+    ],
   },
   {
     slug: "classic-terry-towels-80-20-poly",
-    code: "CT8020",
     name: "Classic Terry Towels",
     family: "classic-terry-towels",
     blend: "80% Cot / 20% Poly",
     hem: "Reinforced",
-    weights: {
-      "hand-towel": "4 LBS",
-      "bath-towel": "13 LBS",
-    },
+    lines: [
+      std("wash-cloth", "1.5 LBS", "WC1313BRH"),
+      std("hand-towel", "4 LBS", "HT1627BRH"),
+      std("bath-towel", "13 LBS", "BT2754BRH"),
+      // BM2030CRH, the same code as the 100% cotton row above — see BATH_MAT_NOTE.
+      std("bath-mat", "6.4 LBS", "BM2030CRH"),
+    ],
   },
   {
     slug: "classic-dobby-towels",
-    code: "CD",
     name: "Classic Dobby Towels",
     family: "classic-dobby-towels",
     blend: "90% Cot / 10% Poly",
     hem: "Plain",
-    weights: {
-      "wash-cloth": "1.5 LBS",
-      "hand-towel": "3 LBS",
-      "bath-towel": "15 LBS",
-      "bath-mat": "10 LBS",
-    },
+    lines: [
+      std("wash-cloth", "1.5 LBS", "WC1313CDB"),
+      std("hand-towel", "3 LBS", "HT1627CDB"),
+      std("bath-towel", "15 LBS", "BT2754CDB"),
+      std("bath-mat", "10 LBS", "BM2030C10"),
+    ],
   },
   {
     slug: "dobby-towels",
-    code: "DB",
     name: "Dobby Towels",
     family: "dobby-towels",
     blend: "86% Cot / 14% Poly",
     hem: "Plain",
-    weights: {
-      "wash-cloth": "1.5 LBS",
-      "hand-towel": "3 LBS",
-      "bath-towel": "15 LBS",
-      "bath-mat": "10 LBS",
-    },
+    lines: [
+      std("wash-cloth", "1.5 LBS", "WC1313FDB"),
+      std("hand-towel", "3 LBS", "HT1627FDB"),
+      std("bath-towel", "15 LBS", "BT2754FDB"),
+      std("bath-mat", "10 LBS", "BM2030C10"),
+    ],
   },
   {
     slug: "plain-quad-cam-towel",
-    code: "QC",
     name: "Plain Quad Cam Towel",
     family: "plain-quad-cam-towel",
     blend: "100% Cotton",
     hem: "Plain",
-    weights: {
-      "wash-cloth": "1.5 LBS",
-      "hand-towel": "4 LBS",
-      "bath-towel": "15 LBS",
-      "bath-mat": "10 LBS",
-    },
+    lines: [
+      // The sheet's wash cloth code for this row reads WC1313CDC while its
+      // hand and bath towels read CQC. Transcribed as written rather than
+      // tidied into the pattern — a stock code is not ours to correct.
+      std("wash-cloth", "1.5 LBS", "WC1313CDC"),
+      std("hand-towel", "4 LBS", "HT1627CQC"),
+      std("bath-towel", "15 LBS", "BT2754CQC"),
+      std("bath-mat", "10 LBS", "BM2030C10"),
+    ],
   },
   {
     slug: "pique-weave-towel",
-    code: "PW",
     name: "Pique Weave Towel",
     family: "pique-weave-towel",
     blend: "86% Cot / 14% Poly",
     hem: "Plain",
-    weights: {
-      "wash-cloth": "1.5 LBS",
-      "hand-towel": "4 LBS",
-      "bath-towel": "15 LBS",
-    },
+    lines: [
+      std("wash-cloth", "1.5 LBS", "WC1313PQB"),
+      std("hand-towel", "4 LBS", "HT1627PQB"),
+      std("bath-towel", "15 LBS", "BT2754PQB"),
+      std("bath-mat", "10 LBS", "BM2030PQC"),
+    ],
   },
   {
     slug: "piano-key-towel",
-    code: "PK",
     name: "Piano Key Towel",
     family: "piano-key-towel",
     blend: "100% Cotton All Ring",
     hem: "Plain",
-    weights: {
-      "wash-cloth": "1.5 LBS",
-      "hand-towel": "4.5 LBS",
-      "bath-towel": "18 LBS",
-      "bath-mat": "10 LBS",
-    },
+    lines: [
+      std("wash-cloth", "1.5 LBS", "WC1313PIANO"),
+      std("hand-towel", "4.5 LBS", "HT1627PIANO"),
+      std("bath-towel", "18 LBS", "BT2754PIANO"),
+      std("bath-mat", "10 LBS", "BM2030PIANO"),
+    ],
+  },
+  {
+    // A pool towel and nothing else, and the one row on the sheet with a
+    // colour choice: two codes for the same size, one blue and one yellow.
+    // They are two lines rather than one with a note, because they are two
+    // codes and a buyer orders one or the other.
+    slug: "cabana-pool-towels",
+    name: "Cabana Pool Towels",
+    family: "cabana-pool-towels",
+    blend: "100% Cotton",
+    hem: "Blue or Yellow",
+    lines: [
+      { ...std("pool-towel", "18 LBS", "PT3060CBNB"), name: "Pool Towel — Blue" },
+      { ...std("pool-towel", "18 LBS", "PT3060CBNY"), name: "Pool Towel — Yellow" },
+    ],
+  },
+  {
+    // The one row measured in GSM rather than pounds, in a size that is not
+    // one of the sheet's five columns. Both are left exactly as written.
+    slug: "sauna-bath-towel",
+    name: "Sauna Bath Towel",
+    family: "sauna-bath-towel",
+    blend: "100% Cotton",
+    hem: "Plain",
+    lines: [
+      {
+        sku: "BTS4080WHT",
+        sizeKey: null,
+        name: "Sauna Bath Towel",
+        dimensions: "40X80",
+        weight: "600 GSM",
+        dozenPerCase: null,
+      },
+    ],
   },
 ];
 
@@ -206,10 +273,10 @@ export function terryFamiliesNeedingChooser(): string[] {
  * Where a card for this product points.
  *
  * A PRODUCT IN A MULTI-MEMBER FAMILY POINTS AT THE CHOOSER, not straight at
- * itself. Both Classic Terry cards carry the same name, and sending each one to
- * its own detail page would mean the buyer picks a blend from a grid before
- * they have been shown that there is a choice to make. The chooser is the page
- * that puts the two side by side.
+ * itself. Both Classic Terry cards carry the same name, and sending each one
+ * to its own detail page would mean the buyer picks a blend from a grid
+ * before they have been shown that there is a choice to make. The chooser is
+ * the page that puts the two side by side.
  */
 export function terryProductHref(product: TerryProduct): string {
   return getTerryFamily(product.family).length > 1
@@ -217,42 +284,17 @@ export function terryProductHref(product: TerryProduct): string {
     : `${TERRY_BASE}/${product.slug}`;
 }
 
-export type TerryLine = {
-  size: TerrySize;
-  /** Exactly as the sheet writes it. A size with no weight is not returned. */
-  weight: string;
-  sku: string;
-};
-
-/**
- * The sizes this product is made in, in sheet order, each with its SKU.
- *
- * Driven entirely by which cells the sheet fills in, so the seven products
- * offer four, two, four, four, four, three and four sizes respectively.
- */
-export function terrySizesFor(product: TerryProduct): TerryLine[] {
-  return TERRY_SIZES.flatMap((size) => {
-    const weight = product.weights[size.key];
-    return weight ? [{ size, weight, sku: terrySkuFor(product, size) }] : [];
-  });
+/** The size names this product is made in, once each, in sheet order. */
+export function terrySizeNames(product: TerryProduct): string[] {
+  const keyed = new Set(product.lines.map((l) => l.sizeKey).filter(Boolean));
+  const named = TERRY_SIZES.filter((s) => keyed.has(s.key)).map((s) => s.name);
+  const bespoke = product.lines.filter((l) => l.sizeKey === null).map((l) => l.name);
+  return [...named, ...bespoke];
 }
 
-/**
- * The stock code for one construction in one size.
- *
- * ─────────────────────────────────────────────────────────────────────────────
- * THESE CODES ARE OURS, NOT THE CLIENT'S. The towel sheet carries no SKU
- * column. The scheme below is deterministic and readable — SW-<construction>-
- * <size>, so SW-PK-BT is a Piano Key bath towel — but if Souwel already runs
- * stock codes in their own system, THESE ARE THE WRONG ONES and a buyer quoting
- * SW-PK-BT back at them will not match anything.
- *
- * Replace by putting the real code on each product and size in this file; every
- * page reads it from here, so nothing else changes.
- * ─────────────────────────────────────────────────────────────────────────────
- */
-export function terrySkuFor(product: TerryProduct, size: TerrySize): string {
-  return `SW-${product.code}-${size.code}`;
+/** Whether this product offers a bath matt, so the page can show BATH_MAT_NOTE. */
+export function hasBathMat(product: TerryProduct): boolean {
+  return product.lines.some((l) => l.sizeKey === "bath-mat");
 }
 
 /**
@@ -262,21 +304,7 @@ export function terrySkuFor(product: TerryProduct, size: TerrySize): string {
  * entries, and the brief asks for that difference to be unmissable.
  */
 export function terryCardSummary(product: TerryProduct): string {
-  const sizes = terrySizesFor(product)
-    .map((s) => s.size.name)
-    .join(", ");
-  return `${product.blend} · ${product.hem} hem · ${sizes}`;
-}
-
-/**
- * The enquiry line a quote request carries for one product in one size.
- *
- * Built here rather than in the query string so nothing a visitor can type ends
- * up in the subject line a member of staff reads — the quote page rebuilds this
- * from the slug and the size key after checking both against this file.
- */
-export function terryEnquiryName(product: TerryProduct, size: TerrySize): string {
-  return `${product.name} (${product.blend}) — ${size.name} ${size.dimensions}`;
+  return `${product.blend} · ${product.hem} hem · ${terrySizeNames(product).join(", ")}`;
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -288,72 +316,73 @@ export const TERRY_DOZEN = 12;
 
 export const roundUpToDozen = (n: number) => Math.ceil(n / TERRY_DOZEN) * TERRY_DOZEN;
 
-export type TerryOrderLine = { sizeKey: TerrySizeKey; quantity: number };
+export type TerryOrderLine = { sku: string; quantity: number };
 
 /**
- * `?lines=` — the buyer's list, as compactly as it can be written down.
+ * `?lines=` — the buyer's list, keyed on the client's own stock codes.
  *
- * `bath-towel:504,wash-cloth:120`. Size keys and quantities only: no names, no
- * weights, no SKUs. Everything a member of staff reads is rebuilt from this
- * file after the keys are checked, so nothing a visitor can type reaches the
- * lead. See readTerryRequest in app/(marketing)/quote/page.tsx.
+ * `BT2754CRH:504,WC1313CRH:120`. Codes and quantities only: no names, no
+ * weights. Everything a member of staff reads is rebuilt from this file after
+ * the codes are checked, so nothing a visitor can type reaches the lead. See
+ * readTerryRequest in app/(marketing)/quote/page.tsx.
  */
 export function encodeTerryLines(lines: TerryOrderLine[]): string {
-  return lines.map((l) => `${l.sizeKey}:${l.quantity}`).join(",");
+  return lines.map((l) => `${l.sku}:${l.quantity}`).join(",");
 }
 
+export type TerryOrderRow = TerryLine & { quantity: number };
+
 /**
- * Parses `?lines=`, keeping only pairs that name a size THIS product is made
- * in. An unknown key, a duplicate or a junk quantity is dropped rather than
- * repaired — a request that half-parsed is worse than one that arrives empty
- * and makes the buyer say what they meant.
+ * Parses `?lines=`, keeping only codes THIS product is made in. An unknown
+ * code, a duplicate or a junk quantity is dropped rather than repaired — a
+ * request that half-parsed is worse than one that arrives empty and makes the
+ * buyer say what they meant.
  */
 export function parseTerryLines(product: TerryProduct, raw: string | undefined): TerryOrderRow[] {
   if (!raw) return [];
-  const offered = new Map(terrySizesFor(product).map((l) => [l.size.key, l]));
+  const offered = new Map(product.lines.map((l) => [l.sku, l]));
   const seen = new Set<string>();
   const out: TerryOrderRow[] = [];
 
-  for (const part of raw.split(",").slice(0, TERRY_SIZES.length)) {
-    const [key, qty] = part.split(":");
-    const line = offered.get(key as TerrySizeKey);
-    if (!line || seen.has(key)) continue;
+  for (const part of raw.split(",").slice(0, product.lines.length)) {
+    const [sku, qty] = part.split(":");
+    const line = offered.get(sku);
+    if (!line || seen.has(sku)) continue;
     if (!/^\d{1,7}$/.test(qty ?? "")) continue;
     const n = Number(qty);
     if (n <= 0) continue;
-    seen.add(key);
+    seen.add(sku);
     out.push({ ...line, quantity: roundUpToDozen(n) });
   }
 
   return out;
 }
 
-export type TerryOrderRow = TerryLine & { quantity: number };
-
 /**
  * The one line the Bath Linen card shows for the range as a whole.
  *
- * Derived, not written down. "Seven constructions" typed into a second file is
+ * Derived, not written down. "Nine constructions" typed into a second file is
  * a number that goes stale the first time the client sends another row.
  */
 export function terryRangeSummary(): string {
-  const sizes = new Set(TERRY_PRODUCTS.flatMap((p) => Object.keys(p.weights)));
+  const sizes = new Set(TERRY_PRODUCTS.flatMap((p) => p.lines.map((l) => l.sizeKey ?? l.name)));
   return `${TERRY_PRODUCTS.length} constructions · ${sizes.size} sizes`;
 }
 
 /**
  * The range listing, one card per FAMILY rather than one per sheet row.
  *
- * The sheet has seven rows but only six products a buyer would name: Classic
- * Terry Towels appears twice, once per blend. Two cards carrying the same title
- * in one grid reads as a duplicate — the difference between them is a line of
- * body text, which is not where a buyer looks first. So the family gets one
- * card and both blends are listed inside it, and the choice is made on the
- * chooser page where the two are side by side.
+ * The sheet has nine rows but only eight products a buyer would name: Classic
+ * Terry Towels appears twice, once per blend. Two cards carrying the same
+ * title in one grid reads as a duplicate — the difference between them is a
+ * line of body text, which is not where a buyer looks first. So the family
+ * gets one card and both blends are listed inside it, and the choice is made
+ * on the chooser page where the two are side by side.
  *
- * A single-member family keeps the fuller summary — blend, hem and the sizes it
- * is made in. A multi-member one lists blend and hem per member instead: the
- * sizes differ between them, so one combined size list would describe neither.
+ * A single-member family keeps the fuller summary — blend, hem and the sizes
+ * it is made in. A multi-member one lists blend and hem per member instead:
+ * the sizes differ between them, so one combined size list would describe
+ * neither.
  */
 export type TerryListingEntry = {
   key: string;
