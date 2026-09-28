@@ -21,10 +21,13 @@
  * colours, so the grid below is sparse on purpose. Never fill a gap from the
  * row above it.
  *
- * SPELLINGS ARE THE CLIENT'S. "Pencel Pocket" and "Mommie Napkin" are written
- * as the sheet writes them. Note this sheet spells the colour "Burgundy",
- * where the salon sheet spells the same shade "Bergundy" — both are kept as
- * found rather than reconciled into one.
+ * SPELLINGS ARE THE CLIENT'S UNLESS THEY SAY OTHERWISE. "Mommie Napkin" is
+ * written as the sheet writes it. The sheet's "PENCEL POCKET" is the one
+ * exception: the client confirmed it as a typo, so the apron reads "Pencil
+ * Pocket". Its stock codes still end in PEN, because a code is an identifier
+ * rather than a word — correcting one would invent a code their system does
+ * not have. The colour "Burgundy" on this sheet is the spelling the whole
+ * site now uses, the salon sheet's "Bergundy" included.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -294,13 +297,15 @@ export const FB_PRODUCTS: FbProduct[] = [
     ),
   },
   {
-    // "PENCEL POCKET" is the sheet's spelling, kept as found. This build is
+    // The sheet writes "PENCEL POCKET"; the client confirmed it is a typo, so
+    // it reads "Pencil Pocket" here. The STOCK CODES are untouched — they end
+    // in PEN, and a code is an identifier rather than a word. This build is
     // given in white and black only — the other five colours are blank.
-    slug: "aprons-bib-tubular-ties-pencel-pocket",
-    name: "Aprons — Bib Aprons with Tubular Ties with Pencel Pocket",
+    slug: "aprons-bib-tubular-ties-pencil-pocket",
+    name: "Aprons — Bib Aprons with Tubular Ties with Pencil Pocket",
     family: "aprons",
     familyLabel: "Aprons",
-    description: "Bib Aprons with Tubular Ties with Pencel Pocket",
+    description: "Bib Aprons with Tubular Ties with Pencil Pocket",
     blend: "100% Polyester",
     weight: "6.40 OZ/SQYD",
     unit: "dozen",
