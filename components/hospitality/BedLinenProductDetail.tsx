@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import {
   BALANCE_HEM_NOTE,
   BED_LINEN_BASE,
+  bedLinenProductHref,
   bedSizeLabel,
   getBedLinenFamily,
   hasBalanceHem,
@@ -55,7 +56,22 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
   ].filter((f): f is { label: string; value: string } => Boolean(f.value));
 
   return (
-    <RangeOrderListProvider>
+    <RangeOrderListProvider
+      product={{
+        kind: "bed",
+        slug: product.slug,
+        name: product.name,
+        image: IMAGES[0].src,
+        href: bedLinenProductHref(product),
+      }}
+      // The step is this product's own case pack, the same figure the picker
+      // and the table round to — so the drawer's + and − move by the case.
+      lineMeta={sizes.map((s) => ({
+        sku: s.sku,
+        label: `${s.label} ${s.dimensions}`,
+        step: product.pcsPerCase ?? 1,
+      }))}
+    >
       <main className="bg-background">
         <section className="border-premium/20 border-b">
           <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">

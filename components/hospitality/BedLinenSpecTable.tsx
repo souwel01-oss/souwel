@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
 import { BED_LINEN_BASE, encodeBedLinenLines } from "@/lib/bed-linen";
-import { useRangeOrderList } from "@/components/hospitality/RangeOrderList";
+import { RangeListScopeNote, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -149,6 +149,7 @@ export function BedLinenSpecTable({
               ? "Add at least one line to request a quote."
               : "Priced by quotation against your specification and volume. No account needed to ask."}
           </p>
+          <RangeListScopeNote />
         </div>
       </div>
 
@@ -160,7 +161,7 @@ export function BedLinenSpecTable({
         <Link href={BED_LINEN_BASE} className="underline underline-offset-4">
           The rest of Bed Linen
         </Link>{" "}
-        is quoted separately.
+        can be added to the same list.
       </p>
     </>
   );

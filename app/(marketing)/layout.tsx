@@ -1,6 +1,7 @@
 import { SiteHeader } from "@/components/marketing/SiteHeader";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
 import { SmoothScroll } from "@/components/animation/SmoothScroll";
+import { QuoteListProvider } from "@/components/quote-list/QuoteListProvider";
 
 /**
  * Public marketing shell (FR-007a, FR-007f).
@@ -8,7 +9,11 @@ import { SmoothScroll } from "@/components/animation/SmoothScroll";
  */
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
+    // Around the header AND the page: the list icon lives in one and the
+    // "Add to List" buttons in the other, and both open the same drawer. The
+    // provider is a client component but its children are passed through, so
+    // the pages under it stay server-rendered.
+    <QuoteListProvider>
       {/* Skip link — the nav carries 6+ links before content on every page.
           Visually hidden until focused, then pinned to the top-left. */}
       <a
@@ -29,6 +34,6 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
       </div>
 
       <SiteFooter />
-    </>
+    </QuoteListProvider>
   );
 }

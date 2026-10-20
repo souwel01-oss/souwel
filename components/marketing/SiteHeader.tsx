@@ -9,6 +9,7 @@ import { CategoryMegaMenu } from "@/components/marketing/CategoryMegaMenu";
 import { SouwelLogo } from "@/components/marketing/SouwelLogo";
 import { DrawerAuth, HeaderAuth } from "@/components/auth/HeaderAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { QuoteListButton } from "@/components/quote-list/QuoteListButton";
 import { cn } from "@/lib/utils";
 
 /**
@@ -309,18 +310,32 @@ export function SiteHeader() {
           </nav>
         </div>
 
-        {/* Desktop actions — theme toggle, then either Sign In/Register or the
-            signed-in account menu. HeaderAuth owns that decision; see the note
-            at the top of it for why the session is read on the client. */}
-        <div className="hidden shrink-0 items-center xl:flex">
+        {/* Desktop actions — the quote list, the theme toggle, then either
+            Sign In/Register or the signed-in account menu. HeaderAuth owns that
+            last decision; see the note at the top of it for why the session is
+            read on the client. */}
+        <div className="hidden shrink-0 items-center gap-1.5 xl:flex">
+          <QuoteListButton />
           <HeaderAuth />
         </div>
 
         {/* Mobile: theme toggle stays on the bar rather than being buried in
             the drawer — it is a display preference, wanted at the moment the
-            screen is too bright, not after opening a navigation menu. */}
+            screen is too bright, not after opening a navigation menu. The
+            quote list sits beside it for the same reason: its badge is the
+            only sign that "Add to List" did something, and it cannot do that
+            from inside a closed menu. */}
         <div className="flex items-center gap-1 xl:hidden">
           <ThemeToggle tone="auto" />
+          {/* Opening the list closes the navigation menu. They are both
+              answers to "show me something over this page", and Escape would
+              otherwise have two things to dismiss at once. */}
+          <QuoteListButton
+            onOpen={() => {
+              setOpen(false);
+              setDrawerOpen(null);
+            }}
+          />
           <button
             type="button"
             ref={drawerToggle}

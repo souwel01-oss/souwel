@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
 import { FB_BASE, encodeFbLines } from "@/lib/food-beverage";
-import { useRangeOrderList } from "@/components/hospitality/RangeOrderList";
+import { RangeListScopeNote, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -167,6 +167,7 @@ export function FoodBevSpecTable({
               ? "Add at least one line to request a quote."
               : "Priced by quotation against your specification and volume. No account needed to ask."}
           </p>
+          <RangeListScopeNote />
         </div>
       </div>
 
@@ -179,7 +180,7 @@ export function FoodBevSpecTable({
         <Link href={FB_BASE} className="underline underline-offset-4">
           The rest of Food &amp; Beverage
         </Link>{" "}
-        is quoted separately.
+        can be added to the same list.
       </p>
     </>
   );

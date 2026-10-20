@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db/prisma";
 import { getSessionUser } from "@/lib/auth/session";
 import { hasProductPage } from "@/lib/product-slugs";
 import { buildReference } from "@/lib/quote-reference";
-import { ANNUAL_VOLUME_BANDS } from "@/lib/quote-fields";
+import { ANNUAL_VOLUME_BANDS, QUOTE_ENQUIRY_MAX, QUOTE_MESSAGE_MAX } from "@/lib/quote-fields";
 
 /**
  * Public "Request a Quote" submission (FR-005).
@@ -79,10 +79,16 @@ const quoteSchema = z
       .union([z.enum(ANNUAL_VOLUME_BANDS), z.literal("")])
       .optional()
       .transform((v) => (v ? v : undefined)),
-    message: z.string().trim().max(2000).optional(),
+    // Long enough for a whole quote list's specification, which the page
+    // writes into this field — see the note on the limit in lib/quote-fields.ts.
+    message: z
+      .string()
+      .trim()
+      .max(QUOTE_MESSAGE_MAX, "That message is too long. Please shorten it and send it again.")
+      .optional(),
     items: z.array(itemSchema).max(MAX_ITEMS),
     /** A product NAME, for a line with no catalogue entry. */
-    enquiry: z.string().trim().max(160).optional(),
+    enquiry: z.string().trim().max(QUOTE_ENQUIRY_MAX).optional(),
   })
   .superRefine((value, ctx) => {
     if (value.items.length === 0 && !value.enquiry) {

@@ -5,7 +5,9 @@ import Link from "next/link";
 import { CheckCircle2, Plus, Trash2 } from "lucide-react";
 import { Field, FormAlert, SubmitButton } from "@/components/auth/fields";
 import { submitQuoteRequest } from "@/app/(marketing)/quote/actions";
-import { ANNUAL_VOLUME_BANDS } from "@/lib/quote-fields";
+import { ANNUAL_VOLUME_BANDS, QUOTE_MESSAGE_MAX } from "@/lib/quote-fields";
+import { quoteListId } from "@/lib/quote-list";
+import { removeFromQuoteList } from "@/lib/quote-list-store";
 import { cn } from "@/lib/utils";
 
 /**
@@ -40,6 +42,26 @@ export type QuoteRequestFormProps = {
   /** Slug taken from ?product=, so the row is pre-filled from a product page. */
   initialSlug?: string;
   /**
+   * The catalogue products of a quote list, with the quantities the buyer set
+   * in the drawer. Each becomes a row here, still editable.
+   */
+  initialItems?: { slug: string; quantity: number }[];
+  /**
+   * Identifies the list this form was last built from — the raw `?list=`.
+   *
+   * The drawer can send a different list to this same page while it is open,
+   * which re-renders it with new props and leaves the form's own state where
+   * it was. When this changes, the product rows start over from the new list
+   * and the buyer's contact details stay as typed.
+   */
+  listKey?: string;
+  /**
+   * The quote-list entries this request covers. They leave the list once the
+   * request has gone, so the same products are not sitting in the drawer
+   * waiting to be sent a second time.
+   */
+  listIds?: string[];
+  /**
    * A product NAME, for a Hospitality line with no catalogue entry.
    *
    * Twenty of the thirty-one lines have no slug for the picker to select, so
@@ -69,6 +91,9 @@ const nextKey = () => `row-${(rowCounter += 1)}`;
 export function QuoteRequestForm({
   products,
   initialSlug,
+  initialItems,
+  listKey,
+  listIds,
   enquiryName,
   enquiryNote,
   messagePrefill,
@@ -81,12 +106,46 @@ export function QuoteRequestForm({
   // "Select a product…" row asks the buyer to do the job they just did, and
   // worse, implies the thing they picked did not come through. The picker is
   // still there behind "Add a product" for anyone who wants a second line.
-  const [items, setItems] = useState<LineItem[]>(() =>
-    enquiryName ? [] : [{ key: nextKey(), slug: initialSlug ?? "", quantity: "", notes: "" }]
-  );
+  //
+  // A quote list's catalogue products come first of all: they are rows the
+  // buyer has already chosen, quantity included.
+  //
+  // SEEDED ROWS ARE KEYED BY POSITION, NOT BY nextKey(). These keys become
+  // the `id` of each row's inputs, so they are in the HTML the server sends —
+  // and `rowCounter` is module state, which on the server runs on from one
+  // request to the next. The server would render "row-5" where the browser
+  // expects "row-1", and React reports the page as failing to hydrate.
+  // nextKey() is still right for a row added by a click: that only ever
+  // happens in the browser.
+  const seedItems = (): LineItem[] =>
+    initialItems?.length
+      ? initialItems.map((i, index) => ({
+          key: `seed-${index}`,
+          slug: i.slug,
+          quantity: String(i.quantity),
+          notes: "",
+        }))
+      : enquiryName
+        ? []
+        : [{ key: "seed-0", slug: initialSlug ?? "", quantity: "", notes: "" }];
+
+  const [items, setItems] = useState<LineItem[]>(seedItems);
   const [pending, setPending] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [reference, setReference] = useState<string | null>(null);
+
+  // A different list has been sent to this page while it was open. Start the
+  // product rows again from it — and drop a "Request received" panel left over
+  // from the last one, or the new list would arrive behind a success message.
+  // Adjusted during render rather than in an effect, the way SiteHeader resets
+  // its menus on a route change: an effect would paint the stale rows first.
+  const [seededFrom, setSeededFrom] = useState(listKey);
+  if (listKey !== seededFrom) {
+    setSeededFrom(listKey);
+    setItems(seedItems());
+    setReference(null);
+    setFormError(null);
+  }
 
   const updateItem = (key: string, patch: Partial<LineItem>) => {
     setItems((prev) => prev.map((i) => (i.key === key ? { ...i, ...patch } : i)));
@@ -146,6 +205,13 @@ export function QuoteRequestForm({
 
       if (result.ok) {
         setReference(result.reference);
+        // What has been requested leaves the quote list: the entries this
+        // request was built from, and any catalogue product sent in a row
+        // here that also happens to be listed.
+        removeFromQuoteList([
+          ...(listIds ?? []),
+          ...chosen.map((i) => quoteListId("product", i.slug)),
+        ]);
       } else {
         setFormError(result.message);
       }
@@ -377,10 +443,17 @@ export function QuoteRequestForm({
             Anything else? (optional)
           </label>
           <textarea
+            // Uncontrolled, so a new prefill only shows if the element is new.
+            // Keyed on the list for the same reason the rows are re-seeded
+            // above: a second list sent to this page must replace the first
+            // one's specification, not sit unseen behind it.
+            key={listKey ?? "message"}
             id="quote-message"
             name="message"
-            rows={4}
-            maxLength={2000}
+            // Tall enough to show a list's specification without scrolling a
+            // four-line box, and no taller than it needs to be otherwise.
+            rows={messagePrefill ? Math.min(Math.max(messagePrefill.split("\n").length + 1, 4), 16) : 4}
+            maxLength={QUOTE_MESSAGE_MAX}
             defaultValue={
               messagePrefill ??
               (enquiryName ? `We are looking at ${enquiryName}. Rough annual volume: ` : undefined)

@@ -6,6 +6,7 @@ import {
   SPA_SALON_BASE,
   SPA_SALON_PRODUCTS,
   getSpaSalonProduct,
+  spaSalonProductHref,
   type SpaSalonProduct,
 } from "@/lib/spa-salon";
 import { swatchColour } from "@/lib/hospitality";
@@ -83,7 +84,20 @@ function ProductDetail({ product }: { product: SpaSalonProduct }) {
   ].filter((f): f is { label: string; value: string } => Boolean(f.value));
 
   return (
-    <RangeOrderListProvider>
+    <RangeOrderListProvider
+      product={{
+        kind: "spa",
+        slug: product.slug,
+        name: product.name,
+        image: IMAGES[0].src,
+        href: spaSalonProductHref(product),
+      }}
+      lineMeta={product.colours.map((c) => ({
+        sku: c.sku,
+        label: c.colour,
+        step: product.pack,
+      }))}
+    >
       <main className="bg-background">
         <section className="border-premium/20 border-b">
           <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">

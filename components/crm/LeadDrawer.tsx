@@ -163,7 +163,11 @@ export function LeadDrawer({ detail }: { detail: LeadDetail }) {
 
       {detail.customerMessage ? (
         <DrawerSection title="Customer message">
-          <p className="border-border bg-card rounded-xl border p-4 text-[13px] leading-relaxed">
+          {/* pre-line: a request sent from a range page or the quote list
+              arrives with one stock code per line, and several products
+              stacked under their own names. Collapsed into one paragraph that
+              is unreadable. The portal shows the same text the same way. */}
+          <p className="border-border bg-card rounded-xl border p-4 text-[13px] leading-relaxed whitespace-pre-line">
             {detail.customerMessage}
           </p>
         </DrawerSection>

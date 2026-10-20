@@ -7,6 +7,7 @@ import { Reveal } from "@/components/animation/Reveal";
 import { SplitReveal } from "@/components/animation/SplitReveal";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { FabricWeaveViewer } from "@/components/catalog/FabricWeaveViewer";
+import { AddToListButton } from "@/components/quote-list/AddToListButton";
 import { PRODUCTS, getProduct } from "@/lib/product-data";
 import { CATEGORIES } from "@/lib/site-config";
 
@@ -14,16 +15,19 @@ import { CATEGORIES } from "@/lib/site-config";
  * Product detail page (FR-008).
  *
  * THIS IS NOT A SHOP PAGE, AND THE DIFFERENCE IS THE WHOLE DESIGN. There is no
- * price, no stock figure, no quantity selector, no basket. A textile buyer does
- * not add 4,000 sheets to a cart — they check whether the construction matches
- * their specification, whether the sizes fit their mattress build, whether it
- * survives their laundry's cycle, and then they ask for a quote. So the page is
- * ordered the way that conversation goes: what it is, what it is made of, what
- * sizes exist, what can be changed, how it launders, then the quote request.
+ * price, no stock figure and nothing to pay for. A textile buyer checks whether
+ * the construction matches their specification, whether the sizes fit their
+ * mattress build, whether it survives their laundry's cycle, and then they ask
+ * for a quote. So the page is ordered the way that conversation goes: what it
+ * is, what it is made of, what sizes exist, what can be changed, how it
+ * launders, then the quote request.
  *
- * The single call to action is "Request a Quote", repeated at the top and the
- * bottom. Everything else on the page exists to let a buyer decide whether that
- * request is worth making.
+ * TWO WAYS TO ASK, repeated at the top and the bottom. "Request a Quote" asks
+ * about this product now. "Add to List" keeps it for a request that covers
+ * several — a buyer fitting out a property wants towels, sheets and napery
+ * priced together, not in three conversations. The list is a cart in shape
+ * only: see lib/quote-list.ts. Everything else on the page exists to let a
+ * buyer decide whether either request is worth making.
  *
  * The specifications table is the most important element here and is deliberately
  * a real <table> with row headers — a buyer will read it against their own tender
@@ -66,6 +70,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const hasCare = product.care.length > 0;
 
   const category = CATEGORIES.find((c) => c.slug === product.categorySlug);
+
+  // What the quote list keeps about this product: enough to draw a row in the
+  // drawer, and nothing from the specification.
+  const listProduct = {
+    slug: product.slug,
+    name: product.name,
+    image: product.heroImageUrl,
+    href: `/products/${product.slug}`,
+  };
 
   return (
     <main>
@@ -143,7 +156,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             </Reveal>
 
             <Reveal variant="fade-up" delay={0.2}>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {/* Wraps from sm up: three buttons are wider than this column at
+                  some widths, and the third dropping to a second row is better
+                  than all three squeezing. */}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
                 <Button
                   asChild
                   size="lg"
@@ -154,6 +170,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
+                <AddToListButton product={listProduct} />
                 <Button
                   asChild
                   size="lg"
@@ -453,7 +470,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 Tell us the construction, the sizes and the annual volume. We will come back with a
                 quotation and a pre-production sample for sign-off.
               </p>
-              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap">
                 <Button
                   asChild
                   size="lg"
@@ -464,6 +481,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
+                <AddToListButton product={listProduct} className="px-8" />
                 <Button
                   asChild
                   size="lg"

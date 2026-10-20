@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import {
   BATH_MAT_NOTE,
   TERRY_BASE,
+  TERRY_DOZEN,
   TERRY_PRODUCTS,
   getTerryFamily,
   getTerryProduct,
@@ -165,7 +166,25 @@ function ProductDetail({ product }: { product: TerryProduct }) {
     // the table further down share one list. The prose and the gallery inside
     // it stay server-rendered — a provider does not pull its children into the
     // client bundle.
-    <RangeOrderListProvider>
+    <RangeOrderListProvider
+      product={{
+        kind: "terry",
+        slug: product.slug,
+        // The blend is part of the name here and nowhere else on the page:
+        // two products are both "Classic Terry Towels", and in the quote list
+        // there is no heading above the row to say which one this is.
+        name: `${product.name} (${product.blend})`,
+        image: IMAGES[0].src,
+        // Straight to this construction, not through terryProductHref — that
+        // sends a shared name to its chooser, and the buyer has chosen.
+        href: `${TERRY_BASE}/${product.slug}`,
+      }}
+      lineMeta={sizes.map((line) => ({
+        sku: line.sku,
+        label: `${line.name} ${line.dimensions}`,
+        step: TERRY_DOZEN,
+      }))}
+    >
       <main className="bg-background">
         <section className="border-premium/20 border-b">
           <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">

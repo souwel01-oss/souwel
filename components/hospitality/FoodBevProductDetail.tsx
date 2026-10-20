@@ -1,6 +1,12 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { FB_BASE, FB_DOZEN, getFbFamily, type FbProduct } from "@/lib/food-beverage";
+import {
+  FB_BASE,
+  FB_DOZEN,
+  fbProductHref,
+  getFbFamily,
+  type FbProduct,
+} from "@/lib/food-beverage";
 import { swatchColour } from "@/lib/hospitality";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { FoodBevSpecPicker } from "@/components/hospitality/FoodBevSpecPicker";
@@ -57,7 +63,22 @@ export function ProductDetail({ product }: { product: FbProduct }) {
   const dozenRounding = product.unit === "dozen" ? FB_DOZEN : null;
 
   return (
-    <RangeOrderListProvider>
+    <RangeOrderListProvider
+      product={{
+        kind: "fb",
+        slug: product.slug,
+        name: product.name,
+        image: IMAGES[0].src,
+        href: fbProductHref(product),
+      }}
+      // The size is in the label only where there is more than one — the same
+      // rule the table uses for its Size column.
+      lineMeta={product.lines.map((l) => ({
+        sku: l.sku,
+        label: sizes.length > 1 ? `${l.colour} ${l.size}` : l.colour,
+        step: dozenRounding ?? 1,
+      }))}
+    >
       <main className="bg-background">
         <section className="border-premium/20 border-b">
           <div className="mx-auto w-full max-w-6xl px-5 py-5 sm:px-8">

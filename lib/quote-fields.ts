@@ -22,3 +22,22 @@ export const ANNUAL_VOLUME_BANDS = [
 ] as const;
 
 export type AnnualVolumeBand = (typeof ANNUAL_VOLUME_BANDS)[number];
+
+/**
+ * Length limits the quote form, its page and its server action all enforce.
+ *
+ * HERE FOR THE SAME REASON AS THE BANDS ABOVE: three files have to agree. The
+ * page builds the enquiry line and the prefilled message, the textarea stops
+ * the buyer typing past the limit, and the action refuses anything longer. A
+ * limit raised in one and not the others produces a request the form happily
+ * builds and the server then rejects.
+ *
+ * THE MESSAGE LIMIT IS SIZED TO A FULL QUOTE LIST, not to a paragraph of
+ * prose. A list sent from the drawer arrives with each range product's
+ * specification written into the message — about 300 characters for a typical
+ * product, 2,500 for the 56-line table cloth. The longest list the site
+ * allows (25 products, every line of each selected) measures about 11,600, so
+ * this leaves that room and still some for what the buyer adds underneath.
+ */
+export const QUOTE_ENQUIRY_MAX = 160;
+export const QUOTE_MESSAGE_MAX = 15_000;

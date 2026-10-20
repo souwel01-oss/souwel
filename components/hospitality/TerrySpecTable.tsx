@@ -10,7 +10,7 @@ import {
   roundUpToDozen,
   terryWeightLabel,
 } from "@/lib/terry-towels";
-import { useRangeOrderList } from "@/components/hospitality/RangeOrderList";
+import { RangeListScopeNote, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
 /**
@@ -170,6 +170,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
               ? "Add at least one line to request a quote."
               : "Priced by quotation against your specification and volume. No account needed to ask."}
           </p>
+          <RangeListScopeNote />
         </div>
       </div>
 
@@ -179,7 +180,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
         <Link href={TERRY_BASE} className="underline underline-offset-4">
           Other terry constructions
         </Link>{" "}
-        are quoted separately.
+        can be added to the same list.
       </p>
     </>
   );

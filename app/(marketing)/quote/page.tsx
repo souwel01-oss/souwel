@@ -9,6 +9,8 @@ import { getTerryProduct, parseTerryLines, terryWeightLabel } from "@/lib/terry-
 import { bedSizeLabel, getBedLinenProduct, parseBedLinenLines } from "@/lib/bed-linen";
 import { getSpaSalonProduct, parseSpaSalonLines } from "@/lib/spa-salon";
 import { getFbProduct, parseFbLines } from "@/lib/food-beverage";
+import { decodeQuoteList, quoteListId, type QuoteListRequestEntry } from "@/lib/quote-list";
+import { QUOTE_ENQUIRY_MAX } from "@/lib/quote-fields";
 import { getSessionUser } from "@/lib/auth/session";
 import { prisma } from "@/lib/db/prisma";
 
@@ -35,6 +37,21 @@ const PICKER_PRODUCTS: QuotePickerProduct[] = Object.values(PRODUCTS)
   .sort((a, b) => a.categoryName.localeCompare(b.categoryName) || a.name.localeCompare(b.name));
 
 /**
+ * One range product's request, as the four readers below return it.
+ *
+ * `title` is the product on its own; `name` adds how many lines were chosen.
+ * A request for one product leads with `name`. A request for several needs
+ * the bare `title` of each, to say in one line which products it covers.
+ */
+type RangeRequest = {
+  /** This product's entry in the quote list — see quoteListId. */
+  id: string;
+  title: string;
+  name: string;
+  message: string;
+};
+
+/**
  * A Terry Towels request, rebuilt from the query string.
  *
  * THE SLUG AND THE SIZE KEYS ARE THE ONLY THINGS TRUSTED, and only after both
@@ -49,7 +66,7 @@ const PICKER_PRODUCTS: QuotePickerProduct[] = Object.values(PRODUCTS)
  * way the page does it. These are supplied by the dozen; a hand-edited URL
  * should not be able to ask for 10,000 of something that only exists in twelves.
  */
-function readTerryRequest(params: { terry?: string; lines?: string }) {
+function readTerryRequest(params: { terry?: string; lines?: string }): RangeRequest | null {
   if (!params.terry) return null;
   const product = getTerryProduct(params.terry);
   if (!product) return null;
@@ -67,11 +84,12 @@ function readTerryRequest(params: { terry?: string; lines?: string }) {
   // The name says the construction; the body says which sizes. Putting every
   // size in the subject line would run past the 160 characters the enquiry
   // field allows the moment a buyer lists four of them.
-  const name = `${product.name} (${product.blend}) — ${lines.length} ${
-    lines.length === 1 ? "line" : "lines"
-  }`;
+  const title = `${product.name} (${product.blend})`;
+  const name = `${title} — ${lines.length} ${lines.length === 1 ? "line" : "lines"}`;
 
   return {
+    id: quoteListId("terry", product.slug),
+    title,
     name,
     // Trailing blank line so the buyer types after the specification rather
     // than into the middle of it.
@@ -86,7 +104,7 @@ function readTerryRequest(params: { terry?: string; lines?: string }) {
  * lib/bed-linen.ts. Everything a member of staff reads is written here from
  * that file, never carried as prose in the URL.
  */
-function readBedLinenRequest(params: { bed?: string; lines?: string }) {
+function readBedLinenRequest(params: { bed?: string; lines?: string }): RangeRequest | null {
   if (!params.bed) return null;
   const product = getBedLinenProduct(params.bed);
   if (!product) return null;
@@ -110,6 +128,8 @@ function readBedLinenRequest(params: { bed?: string; lines?: string }) {
   const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "size" : "sizes"}`;
 
   return {
+    id: quoteListId("bed", product.slug),
+    title: product.name,
     name,
     message: [...facts, "", ...body, "", ""].join("\n"),
   };
@@ -120,7 +140,7 @@ function readBedLinenRequest(params: { bed?: string; lines?: string }) {
  * the two above: only the product slug and the stock codes in `?lines=` are
  * looked at, and only after both are checked against lib/spa-salon.ts.
  */
-function readSpaSalonRequest(params: { spa?: string; lines?: string }) {
+function readSpaSalonRequest(params: { spa?: string; lines?: string }): RangeRequest | null {
   if (!params.spa) return null;
   const product = getSpaSalonProduct(params.spa);
   if (!product) return null;
@@ -141,7 +161,12 @@ function readSpaSalonRequest(params: { spa?: string; lines?: string }) {
 
   const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "colour" : "colours"}`;
 
-  return { name, message: [...facts, "", ...body, "", ""].join("\n") };
+  return {
+    id: quoteListId("spa", product.slug),
+    title: product.name,
+    name,
+    message: [...facts, "", ...body, "", ""].join("\n"),
+  };
 }
 
 /**
@@ -149,7 +174,7 @@ function readSpaSalonRequest(params: { spa?: string; lines?: string }) {
  * as the three above: only the product slug and the stock codes in `?lines=`
  * are looked at, and only after both are checked against lib/food-beverage.ts.
  */
-function readFbRequest(params: { fb?: string; lines?: string }) {
+function readFbRequest(params: { fb?: string; lines?: string }): RangeRequest | null {
   if (!params.fb) return null;
   const product = getFbProduct(params.fb);
   if (!product) return null;
@@ -175,7 +200,105 @@ function readFbRequest(params: { fb?: string; lines?: string }) {
 
   const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "line" : "lines"}`;
 
-  return { name, message: [...facts, "", ...body, "", ""].join("\n") };
+  return {
+    id: quoteListId("fb", product.slug),
+    title: product.name,
+    name,
+    message: [...facts, "", ...body, "", ""].join("\n"),
+  };
+}
+
+/** One range entry of `?list=`, through the reader its own range already has. */
+function readRangeEntry(entry: Exclude<QuoteListRequestEntry, { kind: "product" }>) {
+  const { slug, lines } = entry;
+  switch (entry.kind) {
+    case "terry":
+      return readTerryRequest({ terry: slug, lines });
+    case "bed":
+      return readBedLinenRequest({ bed: slug, lines });
+    case "spa":
+      return readSpaSalonRequest({ spa: slug, lines });
+    case "fb":
+      return readFbRequest({ fb: slug, lines });
+  }
+}
+
+/**
+ * Names several products in the one line the enquiry field allows.
+ *
+ * "Dobby Towels (86% Cot / 14% Poly); Flat Sheet T-200 + 2 more". As many
+ * whole names as fit, then a count of the rest — a name cut off mid-word
+ * reads as a mistake, and the full list is in the message underneath anyway.
+ */
+function summariseTitles(titles: string[]): string {
+  let out = titles[0].slice(0, QUOTE_ENQUIRY_MAX);
+  for (let i = 1; i < titles.length; i += 1) {
+    const candidate = `${out}; ${titles[i]}`;
+    const after = titles.length - i - 1;
+    const tail = after > 0 ? ` + ${after} more` : "";
+    if (candidate.length + tail.length > QUOTE_ENQUIRY_MAX) {
+      return `${out} + ${titles.length - i} more`;
+    }
+    out = candidate;
+  }
+  return out;
+}
+
+/**
+ * The buyer's whole quote list, rebuilt from `?list=`.
+ *
+ * SAME TRUST RULE AS EVERY READER ABOVE, applied per entry: the link carries
+ * slugs, stock codes and quantities, each is checked against the catalogue,
+ * and everything a member of staff reads is written here from the catalogue
+ * files. An entry that does not check out is dropped and the rest still go.
+ *
+ * THE TWO KINDS OF ENTRY LAND IN TWO PLACES, because they are two kinds of
+ * thing to Sales. A catalogue product becomes a row in the form's product
+ * list, and so a line item that can be priced on its own. A range product has
+ * no catalogue row to attach to, so it arrives the way its own page already
+ * sends it — named in the enquiry, specified in the message.
+ */
+function readListRequest(raw: string | undefined) {
+  const entries = decodeQuoteList(raw);
+  if (entries.length === 0) return null;
+
+  const items: { slug: string; quantity: number }[] = [];
+  const ranges: RangeRequest[] = [];
+  const ids: string[] = [];
+
+  for (const entry of entries) {
+    if (entry.kind === "product") {
+      if (!hasProductPage(entry.slug)) continue;
+      items.push({ slug: entry.slug, quantity: entry.quantity });
+      ids.push(entry.id);
+      continue;
+    }
+    const range = readRangeEntry(entry);
+    if (!range) continue;
+    ranges.push(range);
+    ids.push(range.id);
+  }
+
+  if (ids.length === 0) return null;
+
+  // One range product reads exactly as it does from its own page. Several
+  // are stacked, each under its own name, so the message says which lines
+  // belong to which product.
+  const enquiry =
+    ranges.length === 0
+      ? undefined
+      : ranges.length === 1
+        ? ranges[0].name
+        : summariseTitles(ranges.map((r) => r.title));
+
+  const message =
+    ranges.length === 0
+      ? undefined
+      : ranges.length === 1
+        ? ranges[0].message
+        : `${ranges.map((r) => `${r.name}\n${r.message.trimEnd()}`).join("\n\n")}\n\n`;
+
+  return { ids, items, enquiry, message };
 }
 
 export default async function QuotePage({
@@ -189,6 +312,7 @@ export default async function QuotePage({
     spa?: string;
     fb?: string;
     lines?: string;
+    list?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -218,6 +342,13 @@ export default async function QuotePage({
     readBedLinenRequest(params) ??
     readSpaSalonRequest(params) ??
     readFbRequest(params);
+
+  // `?list=` is the buyer's whole quote list, sent from the drawer. It wins
+  // over everything above: a link only ever carries one of these, and a list
+  // that was deliberately built is the stronger statement of what is wanted.
+  // A repeated parameter arrives as an array at runtime, hence the check.
+  const listParam = typeof params.list === "string" ? params.list : undefined;
+  const list = readListRequest(listParam);
 
   const user = await getSessionUser();
   const profile = user
@@ -263,18 +394,37 @@ export default async function QuotePage({
           ) : null}
         </header>
 
-        <QuoteRequestForm
-          products={PICKER_PRODUCTS}
-          initialSlug={initialSlug}
-          enquiryName={range?.name ?? enquiryName}
-          enquiryNote={
-            range
-              ? "Your list and its specification are below. Fill in your details and send it."
-              : undefined
-          }
-          messagePrefill={range?.message}
-          prefill={prefill}
-        />
+        {list ? (
+          <QuoteRequestForm
+            products={PICKER_PRODUCTS}
+            initialItems={list.items}
+            enquiryName={list.enquiry}
+            enquiryNote="Everything from your list is below. Check it over, fill in your details and send it."
+            messagePrefill={list.message}
+            // The list as it was when this request was built. If the buyer
+            // changes the list and sends it again from this page, this is how
+            // the form knows to start over from the new one.
+            listKey={listParam}
+            listIds={list.ids}
+            prefill={prefill}
+          />
+        ) : (
+          <QuoteRequestForm
+            products={PICKER_PRODUCTS}
+            initialSlug={initialSlug}
+            enquiryName={range?.name ?? enquiryName}
+            enquiryNote={
+              range
+                ? "Your list and its specification are below. Fill in your details and send it."
+                : undefined
+            }
+            messagePrefill={range?.message}
+            // A product sent from its own page leaves the quote list once the
+            // request has gone, so it is not sent a second time from there.
+            listIds={range ? [range.id] : undefined}
+            prefill={prefill}
+          />
+        )}
       </div>
     </main>
   );
