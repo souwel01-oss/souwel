@@ -12,7 +12,8 @@ import {
 } from "@/lib/food-beverage";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
-import { ProductDetail, IMAGES } from "@/components/hospitality/FoodBevProductDetail";
+import { ProductDetail, fbImages } from "@/components/hospitality/FoodBevProductDetail";
+import { CARD_SHOTS } from "@/lib/hospitality-photos";
 
 /**
  * One segment, two kinds of page — the same shape as the Bed Linen family
@@ -142,7 +143,7 @@ function toCard(product: FbProduct): HospitalityCardProduct {
     ctaLabel: "View details",
     material: fbCardSummary(product),
     colours: [],
-    images: IMAGES,
+    images: fbImages(product).slice(0, CARD_SHOTS),
     badge: null,
     rating: null,
   };

@@ -4,6 +4,19 @@
  */
 import { hasProductPage } from "@/lib/product-slugs";
 import { HOSPITALITY_GROUPS, hospitalityItemByName } from "@/lib/hospitality";
+import {
+  HEALTH_CARE_BASE,
+  HEALTH_CARE_LINES,
+  healthCareLineByName,
+  healthCareLineHref,
+} from "@/lib/health-care";
+import {
+  COMMERCIAL_BASE,
+  COMMERCIAL_GROUPS,
+  COMMERCIAL_ITEMS,
+  commercialItemByName,
+  commercialItemHref,
+} from "@/lib/commercial";
 
 export const SITE = {
   name: "Souwel",
@@ -53,8 +66,11 @@ export const CATEGORIES: CategoryNavItem[] = [
     imageAlt: "Folded white towels stacked on a laundry rack",
   },
   {
+    // The slug keeps its old name — it is a database key and a sector tag on
+    // the catalogue — but the range now covers Airline and Institutional
+    // Laundry too, so it is no longer called Automotive.
     slug: "commercial-automotive",
-    name: "Commercial / Automotive",
+    name: "Commercial",
     shortName: "Commercial",
     description: "Hard-working textiles for hard-working spaces.",
     accent: "#4A5C2F",
@@ -75,7 +91,30 @@ export type ProductGroup = {
    */
   col?: number;
   row?: number;
+  /** Names in `items` drawn in red — see `alert` in lib/health-care.ts. */
+  alertItems?: string[];
+  /**
+   * Names in `items` drawn indented under the item above them, mapped to the
+   * shorter label they take there — see `subLabel` in lib/health-care.ts.
+   */
+  subItems?: Record<string, string>;
 };
+
+/**
+ * A group's items with each sub-item gathered under the item above it. Both
+ * menus render a parent and its sub-items as one list entry, so a column
+ * break cannot leave "Towel" at the top of a column with its parent in the
+ * previous one.
+ */
+export function nestedItems(group: ProductGroup): { name: string; subs: string[] }[] {
+  const rows: { name: string; subs: string[] }[] = [];
+  for (const name of group.items) {
+    const parent = rows[rows.length - 1];
+    if (group.subItems?.[name] && parent) parent.subs.push(name);
+    else rows.push({ name, subs: [] });
+  }
+  return rows;
+}
 
 /**
  * The client's arrangement of the five Hospitality blocks in the mega-menu:
@@ -136,24 +175,16 @@ export const CATEGORY_PRODUCTS: Partial<Record<string, ProductGroup[]>> = {
     // of the middle column back up to the top of the right one. Sorting here
     // costs nothing and keeps the two in step.
     .sort((a, b) => (a.row ?? 99) - (b.row ?? 99) || (a.col ?? 99) - (b.col ?? 99)),
+  // Derived from lib/health-care.ts for the same reason Hospitality is: that
+  // file also builds /health-care and its line pages.
   "health-care": [
     {
       title: null,
-      items: [
-        "Surgical Towel",
-        "Hyperbaric Blanket",
-        "Chevron Blanket",
-        "Spectrum Spread Blanket",
-        "Spectrum Links Spread Blanket",
-        "Serpentine Blanket",
-        "Herringbone Thermal Blanket",
-        "Bath Blanket",
-        "Baby Blanket",
-        "Huck Towel",
-        "Hand Towel",
-        "Bath Towel",
-        "Wash Cloth",
-      ],
+      items: HEALTH_CARE_LINES.map((line) => line.name),
+      alertItems: HEALTH_CARE_LINES.filter((line) => line.alert).map((line) => line.name),
+      subItems: Object.fromEntries(
+        HEALTH_CARE_LINES.flatMap((line) => (line.subLabel ? [[line.name, line.subLabel]] : []))
+      ),
     },
   ],
   "institutional-laundry": [
@@ -175,12 +206,14 @@ export const CATEGORY_PRODUCTS: Partial<Record<string, ProductGroup[]>> = {
       ],
     },
   ],
-  "commercial-automotive": [
-    {
-      title: null,
-      items: ["Shop Towel", "Drop Cloth"],
-    },
-  ],
+  // Grouped like Hospitality, from lib/commercial.ts: the client's three
+  // headings, one column each, in their order.
+  "commercial-automotive": COMMERCIAL_GROUPS.map((g, i) => ({
+    title: g.title,
+    items: g.items.map((item) => item.name),
+    col: i + 1,
+    row: 1,
+  })),
 };
 
 /** URL-safe slug for a product name, e.g. "Duvet/Pillow Covers" -> "duvet-pillow-covers". */
@@ -217,6 +250,18 @@ export function productSlug(name: string) {
  * arrangement exists to prevent.
  */
 export function productHref(categorySlug: string, name: string) {
+  // Checked first and only under its own category: several Health-Care names
+  // ("Bath Blanket", "Pillow Case") are also spelled near-identically
+  // elsewhere, and each menu should open its own range's page.
+  if (categorySlug === "health-care") {
+    const line = healthCareLineByName(name);
+    if (line) return healthCareLineHref(line);
+  }
+  if (categorySlug === "commercial-automotive") {
+    const item = commercialItemByName(name);
+    if (item) return commercialItemHref(item);
+  }
+
   const hospitality = hospitalityItemByName(name);
   if (hospitality) {
     const { group, item } = hospitality;
@@ -264,6 +309,14 @@ export const LIVE_ROUTES: { href: string; label: string }[] = [
     href: `/hospitality/${g.slug}`,
     label: `Hospitality — ${g.title}`,
   })),
+  ...HEALTH_CARE_LINES.map((line) => ({
+    href: healthCareLineHref(line),
+    label: `Health-Care — ${line.name}`,
+  })),
+  ...COMMERCIAL_ITEMS.map(({ group, item }) => ({
+    href: commercialItemHref(item),
+    label: `Commercial — ${group.title} — ${item.name}`,
+  })),
   { href: "/quote", label: "Request a Quote" },
   { href: "/contact", label: "Contact Us" },
 ];
@@ -286,7 +339,7 @@ export const PLANNED_ROUTES = ["/about"] as const;
  *
  * THERE IS NO "ABOUT" ENTRY EITHER, by the client's decision. /about is still
  * reached from the footer and from the hero's second button, so the route is
- * not orphaned — it is simply not one of the six tabs competing for the bar.
+ * not orphaned — it is simply not one of the tabs competing for the bar.
  */
 /**
  * Hospitality is the one category with a landing page of its own rather than a
@@ -296,11 +349,26 @@ export const PLANNED_ROUTES = ["/about"] as const;
  * helpful links cannot disagree about where Hospitality lives.
  */
 export function categoryHref(slug: string) {
-  return slug === "hospitality" ? "/hospitality" : `/categories/${slug}`;
+  if (slug === "hospitality") return "/hospitality";
+  if (slug === "health-care") return HEALTH_CARE_BASE;
+  if (slug === "commercial-automotive") return COMMERCIAL_BASE;
+  return `/categories/${slug}`;
 }
 
+/**
+ * Categories kept off the header, by the client's decision. Institutional
+ * Laundry is now a heading inside the Commercial menu, which links to the
+ * Hospitality and Health-Care ranges a laundry buys from, so a tab of its own
+ * offered the same thing twice. The category itself stays — the footer, the
+ * homepage and the shop towel's home page still use it.
+ */
+const OFF_NAV = new Set(["institutional-laundry"]);
+
 export const MAIN_NAV = [
-  ...CATEGORIES.map((c) => ({ href: categoryHref(c.slug), label: c.shortName })),
+  ...CATEGORIES.filter((c) => !OFF_NAV.has(c.slug)).map((c) => ({
+    href: categoryHref(c.slug),
+    label: c.shortName,
+  })),
   { href: "/contact", label: "Contact Us" },
 ];
 

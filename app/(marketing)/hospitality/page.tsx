@@ -1,12 +1,10 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HOSPITALITY_GROUPS } from "@/lib/hospitality";
-import { LiteYouTube } from "@/components/marketing/LiteYouTube";
-import { PromoVideo } from "@/components/marketing/PromoVideo";
+import { RangeVideoBand } from "@/components/marketing/RangeVideoBand";
+import { RangeQuotePrompt } from "@/components/marketing/RangeQuotePrompt";
 import { Reveal } from "@/components/animation/Reveal";
 
 export const metadata: Metadata = {
@@ -31,59 +29,14 @@ export const metadata: Metadata = {
  * covering one range splits the inbound links and asks a search engine to pick
  * a winner.
  *
- * ─────────────────────────────────────────────────────────────────────────────
- * TO REPLACE THE VIDEO, drop a file at:
- *
- *   public/videos/hospitality.mp4        ← the film
- *   public/videos/hospitality.jpg        ← optional still, used as the poster
- *
- * Until it exists the band plays the same footage the homepage falls back to,
- * so the section is a real, playable video rather than a black box with a dead
- * control on it. Nothing else changes when the file lands. Keep it under ~50MB;
- * these ship in the git repository and GitHub rejects anything over 100MB.
- * ─────────────────────────────────────────────────────────────────────────────
+ * The film is public/videos/hospitality.mp4 once it exists — see
+ * components/marketing/RangeVideoBand.tsx.
  */
 
-const VIDEO_FILE = "hospitality.mp4";
-const VIDEO_POSTER = "hospitality.jpg";
-const FALLBACK_YOUTUBE_ID = "rOzAV40WgMA";
-
-const PUBLIC_VIDEOS = path.join(process.cwd(), "public", "videos");
-
-function resolveVideo() {
-  if (!existsSync(path.join(PUBLIC_VIDEOS, VIDEO_FILE))) return null;
-  return {
-    src: `/videos/${VIDEO_FILE}`,
-    poster: existsSync(path.join(PUBLIC_VIDEOS, VIDEO_POSTER))
-      ? `/videos/${VIDEO_POSTER}`
-      : undefined,
-  };
-}
-
 export default function HospitalityPage() {
-  const video = resolveVideo();
-
   return (
     <main className="bg-background">
-      {/* ── Video band ──────────────────────────────────────────────────
-          Full bleed directly under the header: no container, no rounding, no
-          frame. A 16:9 film inside a padded card reads as an embed; edge to
-          edge it reads as the page opening on footage. */}
-      <section
-        aria-label="Souwel hospitality linens"
-        className="bg-navy relative isolate overflow-hidden"
-      >
-        {video ? (
-          <PromoVideo src={video.src} poster={video.poster} label="Hospitality Linens" />
-        ) : (
-          <LiteYouTube
-            videoId={FALLBACK_YOUTUBE_ID}
-            title="Souwel hospitality linens"
-            poster="maxresdefault"
-            priority
-          />
-        )}
-      </section>
+      <RangeVideoBand name="hospitality" label="Hospitality Linens" />
 
       {/* ── Heading ─────────────────────────────────────────────────────── */}
       <section className="border-premium/20 border-b">
@@ -175,30 +128,7 @@ export default function HospitalityPage() {
         </div>
       </section>
 
-      {/* ── Quote prompt ────────────────────────────────────────────────── */}
-      <section className="bg-navy text-ivory relative isolate overflow-hidden">
-        <span
-          aria-hidden
-          className="pointer-events-none absolute -top-32 left-1/4 -z-10 h-80 w-[36rem] rounded-full bg-[#0b97ff]/18 blur-[100px]"
-        />
-        <div className="mx-auto w-full max-w-6xl px-5 py-16 text-center sm:px-8 sm:py-20">
-          <Reveal variant="fade-up">
-            <h2 className="font-heading mx-auto max-w-2xl text-3xl font-semibold text-balance sm:text-4xl">
-              Partner with us for your linen program
-            </h2>
-            <p className="text-ivory/75 mx-auto mt-4 max-w-xl leading-relaxed">
-              Sizes, weights and annual volumes. We come back with pricing, specifications and lead
-              times.
-            </p>
-            <Link
-              href="/quote"
-              className="bg-accent-gold text-navy focus-visible:ring-ring mt-8 inline-flex h-12 items-center rounded-lg px-7 text-[15px] font-semibold transition-[filter,transform] duration-200 hover:brightness-105 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-navy)] focus-visible:outline-none active:translate-y-px"
-            >
-              Request a quote
-            </Link>
-          </Reveal>
-        </div>
-      </section>
+      <RangeQuotePrompt />
     </main>
   );
 }

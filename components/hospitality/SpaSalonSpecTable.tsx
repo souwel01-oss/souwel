@@ -45,7 +45,7 @@ export function SpaSalonSpecTable({
 
   return (
     <>
-      <div className="border-premium/25 bg-card overflow-x-auto rounded-xl border">
+      <div className="border-premium/25 bg-card relative overflow-x-auto rounded-xl border">
         <table className="w-full min-w-[34rem] text-sm">
           <caption className="sr-only">
             Colours and stock codes for this product, with a quantity box per row

@@ -52,3 +52,6 @@ next-env.d.ts
 # covered further up, so the exception is simply restated after them. Expect
 # the CLI to append them again on a future link; keep this line last.
 !.env.example
+
+# Raw product photography (2+ GB). Web-sized copies live in public/images.
+/Products by Name 2026/

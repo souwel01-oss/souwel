@@ -42,10 +42,11 @@ export type QuoteRequestFormProps = {
   /** Slug taken from ?product=, so the row is pre-filled from a product page. */
   initialSlug?: string;
   /**
-   * The catalogue products of a quote list, with the quantities the buyer set
-   * in the drawer. Each becomes a row here, still editable.
+   * The catalogue rows of a quote list, with the quantities the buyer set.
+   * Each becomes a row here, still editable. `notes` names the row's colour,
+   * size and so on when one product was ordered in several.
    */
-  initialItems?: { slug: string; quantity: number }[];
+  initialItems?: { slug: string; quantity: number; notes?: string }[];
   /**
    * Identifies the list this form was last built from — the raw `?list=`.
    *
@@ -123,7 +124,7 @@ export function QuoteRequestForm({
           key: `seed-${index}`,
           slug: i.slug,
           quantity: String(i.quantity),
-          notes: "",
+          notes: i.notes ?? "",
         }))
       : enquiryName
         ? []

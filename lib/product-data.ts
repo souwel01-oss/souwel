@@ -34,13 +34,17 @@
  * hardest, and the sheet supplies none. Same rule as `certifications`: an empty
  * section is a gap, an invented one is a false claim.
  *
- * PHOTOGRAPHY IS STILL A GAP. There are eight source photographs for
- * twenty-four products, so pages share imagery. Reuse is survivable;
- * MISLABELLING IS NOT -- every `alt` describes what is actually in the frame,
- * not what the page is about. Keep it that way when real photography arrives.
+ * PHOTOGRAPHY IS STILL A GAP FOR SOME OF THESE. Twenty products now carry
+ * the client's own photographs (see PHOTOGRAPHED at the foot of this file);
+ * the rest share eight stand-ins. Reuse is survivable; MISLABELLING IS NOT --
+ * every `alt` describes what is actually in the frame, not what the page is
+ * about. Keep it that way as more photography arrives.
  */
 
 import { PRODUCT_PAGE_SLUGS } from "@/lib/product-slugs";
+import { LINE_PHOTOS as HOSPITALITY_PHOTOS, type Shot } from "@/lib/hospitality-photos";
+import { PRODUCT_PHOTOS as HEALTH_CARE_PRODUCT_PHOTOS } from "@/lib/health-care-photos";
+import { PRODUCT_PHOTOS as COMMERCIAL_PRODUCT_PHOTOS } from "@/lib/commercial-photos";
 
 export type SpecGroup = {
   title: string;
@@ -1224,8 +1228,33 @@ const AUTHORED: AuthoredProduct[] = [
   },
 ];
 
+/**
+ * Catalogue pages whose product the client has since photographed. The shots
+ * live in lib/hospitality-photos.ts, lib/health-care-photos.ts and
+ * lib/commercial-photos.ts; this only
+ * says which page each set belongs on, so a catalogue page and its range page
+ * cannot show two different pictures of one product. Every other entry keeps
+ * the stand-ins written against it.
+ */
+const PHOTOGRAPHED: Record<string, Shot[] | undefined> = {
+  "bath-mat": HOSPITALITY_PHOTOS["bath-mats"],
+  "bar-mop": HOSPITALITY_PHOTOS["bar-mop"],
+  "kitchen-towel-herringbone": HOSPITALITY_PHOTOS["kitchen-towel"],
+  "glass-towel": HOSPITALITY_PHOTOS["glass-towel"],
+  "bistro-napkin": HOSPITALITY_PHOTOS["bistro-napkin"],
+  napkin: HOSPITALITY_PHOTOS.napkins,
+  ...HEALTH_CARE_PRODUCT_PHOTOS,
+  ...COMMERCIAL_PRODUCT_PHOTOS,
+};
+
+function withPhotography(p: AuthoredProduct): AuthoredProduct {
+  const shots = PHOTOGRAPHED[p.slug];
+  if (!shots?.length) return p;
+  return { ...p, heroImageUrl: shots[0].src, heroImageAlt: shots[0].alt, galleryImageUrls: shots };
+}
+
 export const PRODUCTS: Record<string, ProductDetail> = Object.fromEntries(
-  AUTHORED.map((p) => [
+  AUTHORED.map(withPhotography).map((p) => [
     p.slug,
     { ...p, keyFacts: deriveKeyFacts(p), specifications: deriveSpecifications(p) },
   ])

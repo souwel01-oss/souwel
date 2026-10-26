@@ -7,6 +7,7 @@ import { ArrowRight, ClipboardList, Trash2, X } from "lucide-react";
 import {
   QUOTE_LIST_MAX_LINE_QUANTITY,
   QUOTE_LIST_MAX_QUANTITY,
+  hasStockCodes,
   quoteListCount,
   quoteListHref,
   type QuoteListItem,
@@ -247,10 +248,13 @@ function ListRow({ row, onNavigate }: { row: ListRowData; onNavigate: () => void
           <p className="text-muted-foreground mt-0.5 text-[13px] leading-snug">
             {line.label}
             {/* The client's own code, so a buyer can match the row to their
-                order sheet without opening the product page. */}
-            <span className="text-muted-foreground/80 ml-1.5 font-mono text-[11px]">
-              {line.sku}
-            </span>
+                order sheet without opening the product page. Only where it
+                is one: a catalogue row's key is this site's, not theirs. */}
+            {hasStockCodes(item.kind) ? (
+              <span className="text-muted-foreground/80 ml-1.5 font-mono text-[11px]">
+                {line.sku}
+              </span>
+            ) : null}
           </p>
         ) : null}
 

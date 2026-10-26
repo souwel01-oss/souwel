@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { gsap, useGSAP, prefersReducedMotion } from "@/lib/animation/gsap";
-import { CATEGORIES } from "@/lib/site-config";
+import { CATEGORIES, categoryHref } from "@/lib/site-config";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -445,7 +445,7 @@ export function CategoryCarousel() {
                 style={{ pointerEvents: offstage ? "none" : "auto" }}
               >
                 <Link
-                  href={`/categories/${category.slug}`}
+                  href={categoryHref(category.slug)}
                   tabIndex={offstage ? -1 : 0}
                   // Focusing a side card promotes it, so keyboard users never
                   // interact with something they cannot properly see.

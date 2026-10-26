@@ -10,6 +10,7 @@ import {
   type SpaSalonProduct,
 } from "@/lib/spa-salon";
 import { swatchColour } from "@/lib/hospitality";
+import { LINE_PHOTOS } from "@/lib/hospitality-photos";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { SpaSalonSpecPicker } from "@/components/hospitality/SpaSalonSpecPicker";
 import { SpaSalonSpecTable } from "@/components/hospitality/SpaSalonSpecTable";
@@ -29,7 +30,7 @@ import { Reveal } from "@/components/animation/Reveal";
  * holding one card is a click that exists only to be clicked through.
  */
 
-/** Stand-ins. There is no photography for these four yet. */
+/** Stand-ins, for the three of the four the client's shoot does not cover. */
 const IMAGES = [
   { src: "/images/products/towels.jpg", alt: "Stack of folded white towels" },
   { src: "/images/products/other-textile.jpg", alt: "Close-up of plain white woven textile" },
@@ -70,6 +71,7 @@ export default async function SpaSalonItemPage({
 }
 
 function ProductDetail({ product }: { product: SpaSalonProduct }) {
+  const images = LINE_PHOTOS[product.slug] ?? IMAGES;
   const colours = product.colours.map((c) => ({
     sku: c.sku,
     colour: c.colour,
@@ -89,7 +91,7 @@ function ProductDetail({ product }: { product: SpaSalonProduct }) {
         kind: "spa",
         slug: product.slug,
         name: product.name,
-        image: IMAGES[0].src,
+        image: images[0].src,
         href: spaSalonProductHref(product),
       }}
       lineMeta={product.colours.map((c) => ({
@@ -109,7 +111,7 @@ function ProductDetail({ product }: { product: SpaSalonProduct }) {
         <section className="py-12 sm:py-16">
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-14">
             <Reveal variant="fade-up">
-              <ProductGallery images={IMAGES} />
+              <ProductGallery images={images} />
             </Reveal>
 
             <div className="flex flex-col justify-center">

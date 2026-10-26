@@ -86,6 +86,8 @@ export type HospitalityCardProduct = {
   /** No data source yet — see the note above. */
   badge: string | null;
   rating: { stars: number; count: number } | null;
+  /** Title drawn in red — see `alert` in lib/health-care.ts. */
+  alert?: boolean;
 };
 
 /** Swatches shown before the overflow count takes over. */
@@ -181,7 +183,12 @@ export function ProductCard({ product }: { product: HospitalityCardProduct }) {
         <h3 className="text-[15px] leading-snug font-semibold">
           <Link
             href={product.href}
-            className="text-foreground hover:text-primary-strong dark:hover:text-primary focus-visible:ring-ring rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
+            className={cn(
+              "focus-visible:ring-ring rounded-sm transition-colors focus-visible:ring-2 focus-visible:outline-none",
+              product.alert
+                ? "text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                : "text-foreground hover:text-primary-strong dark:hover:text-primary"
+            )}
           >
             {product.name}
           </Link>

@@ -40,6 +40,8 @@
  * stands between the range listing and either detail page.
  */
 
+import { roundUpToCase } from "@/lib/case-pack";
+
 export type TerrySizeKey = "wash-cloth" | "hand-towel" | "bath-towel" | "bath-mat" | "pool-towel";
 
 export type TerrySize = {
@@ -57,7 +59,8 @@ export const TERRY_SIZES: TerrySize[] = [
   { key: "wash-cloth", name: "Wash Cloth", dimensions: '13"X13"', dozenPerCase: 15 },
   { key: "hand-towel", name: "Hand Towel", dimensions: '16"X27"', dozenPerCase: 10 },
   { key: "bath-towel", name: "Bath Towel", dimensions: '27"X54"', dozenPerCase: 3 },
-  { key: "bath-mat", name: "Bath Matt", dimensions: '20"X30"', dozenPerCase: 4 },
+  // The sheet heads this column "BATH MATT"; the product is a bath mat.
+  { key: "bath-mat", name: "Bath Mat", dimensions: '20"X30"', dozenPerCase: 4 },
   { key: "pool-towel", name: "Pool Towel", dimensions: '30"X60"', dozenPerCase: 2 },
 ];
 
@@ -67,7 +70,7 @@ export const TERRY_SIZES: TerrySize[] = [
  * Which is also why both Classic Terry constructions carry the SAME bath mat
  * code, BM2030CRH: it is literally the same mat.
  */
-export const BATH_MAT_NOTE = "Bath matts are 100% cotton on every construction.";
+export const BATH_MAT_NOTE = "Bath mats are 100% cotton on every construction.";
 
 /** One orderable line: a size, its weight, and the client's code for it. */
 export type TerryLine = {
@@ -132,10 +135,11 @@ function std(sizeKey: TerrySizeKey, weight: string, sku: string): TerryLine {
 /**
  * The nine rows of the sheet, in sheet order.
  *
- * NO PHOTOGRAPHY EXISTS FOR THESE. The cards and detail pages fall back to
- * the range imagery, the same way the rest of the Hospitality listing does. A
- * card with a real weight table and a stand-in photograph is honest; an
- * invented weight would not be.
+ * ONLY CABANA POOL TOWELS HAS A PHOTOGRAPH OF ITS OWN. The other eight show
+ * the client's range shots of their terry, the same way the rest of the
+ * Hospitality listing falls back — see lib/hospitality-photos.ts for why the
+ * shoot cannot be matched to these rows yet. A card with a real weight table
+ * and a range photograph is honest; an invented weight would not be.
  */
 export const TERRY_PRODUCTS: TerryProduct[] = [
   {
@@ -334,10 +338,16 @@ export function terryCardSummary(product: TerryProduct): string {
    The order list, as it travels to the quote form
    ─────────────────────────────────────────────────────────────────────────── */
 
-/** Supplied by the dozen. Mirrored in TerrySpecPicker and the quote page. */
-export const TERRY_DOZEN = 12;
-
-export const roundUpToDozen = (n: number) => Math.ceil(n / TERRY_DOZEN) * TERRY_DOZEN;
+/**
+ * QUANTITIES ARE IN DOZENS AND ROUND UP TO A FULL CASE. The sheet's dozens per
+ * case is a minimum as well as a pack, so a wash cloth packed 15 dz to a case
+ * is ordered in 15s and 20 becomes 30. A line the sheet gives no case figure
+ * for (the Sauna Bath Towel) rounds to the whole dozen only. See
+ * lib/case-pack.ts.
+ */
+export function terryCaseStep(line: { dozenPerCase: number | null }): number {
+  return line.dozenPerCase ?? 1;
+}
 
 export type TerryOrderLine = { sku: string; quantity: number };
 
@@ -375,7 +385,7 @@ export function parseTerryLines(product: TerryProduct, raw: string | undefined):
     const n = Number(qty);
     if (n <= 0) continue;
     seen.add(sku);
-    out.push({ ...line, quantity: roundUpToDozen(n) });
+    out.push({ ...line, quantity: roundUpToCase(n, terryCaseStep(line)) });
   }
 
   return out;

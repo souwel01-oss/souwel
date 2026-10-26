@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
 import { FB_BASE, encodeFbLines } from "@/lib/food-beverage";
+import { roundUpToCase, type QuantityUnit } from "@/lib/case-pack";
 import { RangeListScopeNote, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -28,19 +29,20 @@ export type FbSpecRow = {
   colour: string;
   /** Indicative swatch, or null when the shade name has no mapping. */
   hex: string | null;
+  /** What a quantity goes up in: this size's case, in the product's unit. */
+  step: number;
 };
 
 export function FoodBevSpecTable({
   productSlug,
   rows,
   showSize,
-  dozenRounding,
+  unit,
 }: {
   productSlug: string;
   rows: FbSpecRow[];
   showSize: boolean;
-  /** Null where the sheet gives no per-dozen figure to round to. */
-  dozenRounding: number | null;
+  unit: QuantityUnit;
 }) {
   const { lines, setLine, removeLine, quantityOf, selected } = useRangeOrderList();
 
@@ -52,13 +54,20 @@ export function FoodBevSpecTable({
       : null;
 
   const bySku = new Map(rows.map((r) => [r.sku, r]));
-  const headings = showSize
-    ? ["Size", "Colour", "SKU", "Quantity", ""]
-    : ["Colour", "SKU", "Quantity", ""];
+  // The case column, as on the Terry table, wherever the sheet gives one.
+  const showCase = rows.some((r) => r.step > 1);
+  const headings = [
+    ...(showSize ? ["Size"] : []),
+    "Colour",
+    "SKU",
+    ...(showCase ? ["Per case"] : []),
+    `Quantity (${unit})`,
+    "",
+  ];
 
   return (
     <>
-      <div className="border-premium/25 bg-card overflow-x-auto rounded-xl border">
+      <div className="border-premium/25 bg-card relative overflow-x-auto rounded-xl border">
         <table className="w-full min-w-[36rem] text-sm">
           <caption className="sr-only">
             Sizes, colours and stock codes for this product, with a quantity box per row
@@ -82,7 +91,8 @@ export function FoodBevSpecTable({
                 key={row.sku}
                 row={row}
                 showSize={showSize}
-                dozenRounding={dozenRounding}
+                showCase={showCase}
+                unit={unit}
                 listed={quantityOf(row.sku)}
                 highlighted={row.sku === selected}
                 onAdd={(qty) => setLine(row.sku, qty)}
@@ -124,7 +134,7 @@ export function FoodBevSpecTable({
                   {showSize ? <span className="text-muted-foreground">{row.size}</span> : null}
                   <span className="text-muted-foreground font-mono text-[12px]">{row.sku}</span>
                   <span className="text-foreground ml-auto font-semibold tabular-nums">
-                    {line.quantity.toLocaleString("en-US")}
+                    {line.quantity.toLocaleString("en-US")} {unit}
                   </span>
                   <button
                     type="button"
@@ -174,9 +184,7 @@ export function FoodBevSpecTable({
       <p className="text-muted-foreground mt-6 max-w-2xl text-[13px] leading-relaxed">
         Sizes and colours not listed are not part of this line. Shades are matched from a physical
         sample when we quote.{" "}
-        {dozenRounding
-          ? "Quantities are supplied by the dozen and round up to the next twelve. "
-          : ""}
+        {unit === "dz" ? "Quantities are in dozens and round up to a full case. " : ""}
         <Link href={FB_BASE} className="underline underline-offset-4">
           The rest of Food &amp; Beverage
         </Link>{" "}
@@ -189,14 +197,16 @@ export function FoodBevSpecTable({
 function SpecTableRow({
   row,
   showSize,
-  dozenRounding,
+  showCase,
+  unit,
   listed,
   highlighted,
   onAdd,
 }: {
   row: FbSpecRow;
   showSize: boolean;
-  dozenRounding: number | null;
+  showCase: boolean;
+  unit: QuantityUnit;
   listed: number | null;
   highlighted: boolean;
   onAdd: (quantity: number) => void;
@@ -208,7 +218,7 @@ function SpecTableRow({
 
   const add = () => {
     if (!canAdd) return;
-    onAdd(dozenRounding ? Math.ceil(typed / dozenRounding) * dozenRounding : typed);
+    onAdd(roundUpToCase(typed, row.step));
     setDraft("");
   };
 
@@ -232,18 +242,23 @@ function SpecTableRow({
           {listed !== null ? (
             <span className="text-primary-strong dark:text-primary inline-flex items-center gap-1 text-[11.5px] font-semibold">
               <Check aria-hidden className="size-3" />
-              {listed.toLocaleString("en-US")}
+              {listed.toLocaleString("en-US")} {unit}
             </span>
           ) : null}
         </span>
       </td>
       <td className="text-foreground/80 px-5 py-3.5 font-mono text-[12.5px]">{row.sku}</td>
+      {showCase ? (
+        <td className="text-foreground/80 px-5 py-3.5 whitespace-nowrap">
+          {row.step > 1 ? `${row.step} ${unit}` : "—"}
+        </td>
+      ) : null}
       <td className="px-5 py-3.5">
         <input
           type="number"
           inputMode="numeric"
-          min={dozenRounding ?? 1}
-          step={dozenRounding ?? 1}
+          min={row.step}
+          step={row.step}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -252,7 +267,9 @@ function SpecTableRow({
               add();
             }
           }}
-          aria-label={`Quantity of ${row.colour}${showSize ? ` ${row.size}` : ""}`}
+          aria-label={`Quantity of ${row.colour}${showSize ? ` ${row.size}` : ""} in ${
+            unit === "dz" ? "dozens" : "pieces"
+          }`}
           placeholder="Qty"
           className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-10 w-28 rounded-lg border px-3 text-[14px] outline-none focus-visible:ring-4"
         />

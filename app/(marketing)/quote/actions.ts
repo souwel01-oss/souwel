@@ -130,25 +130,29 @@ export async function submitQuoteRequest(input: unknown): Promise<QuoteRequestRe
   }
 
   // Collapse duplicates — the same product can be added twice from two pages.
-  const bySlug = new Map<string, { slug: string; quantity: number; notes?: string }>();
+  // Keyed on the notes as well as the slug: one product ordered in two rows
+  // (Absorbent Towel in Jade and in Blue) arrives as two items whose notes
+  // differ, and Sales prices them separately.
+  const byKey = new Map<string, { slug: string; quantity: number; notes?: string }>();
   for (const item of items) {
-    const existing = bySlug.get(item.slug);
+    const key = `${item.slug}\n${item.notes ?? ""}`;
+    const existing = byKey.get(key);
     if (existing) {
       existing.quantity += item.quantity;
-      existing.notes = existing.notes ?? item.notes;
     } else {
-      bySlug.set(item.slug, { ...item });
+      byKey.set(key, { ...item });
     }
   }
-  const merged = [...bySlug.values()];
+  const merged = [...byKey.values()];
+  const slugs = [...new Set(merged.map((i) => i.slug))];
 
   const products = await prisma.product.findMany({
-    where: { slug: { in: merged.map((i) => i.slug) } },
+    where: { slug: { in: slugs } },
     select: { id: true, slug: true },
   });
   const productIdBySlug = new Map(products.map((p) => [p.slug, p.id]));
 
-  if (productIdBySlug.size !== merged.length) {
+  if (productIdBySlug.size !== slugs.length) {
     // The catalogue is missing from the database — see prisma/seed-catalog.ts.
     // Say so plainly rather than dropping the request on the floor: the visitor
     // needs to know their message did NOT reach anyone.

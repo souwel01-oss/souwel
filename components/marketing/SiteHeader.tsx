@@ -4,7 +4,16 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronDown, Menu, X } from "lucide-react";
-import { CATEGORY_PRODUCTS, MAIN_NAV, SITE, productHref } from "@/lib/site-config";
+import {
+  CATEGORIES,
+  CATEGORY_PRODUCTS,
+  MAIN_NAV,
+  SITE,
+  categoryHref,
+  nestedItems,
+  productHref,
+  type ProductGroup,
+} from "@/lib/site-config";
 import { CategoryMegaMenu } from "@/components/marketing/CategoryMegaMenu";
 import { SouwelLogo } from "@/components/marketing/SouwelLogo";
 import { DrawerAuth, HeaderAuth } from "@/components/auth/HeaderAuth";
@@ -15,17 +24,16 @@ import { cn } from "@/lib/utils";
 /**
  * Category slug a nav href points at, or null if it is not a category link.
  *
- * TWO SHAPES, because Hospitality no longer lives under /categories. It has its
- * own landing page at /hospitality — five ranges, a video band and thirty-one
- * lines outgrew the shared category template — and the mega-menu is keyed on
- * the slug this returns. Matching only the /categories/ shape silently dropped
- * the chevron, the hover panel and the whole drawer disclosure from the busiest
- * tab on the bar, with no error anywhere: the tab simply became a plain link.
+ * READ BACK THROUGH categoryHref, NOT MATCHED AGAINST A URL SHAPE. Hospitality
+ * and Health-Care no longer live under /categories, and the mega-menu is keyed
+ * on the slug this returns. Matching only the /categories/ shape silently
+ * dropped the chevron, the hover panel and the whole drawer disclosure from a
+ * tab, with no error anywhere: the tab simply became a plain link. It happened
+ * once for each range that moved, so this now asks the one function that knows
+ * where every category lives.
  */
 function slugOf(href: string) {
-  if (href === "/hospitality") return "hospitality";
-  const m = /^\/categories\/([a-z0-9-]+)$/.exec(href);
-  return m?.[1] ?? null;
+  return CATEGORIES.find((c) => categoryHref(c.slug) === href)?.slug ?? null;
 }
 
 /**
@@ -447,19 +455,34 @@ export function SiteHeader() {
                           </h3>
                         ) : null}
                         <ul className="grid grid-cols-1 gap-y-0.5 sm:grid-cols-2">
-                          {group.items.map((name) => (
+                          {nestedItems(group).map(({ name, subs }) => (
                             <li key={name}>
-                              <Link
-                                href={productHref(slug, name)}
-                                onClick={() => setOpen(false)}
-                                className="text-muted-foreground hover:text-foreground flex items-center gap-2.5 py-2.5 text-sm"
-                              >
-                                <span
-                                  aria-hidden
-                                  className="bg-primary/50 size-1.5 shrink-0 rounded-full"
-                                />
-                                {name}
-                              </Link>
+                              <DrawerItemLink
+                                group={group}
+                                categorySlug={slug}
+                                name={name}
+                                onNavigate={() => setOpen(false)}
+                              />
+                              {subs.length ? (
+                                <ul
+                                  className={`ml-[2.5px] border-l pl-4 ${
+                                    group.alertItems?.includes(name)
+                                      ? "border-red-500/30"
+                                      : "border-border"
+                                  }`}
+                                >
+                                  {subs.map((sub) => (
+                                    <li key={sub}>
+                                      <DrawerItemLink
+                                        group={group}
+                                        categorySlug={slug}
+                                        name={sub}
+                                        onNavigate={() => setOpen(false)}
+                                      />
+                                    </li>
+                                  ))}
+                                </ul>
+                              ) : null}
                             </li>
                           ))}
                         </ul>
@@ -477,5 +500,39 @@ export function SiteHeader() {
         </nav>
       </div>
     </header>
+  );
+}
+
+/** One product link in the drawer — the phone counterpart of the mega-menu's. */
+function DrawerItemLink({
+  group,
+  categorySlug,
+  name,
+  onNavigate,
+}: {
+  group: ProductGroup;
+  categorySlug: string;
+  name: string;
+  onNavigate: () => void;
+}) {
+  const alert = group.alertItems?.includes(name);
+  const subLabel = group.subItems?.[name];
+  return (
+    <Link
+      href={productHref(categorySlug, name)}
+      onClick={onNavigate}
+      aria-label={subLabel ? name : undefined}
+      className={`flex items-center gap-2.5 ${subLabel ? "py-2 text-[13px]" : "py-2.5 text-sm"} ${
+        alert
+          ? "font-semibold text-red-600 hover:text-red-700 dark:text-red-400"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      <span
+        aria-hidden
+        className={`size-1.5 shrink-0 rounded-full ${alert ? "bg-red-500/70" : "bg-primary/50"}`}
+      />
+      {subLabel ?? name}
+    </Link>
   );
 }

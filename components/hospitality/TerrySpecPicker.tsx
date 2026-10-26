@@ -2,7 +2,8 @@
 
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
-import { TERRY_DOZEN, roundUpToDozen, terryWeightLabel } from "@/lib/terry-towels";
+import { terryCaseStep, terryWeightLabel } from "@/lib/terry-towels";
+import { caseNote, roundUpToCase } from "@/lib/case-pack";
 import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -27,17 +28,20 @@ import { cn } from "@/lib/utils";
  * implying a size we could supply if asked, and no size appears anywhere the
  * sheet leaves blank.
  *
- * ── QUANTITY IS IN DOZENS ────────────────────────────────────────────────────
+ * ── QUANTITY IS IN DOZENS, IN WHOLE CASES ───────────────────────────────────
  *
- * These are supplied by the dozen, so a quantity that is not a multiple of
- * twelve cannot be filled as typed. Rather than reject it, the field ROUNDS UP
- * to the next twelve: 10,000 becomes 10,008.
+ * Each size is packed a set number of dozens to the case, and the case is the
+ * minimum order. A quantity that is not a whole number of cases cannot be
+ * filled as typed, so rather than reject it the field ROUNDS UP to the next
+ * case: a wash cloth packed 15 dz to the case turns 20 into 30. See
+ * lib/case-pack.ts.
  *
  * It rounds on BLUR, never while typing. Snapping on each keystroke means the
- * "1" of 1200 becomes 12 before the second digit lands, and the buyer fights
- * the field the whole way. And it says so afterwards: a number that silently
- * changes itself between being typed and being sent is the kind of thing a
- * buyer discovers on the quotation.
+ * "1" of 150 becomes 15 before the second digit lands, and the buyer fights
+ * the field the whole way. It rounds again when the size changes, because the
+ * case does. And it says so afterwards: a number that silently changes itself
+ * between being typed and being sent is the kind of thing a buyer discovers
+ * on the quotation.
  */
 
 export type TerryPickerSize = {
@@ -73,14 +77,19 @@ export function TerrySpecPicker({
   const helpId = useId();
 
   const chosen = sizes.find((s) => s.sku === selected) ?? null;
+  // Until a size is chosen there is no case to round to, only the dozen.
+  const step = chosen ? terryCaseStep(chosen) : 1;
 
   const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const qty = typed !== null && typed > 0 && typed % TERRY_DOZEN === 0 ? typed : null;
+  const qty = typed !== null && typed > 0 && typed % step === 0 ? typed : null;
 
-  const snapToDozen = () => {
-    if (typed === null || typed <= 0) return;
-    const rounded = roundUpToDozen(typed);
-    setRoundedFrom(rounded === typed ? null : typed);
+  // From the figure the buyer typed, not from an earlier rounding of it, so
+  // trying a few sizes does not ratchet the quantity up.
+  const snapToCase = (perCase: number) => {
+    const base = roundedFrom ?? typed;
+    if (base === null || base <= 0) return;
+    const rounded = roundUpToCase(base, perCase);
+    setRoundedFrom(rounded === base ? null : base);
     setQuantity(String(rounded));
   };
 
@@ -136,7 +145,10 @@ export function TerrySpecPicker({
                 key={size.sku}
                 type="button"
                 aria-pressed={active}
-                onClick={() => setSelected(size.sku)}
+                onClick={() => {
+                  setSelected(size.sku);
+                  snapToCase(terryCaseStep(size));
+                }}
                 className={cn(
                   "focus-visible:ring-ring rounded-lg border px-4 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
                   active
@@ -164,7 +176,7 @@ export function TerrySpecPicker({
           <>
             Weight for {chosen.name}:{" "}
             <span className="text-foreground font-semibold">{terryWeightLabel(chosen)}</span>
-            {chosen.dozenPerCase ? <> · packed {chosen.dozenPerCase} dozen per case</> : null}
+            {chosen.dozenPerCase ? <> · packed {chosen.dozenPerCase} dz per case</> : null}
           </>
         ) : (
           "Pick a product type to see its weight."
@@ -174,16 +186,16 @@ export function TerrySpecPicker({
       {/* ── Quantity ─────────────────────────────────────────────────── */}
       <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
         <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity <span className="text-muted-foreground font-normal">(required)</span>
+          Quantity in dozens <span className="text-muted-foreground font-normal">(required)</span>
         </label>
         <input
           id={qtyId}
           type="number"
           inputMode="numeric"
-          // step and min so the browser's own spinners already move in twelves —
-          // the blur handler is the safety net, not the only thing teaching it.
-          min={TERRY_DOZEN}
-          step={TERRY_DOZEN}
+          // step and min so the browser's own spinners already move in whole
+          // cases — the blur handler is the safety net, not the only teacher.
+          min={step}
+          step={step}
           required
           aria-describedby={qtyHelpId}
           value={quantity}
@@ -191,18 +203,19 @@ export function TerrySpecPicker({
             setQuantity(e.target.value);
             setRoundedFrom(null);
           }}
-          onBlur={snapToDozen}
-          placeholder="e.g. 504"
+          onBlur={() => snapToCase(step)}
+          placeholder={`e.g. ${step * 2}`}
           className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
         />
         <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
           {roundedFrom !== null ? (
             <span className="text-foreground font-medium">
-              Rounded up from {roundedFrom.toLocaleString("en-US")} — supplied by the dozen.
+              Rounded up from {roundedFrom.toLocaleString("en-US")} to a full case.{" "}
             </span>
-          ) : (
-            "Supplied by the dozen, so quantities go up in twelves."
-          )}
+          ) : null}
+          {chosen
+            ? caseNote(step, "dz")
+            : "Quantity in dozens. It rounds up to a full case of the size you pick."}
         </p>
       </div>
 
@@ -228,7 +241,7 @@ export function TerrySpecPicker({
           {!chosen
             ? "Choose a product type above to continue."
             : !qty
-              ? "Enter a quantity in multiples of 12 to continue."
+              ? "Enter a quantity in dozens to continue."
               : "Adds this to your list and takes you to the full table, where you can add more sizes."}
         </p>
       </div>

@@ -121,7 +121,7 @@ const PRODUCTS: Product[] = [
   {
     name: "Other Textile & Linen",
     tagline: "More Ways We Can Help",
-    href: "/categories/health-care",
+    href: "/health-care",
     image: "/images/products/other-textile.jpg",
     alt: "Close-up of plain white woven textile",
     palette: ["#DEC489", "#8A6E2C", "#43350F"],

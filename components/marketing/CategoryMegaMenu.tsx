@@ -8,6 +8,7 @@ import {
   CATEGORIES,
   CATEGORY_PRODUCTS,
   categoryHref,
+  nestedItems,
   productHref,
   type ProductGroup,
 } from "@/lib/site-config";
@@ -51,6 +52,17 @@ const CLOSE_DUR = 0.22;
  * source as literal strings, so a template like `col-start-${n}` compiles to
  * nothing at all and the block silently lands wherever the grid puts it.
  */
+/**
+ * The grouped grid's column count — as many as the category's blocks use.
+ * Hospitality fills five; Commercial's three would otherwise sit in the left
+ * three-fifths of the panel with their longer labels wrapping for no reason.
+ */
+const GRID_COLS: Record<number, string> = {
+  3: "grid-cols-3",
+  4: "grid-cols-4",
+  5: "grid-cols-5",
+};
+
 const COL_START: Record<number, string> = {
   1: "col-start-1",
   2: "col-start-2",
@@ -285,7 +297,11 @@ export function CategoryMegaMenu({
                     has no blocks to align, and balanced columns are the right
                     shape for it — the same list it has always been. */}
                 {groups.some((g) => g.col) ? (
-                  <div className="mt-4 grid grid-cols-5 items-start gap-x-5 gap-y-5">
+                  <div
+                    className={`mt-4 grid ${
+                      GRID_COLS[Math.max(...groups.map((g) => g.col ?? 1))] ?? "grid-cols-5"
+                    } items-start gap-x-5 gap-y-5`}
+                  >
                     {groups.map((group) => (
                       <div
                         key={group.title ?? "all"}
@@ -334,23 +350,67 @@ function GroupBlock({ group, categorySlug }: { group: ProductGroup; categorySlug
       ) : null}
 
       <ul>
-        {group.items.map((name) => (
-          <li key={name} data-mm="item">
-            <Link
-              href={productHref(categorySlug, name)}
-              className="group/mm text-muted-foreground hover:text-foreground focus-visible:ring-ring flex items-center gap-2.5 rounded-md py-2 text-sm transition-colors focus-visible:ring-2 focus-visible:outline-none"
-            >
-              {/* Marker picks up the map's lighting language — dim at rest, lit
-                  on hover, so the row reads as active without moving anything. */}
-              <span
-                aria-hidden
-                className="bg-primary/40 group-hover/mm:bg-primary size-1.5 shrink-0 rounded-full transition-all duration-200 group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
-              />
-              {name}
-            </Link>
+        {nestedItems(group).map(({ name, subs }) => (
+          // break-inside-avoid keeps a parent and its sub-items in one column.
+          <li key={name} className="break-inside-avoid">
+            <ItemLink group={group} categorySlug={categorySlug} name={name} />
+            {subs.length ? (
+              <ul
+                className={`ml-[2.5px] border-l pl-4 ${
+                  group.alertItems?.includes(name) ? "border-red-500/30" : "border-border"
+                }`}
+              >
+                {subs.map((sub) => (
+                  <li key={sub}>
+                    <ItemLink group={group} categorySlug={categorySlug} name={sub} />
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </li>
         ))}
       </ul>
     </>
+  );
+}
+
+function ItemLink({
+  group,
+  categorySlug,
+  name,
+}: {
+  group: ProductGroup;
+  categorySlug: string;
+  name: string;
+}) {
+  const alert = group.alertItems?.includes(name);
+  const subLabel = group.subItems?.[name];
+  return (
+    <Link
+      data-mm="item"
+      href={productHref(categorySlug, name)}
+      // "Towel" is clear only beside its parent line. A screen reader hears
+      // the link on its own, so it gets the full name.
+      aria-label={subLabel ? name : undefined}
+      className={`group/mm focus-visible:ring-ring flex items-center gap-2.5 rounded-md transition-colors focus-visible:ring-2 focus-visible:outline-none ${
+        subLabel ? "py-1.5 text-[13px]" : "py-2 text-sm"
+      } ${
+        alert
+          ? "font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+          : "text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {/* Marker picks up the map's lighting language — dim at rest, lit
+          on hover, so the row reads as active without moving anything. */}
+      <span
+        aria-hidden
+        className={`size-1.5 shrink-0 rounded-full transition-all duration-200 ${
+          alert
+            ? "bg-red-500/60 group-hover/mm:bg-red-500 group-hover/mm:shadow-[0_0_8px_2px_rgb(239_68_68/0.45)]"
+            : "bg-primary/40 group-hover/mm:bg-primary group-hover/mm:shadow-[0_0_8px_2px_rgb(11_151_255/0.45)]"
+        }`}
+      />
+      {subLabel ?? name}
+    </Link>
   );
 }

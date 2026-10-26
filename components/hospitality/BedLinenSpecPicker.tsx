@@ -23,10 +23,11 @@ import { cn } from "@/lib/utils";
  *
  * ── QUANTITY ROUNDS TO THIS PRODUCT'S OWN CASE PACK ─────────────────────────
  *
- * Terry Towels round to a dozen because towels are sold by the dozen. Bed
- * linen is sold by the case, and the case size is not one number across the
- * range — 24 for sheets, 72 for pillow cases, 12 for duvet covers, all from
- * the sheet's own PCS/CASE column.
+ * Every range rounds up to a full case, because the case is the minimum
+ * order (see lib/case-pack.ts). Towels count in dozens. Bed linen counts in
+ * pieces, and the case size is not one number across the range: 24 for
+ * sheets, 72 for pillow cases and 12 for duvet covers, all from the sheet's
+ * own PCS/CASE column.
  */
 
 export type BedLinenPickerSize = {

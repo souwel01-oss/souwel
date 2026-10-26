@@ -9,13 +9,18 @@
  * NO PRICES HERE EITHER. This is a list of what a buyer wants quoted. It is a
  * cart in shape only: nothing in it has a price, and nothing is ever paid for.
  *
- * TWO KINDS OF ENTRY, because the site has two kinds of product page:
+ * TWO SHAPES OF ENTRY:
  *
- *   - a catalogue product (/products/…) is one line with one quantity, and it
- *     becomes a real line item on the request that Sales can price.
- *   - a range product — Towel, Bed Linen, Food & Beverage, Spa Salon — is one
- *     product with a line per stock code, each with its own quantity, because
- *     that is how the client's sheets are written and how those pages order.
+ *   - "product" is one line with one quantity. It is what the catalogue pages
+ *     used to add, and it is still read so that a list saved back then still
+ *     sends.
+ *   - every other kind is one product page with a line per row, each with its
+ *     own quantity, because that is how the client's sheets are written and how
+ *     the pages order. Towel, Bed Linen, Food & Beverage and Spa Salon key their
+ *     rows on the sheet's stock codes. "cat" (/products/…), "hc" (a Health-Care
+ *     line) and "com" (a Commercial line) are catalogue pages, keyed on the row
+ *     codes from lib/catalogue-lines.ts. Their rows still arrive as line items
+ *     that Sales can price.
  *
  * ONLY SLUGS, STOCK CODES AND QUANTITIES EVER LEAVE THE BROWSER. The name,
  * thumbnail and line labels below are a display snapshot so the drawer can
@@ -24,7 +29,16 @@
  * files — same rule as the `?terry=` / `?bed=` links it already accepted.
  */
 
-export const QUOTE_LIST_KINDS = ["product", "terry", "bed", "spa", "fb"] as const;
+export const QUOTE_LIST_KINDS = [
+  "product",
+  "terry",
+  "bed",
+  "spa",
+  "fb",
+  "cat",
+  "hc",
+  "com",
+] as const;
 
 export type QuoteListKind = (typeof QUOTE_LIST_KINDS)[number];
 export type QuoteListRangeKind = Exclude<QuoteListKind, "product">;
@@ -67,6 +81,15 @@ export type QuoteListItem = QuoteListProductRef & {
   /** A range product's lines. Empty on a catalogue product. */
   lines: QuoteListLine[];
 };
+
+/**
+ * Whether a kind's line codes are the client's stock codes, and so worth
+ * showing to a buyer. The catalogue kinds key their rows on codes this site
+ * derives (lib/catalogue-lines.ts), which mean nothing outside it.
+ */
+export function hasStockCodes(kind: QuoteListKind): boolean {
+  return kind === "terry" || kind === "bed" || kind === "spa" || kind === "fb";
+}
 
 export function quoteListId(kind: QuoteListKind, slug: string): string {
   return `${kind}:${slug}`;

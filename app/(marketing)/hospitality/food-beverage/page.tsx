@@ -6,7 +6,7 @@ import { HospitalityGroupListing } from "@/components/hospitality/HospitalityGro
 export const metadata: Metadata = {
   title: "Food & Beverage — Hospitality",
   description:
-    "Bar mops, kitchen towels, flour sacks, glass towels, bistro and mommie napkins, aprons, spun polyester napkins and table cloths — with stock codes, sizes and colours for each.",
+    "Bar mops, kitchen towels, flour sacks, glass towels, bistro and momie napkins, aprons, spun polyester napkins and table cloths — with stock codes, sizes and colours for each.",
   alternates: { canonical: "/hospitality/food-beverage" },
 };
 

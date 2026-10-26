@@ -21,15 +21,19 @@
  * colours, so the grid below is sparse on purpose. Never fill a gap from the
  * row above it.
  *
- * SPELLINGS ARE THE CLIENT'S UNLESS THEY SAY OTHERWISE. "Mommie Napkin" is
- * written as the sheet writes it. The sheet's "PENCEL POCKET" is the one
- * exception: the client confirmed it as a typo, so the apron reads "Pencil
- * Pocket". Its stock codes still end in PEN, because a code is an identifier
- * rather than a word — correcting one would invent a code their system does
- * not have. The colour "Burgundy" on this sheet is the spelling the whole
- * site now uses, the salon sheet's "Bergundy" included.
+ * SPELLINGS ARE THE CLIENT'S UNLESS THEY SAY OTHERWISE. Two have been
+ * corrected. The sheet's "PENCEL POCKET" was confirmed by the client as a
+ * typo, so the apron reads "Pencil Pocket". Its stock codes still end in PEN,
+ * because a code is an identifier rather than a word — correcting one would
+ * invent a code their system does not have. The sheet's "Mommie Napkin" was
+ * corrected to "Momie", the name of the weave, when the client asked for the
+ * site's spellings to be checked; its slug stays "mommie-napkin" so existing
+ * links keep working. The colour "Burgundy" on this sheet is the spelling the
+ * whole site now uses, the salon sheet's "Bergundy" included.
  * ─────────────────────────────────────────────────────────────────────────────
  */
+
+import { roundUpToCase, type QuantityUnit } from "@/lib/case-pack";
 
 export type FbSize = {
   /** Finished size, exactly as the sheet writes it. */
@@ -61,8 +65,9 @@ export type FbProduct = {
   /**
    * Whether the sheet denominates this line in dozens — its weight is per
    * dozen, or its packing counts dozens per case. Where it does, a quantity
-   * rounds up to the next twelve the way the towel range does. Where the
-   * sheet says neither, no rounding rule is invented.
+   * is counted in dozens and rounds up to a full case, the way the towel
+   * range does (see fbCaseStep). Where the sheet says neither, no rounding
+   * rule is invented.
    */
   unit: "dozen" | null;
   sizes: FbSize[];
@@ -231,13 +236,13 @@ export const FB_PRODUCTS: FbProduct[] = [
     ]),
   },
 
-  /* ── Mommie Napkin ───────────────────────────────────────────────────── */
+  /* ── Momie Napkin ────────────────────────────────────────────────────── */
   {
     slug: "mommie-napkin",
-    name: "Mommie Napkin",
+    name: "Momie Napkin",
     family: "mommie-napkin",
-    familyLabel: "Mommie Napkin",
-    description: "Mercerised Mommie Napkin Cotton",
+    familyLabel: "Momie Napkin",
+    description: "Mercerised Momie Napkin Cotton",
     blend: "100% Cotton",
     weight: null,
     unit: null,
@@ -480,17 +485,26 @@ export function fbFamilyCardSummary(family: string): string | null {
    The order list, as it travels to the quote form
    ─────────────────────────────────────────────────────────────────────────── */
 
-/** Supplied by the dozen, on every line the sheet denominates that way. */
-export const FB_DOZEN = 12;
+/**
+ * What a quantity is counted in. Dozens where the sheet denominates the
+ * product that way; pieces where it does not. The two napkin rows carry
+ * neither a per-dozen weight nor a dozens-per-case packing.
+ */
+export function fbUnit(product: FbProduct): QuantityUnit {
+  return product.unit === "dozen" ? "dz" : "pcs";
+}
 
 /**
- * Rounds up to the next dozen where the sheet denominates this product in
- * dozens, and leaves the quantity alone where it does not — the two napkin
- * rows carry neither a per-dozen weight nor a dozens-per-case packing, so
- * there is no figure on the sheet to round them to.
+ * What a quantity of one size goes up in, in the product's own unit. The
+ * packing's dozens per case is the minimum order ("10 DZ / CASE" orders in
+ * 10s), so it is the step wherever the sheet gives one. Without one, a
+ * dozen-sold size goes up a dozen at a time and a piece-sold one is left
+ * alone: no rounding rule is invented. See lib/case-pack.ts.
  */
-export function roundUpForFb(product: FbProduct, n: number): number {
-  return product.unit === "dozen" ? Math.ceil(n / FB_DOZEN) * FB_DOZEN : n;
+export function fbCaseStep(product: FbProduct, size: string): number {
+  if (product.unit !== "dozen") return 1;
+  const perCase = /^(\d+)\s*DZ\b/i.exec(fbPackingFor(product, size) ?? "");
+  return perCase ? Number(perCase[1]) : 1;
 }
 
 export type FbOrderLine = { sku: string; quantity: number };
@@ -521,7 +535,7 @@ export function parseFbLines(product: FbProduct, raw: string | undefined): FbOrd
     const n = Number(qty);
     if (n <= 0) continue;
     seen.add(sku);
-    out.push({ ...line, quantity: roundUpForFb(product, n) });
+    out.push({ ...line, quantity: roundUpToCase(n, fbCaseStep(product, line.size)) });
   }
 
   return out;

@@ -96,6 +96,30 @@ const IMG = {
   },
 } as const;
 
+/**
+ * The client's own photographs, for the range cards on /hospitality. Plain
+ * paths rather than an import of lib/hospitality-photos.ts — see the note on
+ * imports at the top of this file. Bed Linen has no photography yet.
+ */
+const PHOTO = {
+  towels: {
+    src: "/images/hospitality/terry-towels/bath-towels.jpg",
+    alt: "Three folded white terry bath towels",
+  },
+  napkins: {
+    src: "/images/hospitality/napkins/colours.jpg",
+    alt: "Napkins fanned out in several colours",
+  },
+  barmops: {
+    src: "/images/hospitality/bar-mop/blue-cs.jpg",
+    alt: "White terry bar mops with a blue centre stripe",
+  },
+  salon: {
+    src: "/images/hospitality/salon-towel/colours.jpg",
+    alt: "Salon towels fanned out in several colours",
+  },
+} as const;
+
 export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
   {
     slug: "bed-linen",
@@ -162,7 +186,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     description: "Terry from washcloth to bath sheet, built to hold its pile through the wash.",
     intro:
       "The linen a guest actually handles. Weights run from a 1 lb washcloth to a 12 lb bath towel, so a property can set a standard room and a suite off one specification.",
-    image: IMG.towels,
+    image: PHOTO.towels,
     fallbackImages: [IMG.towels, IMG.weave],
     items: [
       // Terry Towels replaces the three separate washcloth / hand towel / bath
@@ -189,7 +213,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     description: "Napery for banqueting and covers, in cotton and polyester.",
     intro:
       "Table dressing for a room that turns over several times a night. Both fibres are here because they launder differently and a banqueting operation usually runs each for a different service.",
-    image: IMG.napkins,
+    image: PHOTO.napkins,
     fallbackImages: [IMG.napkins, IMG.weave],
     // FOUR OF THESE SIX ARE ALSO ON THE FOOD & BEVERAGE SHEET, and they are
     // the same products — napery is table linen and it is also what the F&B
@@ -207,7 +231,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         ctaLabel: "View details",
       },
       {
-        name: "Momi napkins",
+        name: "Momie napkins",
         slug: "momi-napkins",
         productSlug: null,
         href: "/hospitality/food-beverage/mommie-napkin",
@@ -241,7 +265,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     description: "Service cloths, napery and aprons for the kitchen, the pass and the floor.",
     intro:
       "Everything the food and beverage operation handles, from the bar mop behind the pass to the table cloth in front of the guest. Every line carries its own stock code, and most run in a choice of colours so a kitchen can colour-code by station.",
-    image: IMG.barmops,
+    image: PHOTO.barmops,
     fallbackImages: [IMG.barmops, IMG.napkins],
     items: [
       {
@@ -280,7 +304,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         ctaLabel: "View details",
       },
       {
-        name: "Mommie napkins",
+        name: "Momie napkins",
         slug: "mommie-napkin",
         productSlug: null,
         href: "/hospitality/food-beverage/mommie-napkin",
@@ -324,7 +348,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     description: "Towelling for the salon floor and the spa, in the shades they are ordered in.",
     intro:
       "The salon and spa floor asks more of a towel than a bathroom does: tint, bleach, heat and a colour that has to survive all three. Every line here is specified for that, and each carries its own stock code per colour.",
-    image: IMG.towels,
+    image: PHOTO.salon,
     fallbackImages: [IMG.towels, IMG.weave],
     items: [
       {

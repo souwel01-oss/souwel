@@ -5,16 +5,17 @@ import { ChevronRight } from "lucide-react";
 import {
   BATH_MAT_NOTE,
   TERRY_BASE,
-  TERRY_DOZEN,
   TERRY_PRODUCTS,
   getTerryFamily,
   getTerryProduct,
   hasBathMat,
   terryCardSummary,
+  terryCaseStep,
   terryFamiliesNeedingChooser,
   terrySizeNames,
   type TerryProduct,
 } from "@/lib/terry-towels";
+import { CARD_SHOTS, terryPhotos } from "@/lib/hospitality-photos";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { TerrySpecPicker } from "@/components/hospitality/TerrySpecPicker";
@@ -34,12 +35,6 @@ import { Reveal } from "@/components/animation/Reveal";
  * duplicated name on the client's sheet then works with no new files: it gets a
  * chooser the moment two products share a `family`.
  */
-
-/** Stand-ins. There is no photography for these seven — see lib/terry-towels.ts. */
-const IMAGES = [
-  { src: "/images/products/towels.jpg", alt: "Stack of folded white towels" },
-  { src: "/images/products/other-textile.jpg", alt: "Close-up of plain white woven textile" },
-];
 
 export function generateStaticParams() {
   return [
@@ -157,6 +152,7 @@ function FamilyChooser({ family }: { family: TerryProduct[] }) {
    ────────────────────────────────────────────────────────────────────────── */
 
 function ProductDetail({ product }: { product: TerryProduct }) {
+  const images = terryPhotos(product.slug);
   const sizes = product.lines;
   const siblings = getTerryFamily(product.family);
   const hasChooser = siblings.length > 1;
@@ -174,15 +170,16 @@ function ProductDetail({ product }: { product: TerryProduct }) {
         // two products are both "Classic Terry Towels", and in the quote list
         // there is no heading above the row to say which one this is.
         name: `${product.name} (${product.blend})`,
-        image: IMAGES[0].src,
+        image: images[0].src,
         // Straight to this construction, not through terryProductHref — that
         // sends a shared name to its chooser, and the buyer has chosen.
         href: `${TERRY_BASE}/${product.slug}`,
       }}
       lineMeta={sizes.map((line) => ({
         sku: line.sku,
-        label: `${line.name} ${line.dimensions}`,
-        step: TERRY_DOZEN,
+        // The unit in the label: the drawer shows the bare number.
+        label: `${line.name} ${line.dimensions}, in dozens`,
+        step: terryCaseStep(line),
       }))}
     >
       <main className="bg-background">
@@ -203,7 +200,7 @@ function ProductDetail({ product }: { product: TerryProduct }) {
         <section className="py-12 sm:py-16">
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-14">
             <Reveal variant="fade-up">
-              <ProductGallery images={IMAGES} />
+              <ProductGallery images={images} />
             </Reveal>
 
             <div className="flex flex-col justify-center">
@@ -352,7 +349,7 @@ function toDetailCard(product: TerryProduct): HospitalityCardProduct {
     ctaLabel: "View details",
     material: terryCardSummary(product),
     colours: [],
-    images: IMAGES,
+    images: terryPhotos(product.slug).slice(0, CARD_SHOTS),
     badge: null,
     rating: null,
   };

@@ -37,10 +37,10 @@ import { useQuoteListDrawer } from "@/components/quote-list/QuoteListProvider";
  * ONE PROVIDER, FOUR RANGES. Terry, Bed Linen, Food & Beverage and Spa &
  * Salon each render their own picker and table, but the list behind them is
  * the same list with the same rules, so it is written once. QUANTITIES ARE
- * STORED ALREADY ROUNDED — each range rounds by its own rule (a dozen for
- * towels, the case pack for bed linen, the pack for salon) before calling
- * setLine, so nothing downstream has to wonder whether a number has been
- * through that yet.
+ * STORED ALREADY ROUNDED — each range rounds up to its own case (in dozens
+ * for towels and kitchen linen, in pieces for bed linen, the pack for salon)
+ * before calling setLine, so nothing downstream has to wonder whether a
+ * number has been through that yet.
  *
  * ── THE LINES LIVE IN THE SITE-WIDE QUOTE LIST ──────────────────────────────
  *

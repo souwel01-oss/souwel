@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import {
   FB_BASE,
-  FB_DOZEN,
+  fbCaseStep,
   fbProductHref,
+  fbUnit,
   getFbFamily,
   type FbProduct,
 } from "@/lib/food-beverage";
 import { swatchColour } from "@/lib/hospitality";
+import { LINE_PHOTOS, shotsInColours, type Shot } from "@/lib/hospitality-photos";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { FoodBevSpecPicker } from "@/components/hospitality/FoodBevSpecPicker";
 import { FoodBevSpecTable } from "@/components/hospitality/FoodBevSpecTable";
@@ -25,13 +27,24 @@ import { Reveal } from "@/components/animation/Reveal";
  * rest), and the product route for one build of Bar Mop or Aprons.
  */
 
-/** Stand-ins. There is no photography for this range yet. */
-export const IMAGES = [
+/** Stand-ins, for the lines the client's shoot does not cover. */
+const IMAGES = [
   { src: "/images/products/bar-mops.jpg", alt: "Rolled white cotton bar mops stacked together" },
   { src: "/images/products/napkins.jpg", alt: "Folded white linen napkin fabric in soft light" },
 ];
 
+/**
+ * The family's photographs in the colours this build is made in, or the
+ * stand-ins where none are. Narrowed by colour because a family's builds do
+ * not share a colour list — see lib/hospitality-photos.ts.
+ */
+export function fbImages(product: FbProduct): Shot[] {
+  const shots = shotsInColours(LINE_PHOTOS[product.family], product.colours);
+  return shots.length ? shots : IMAGES;
+}
+
 export function ProductDetail({ product }: { product: FbProduct }) {
+  const images = fbImages(product);
   const siblings = getFbFamily(product.family);
   const hasListing = siblings.length > 1;
 
@@ -60,7 +73,8 @@ export function ProductDetail({ product }: { product: FbProduct }) {
     ...(colours.length === 1 ? [{ label: "Colour", value: colours[0].colour }] : []),
   ].filter((f): f is { label: string; value: string } => Boolean(f.value));
 
-  const dozenRounding = product.unit === "dozen" ? FB_DOZEN : null;
+  const unit = fbUnit(product);
+  const stepBySize = Object.fromEntries(sizes.map((s) => [s, fbCaseStep(product, s)]));
 
   return (
     <RangeOrderListProvider
@@ -68,15 +82,18 @@ export function ProductDetail({ product }: { product: FbProduct }) {
         kind: "fb",
         slug: product.slug,
         name: product.name,
-        image: IMAGES[0].src,
+        image: images[0].src,
         href: fbProductHref(product),
       }}
       // The size is in the label only where there is more than one — the same
       // rule the table uses for its Size column.
       lineMeta={product.lines.map((l) => ({
         sku: l.sku,
-        label: sizes.length > 1 ? `${l.colour} ${l.size}` : l.colour,
-        step: dozenRounding ?? 1,
+        // The unit in the label too: the drawer shows the bare number.
+        label: `${sizes.length > 1 ? `${l.colour} ${l.size}` : l.colour}, in ${
+          unit === "dz" ? "dozens" : "pieces"
+        }`,
+        step: stepBySize[l.size] ?? 1,
       }))}
     >
       <main className="bg-background">
@@ -97,7 +114,7 @@ export function ProductDetail({ product }: { product: FbProduct }) {
         <section className="py-12 sm:py-16">
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-14">
             <Reveal variant="fade-up">
-              <ProductGallery images={IMAGES} />
+              <ProductGallery images={images} />
             </Reveal>
 
             <div className="flex flex-col justify-center">
@@ -111,8 +128,10 @@ export function ProductDetail({ product }: { product: FbProduct }) {
 
                 <p className="text-muted-foreground mt-5 leading-relaxed text-pretty">
                   {sizes.length === 1 ? sizes[0] : `${sizes.length} sizes`} in{" "}
-                  {colours.length === 1 ? colours[0].colour.toLowerCase() : `${colours.length} colours`},
-                  each with its own stock code. Every figure below comes from our Food &amp;
+                  {colours.length === 1
+                    ? colours[0].colour.toLowerCase()
+                    : `${colours.length} colours`}
+                  , each with its own stock code. Every figure below comes from our Food &amp;
                   Beverage sheet.
                 </p>
               </Reveal>
@@ -123,7 +142,8 @@ export function ProductDetail({ product }: { product: FbProduct }) {
                   sizes={sizes}
                   colours={colours}
                   skus={skus}
-                  dozenRounding={dozenRounding}
+                  unit={unit}
+                  stepBySize={stepBySize}
                   packingBySize={packingBySize}
                 />
               </Reveal>
@@ -150,12 +170,13 @@ export function ProductDetail({ product }: { product: FbProduct }) {
               <FoodBevSpecTable
                 productSlug={product.slug}
                 showSize={sizes.length > 1}
-                dozenRounding={dozenRounding}
+                unit={unit}
                 rows={product.lines.map((l) => ({
                   sku: l.sku,
                   size: l.size,
                   colour: l.colour,
                   hex: swatchColour(l.colour),
+                  step: stepBySize[l.size] ?? 1,
                 }))}
               />
             </div>
@@ -166,7 +187,9 @@ export function ProductDetail({ product }: { product: FbProduct }) {
         <section className="py-12 sm:py-16">
           <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
             <h2 className="text-muted-foreground text-[11px] font-semibold tracking-[0.16em] uppercase">
-              {hasListing ? `Other ${product.familyLabel.toLowerCase()} builds` : "The rest of the range"}
+              {hasListing
+                ? `Other ${product.familyLabel.toLowerCase()} builds`
+                : "The rest of the range"}
             </h2>
             <ul className="mt-5 flex flex-wrap gap-2.5">
               {hasListing ? (

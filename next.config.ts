@@ -17,7 +17,17 @@ const nextConfig: NextConfig = {
    * its own.
    */
   async redirects() {
-    return [{ source: "/categories/hospitality", destination: "/hospitality", permanent: true }];
+    return [
+      { source: "/categories/hospitality", destination: "/hospitality", permanent: true },
+      // The same move for Health-Care and Commercial, once each range had pages
+      // of its own.
+      { source: "/categories/health-care", destination: "/health-care", permanent: true },
+      {
+        source: "/categories/commercial-automotive",
+        destination: "/commercial",
+        permanent: true,
+      },
+    ];
   },
 
   images: {

@@ -35,7 +35,12 @@ import {
  */
 
 const STORAGE_KEY = "souwel-quote-list";
-const STORAGE_VERSION = 1;
+/**
+ * Version 2: Terry, Food & Beverage and the dozen-sold catalogue lines count
+ * their quantities in dozens, not pieces. A version-1 list would be read
+ * twelve times too large, so it is dropped rather than converted.
+ */
+const STORAGE_VERSION = 2;
 
 const EMPTY: QuoteListItem[] = [];
 
@@ -63,6 +68,7 @@ const localPath = (value: unknown): string | null =>
  * rendered, so a damaged entry costs the buyer one row instead of the drawer.
  */
 function sanitise(value: unknown): QuoteListItem[] {
+  if ((value as { v?: unknown } | null)?.v !== STORAGE_VERSION) return EMPTY;
   const rows = (value as { items?: unknown } | null)?.items;
   if (!Array.isArray(rows)) return EMPTY;
 
@@ -92,7 +98,8 @@ function sanitise(value: unknown): QuoteListItem[] {
           sku: line.sku,
           label: typeof line.label === "string" ? line.label.slice(0, 120) : line.sku,
           quantity,
-          step: clampInt(line.step, 1, 1000) ?? 1,
+          // Up to a 2,500-piece case of shop towels.
+          step: clampInt(line.step, 1, 10_000) ?? 1,
         });
       }
     }
@@ -171,27 +178,6 @@ export function useQuoteList(): QuoteListItem[] {
 }
 
 /* ── Actions ────────────────────────────────────────────────────────────── */
-
-export type QuoteListAddResult = "added" | "exists" | "full";
-
-/**
- * Adds a catalogue product at a quantity of one.
- *
- * NEVER A DUPLICATE. A second "Add to List" for a product already listed
- * reports `exists` and leaves the quantity alone — bumping it would turn a
- * double-click into a different order.
- */
-export function addProductToQuoteList(
-  product: Omit<QuoteListProductRef, "kind">
-): QuoteListAddResult {
-  const items = getSnapshot();
-  const id = quoteListId("product", product.slug);
-  if (items.some((i) => i.id === id)) return "exists";
-  if (items.length >= QUOTE_LIST_MAX_ITEMS) return "full";
-
-  write([...items, { ...product, kind: "product", id, quantity: 1, lines: [] }]);
-  return "added";
-}
 
 export function setQuoteListQuantity(id: string, quantity: number) {
   const next = Math.min(Math.max(Math.round(quantity), 1), QUOTE_LIST_MAX_QUANTITY);

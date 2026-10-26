@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { terryListingEntries, type TerryListingEntry } from "@/lib/terry-towels";
 import { HOSPITALITY_GROUPS } from "@/lib/hospitality";
+import { CARD_SHOTS, terryPhotos } from "@/lib/hospitality-photos";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 
@@ -29,12 +30,6 @@ export const metadata: Metadata = {
  * the two sit side by side. Two cards under one title would have read as a
  * duplicate long before anyone reached the line of body text separating them.
  */
-
-/** Stand-ins. There is no photography for these seven — see lib/terry-towels.ts. */
-const IMAGES = [
-  { src: "/images/products/towels.jpg", alt: "Stack of folded white towels" },
-  { src: "/images/products/other-textile.jpg", alt: "Close-up of plain white woven textile" },
-];
 
 export default function TerryTowelsPage() {
   const cards = terryListingEntries().map(toCard);
@@ -150,7 +145,7 @@ function toCard(entry: TerryListingEntry): HospitalityCardProduct {
     // One line for a single build, one per blend where the name covers several.
     material: entry.lines.length > 1 ? entry.lines : entry.lines[0],
     colours: [],
-    images: IMAGES,
+    images: terryPhotos(entry.key).slice(0, CARD_SHOTS),
     badge: null,
     rating: null,
   };

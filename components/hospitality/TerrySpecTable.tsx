@@ -3,13 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
-import {
-  TERRY_DOZEN,
-  TERRY_BASE,
-  encodeTerryLines,
-  roundUpToDozen,
-  terryWeightLabel,
-} from "@/lib/terry-towels";
+import { TERRY_BASE, encodeTerryLines, terryCaseStep, terryWeightLabel } from "@/lib/terry-towels";
+import { roundUpToCase } from "@/lib/case-pack";
 import { RangeListScopeNote, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -68,22 +63,24 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
 
   return (
     <>
-      <div className="border-premium/25 bg-card overflow-x-auto rounded-xl border">
+      <div className="border-premium/25 bg-card relative overflow-x-auto rounded-xl border">
         <table className="w-full min-w-[46rem] text-sm">
           <caption className="sr-only">
             Sizes, stock codes and weights for this construction, with a quantity box per row
           </caption>
           <thead>
             <tr className="border-premium/20 border-b">
-              {["Product type", "Size", "SKU", "Weight", "Per case", "Quantity", ""].map((h, i) => (
-                <th
-                  key={h || i}
-                  scope="col"
-                  className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-[0.14em] uppercase"
-                >
-                  {h || <span className="sr-only">Add to list</span>}
-                </th>
-              ))}
+              {["Product type", "Size", "SKU", "Weight", "Per case", "Quantity (dz)", ""].map(
+                (h, i) => (
+                  <th
+                    key={h || i}
+                    scope="col"
+                    className="text-muted-foreground px-5 py-3.5 text-left text-[11px] font-semibold tracking-[0.14em] uppercase"
+                  >
+                    {h || <span className="sr-only">Add to list</span>}
+                  </th>
+                )
+              )}
             </tr>
           </thead>
           <tbody>
@@ -127,7 +124,7 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
                   <span className="text-muted-foreground">{row.dimensions}</span>
                   <span className="text-muted-foreground font-mono text-[12px]">{row.sku}</span>
                   <span className="text-foreground ml-auto font-semibold tabular-nums">
-                    {line.quantity.toLocaleString("en-US")}
+                    {line.quantity.toLocaleString("en-US")} dz
                   </span>
                   <button
                     type="button"
@@ -176,7 +173,8 @@ export function TerrySpecTable({ productSlug, rows }: { productSlug: string; row
 
       <p className="text-muted-foreground mt-6 max-w-2xl text-[13px] leading-relaxed">
         Sizes not listed are not part of this construction. Colour is matched from a physical sample
-        when we quote. Quantities are supplied by the dozen and round up to the next twelve.{" "}
+        when we quote. Quantities are in dozens and round up to a full case, so a size packed 15 dz
+        per case goes up in 15s.{" "}
         <Link href={TERRY_BASE} className="underline underline-offset-4">
           Other terry constructions
         </Link>{" "}
@@ -204,7 +202,7 @@ function SpecTableRow({
 
   const add = () => {
     if (!canAdd) return;
-    onAdd(roundUpToDozen(typed));
+    onAdd(roundUpToCase(typed, terryCaseStep(row)));
     setDraft("");
   };
 
@@ -217,7 +215,7 @@ function SpecTableRow({
         {listed !== null ? (
           <span className="text-primary-strong dark:text-primary ml-2 inline-flex items-center gap-1 align-middle text-[11.5px] font-semibold">
             <Check aria-hidden className="size-3" />
-            {listed.toLocaleString("en-US")}
+            {listed.toLocaleString("en-US")} dz
           </span>
         ) : null}
       </th>
@@ -233,8 +231,8 @@ function SpecTableRow({
         <input
           type="number"
           inputMode="numeric"
-          min={TERRY_DOZEN}
-          step={TERRY_DOZEN}
+          min={terryCaseStep(row)}
+          step={terryCaseStep(row)}
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -243,7 +241,7 @@ function SpecTableRow({
               add();
             }
           }}
-          aria-label={`Quantity of ${row.name}`}
+          aria-label={`Quantity of ${row.name} in dozens`}
           placeholder="Qty"
           className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-10 w-28 rounded-lg border px-3 text-[14px] outline-none focus-visible:ring-4"
         />

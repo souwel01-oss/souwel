@@ -5,6 +5,7 @@ import { PRODUCTS } from "@/lib/product-data";
 import { NOT_SPECIFIED } from "@/lib/product-data";
 import { TERRY_BASE, terryRangeSummary } from "@/lib/terry-towels";
 import { bedLinenFamilyCardSummary } from "@/lib/bed-linen";
+import { CARD_SHOTS, LINE_PHOTOS } from "@/lib/hospitality-photos";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 
@@ -84,8 +85,8 @@ export function HospitalityGroupListing({ group }: { group: HospitalityGroup }) 
             {specified < products.length ? (
               <>
                 {" "}
-                {products.length - specified} of these {products.length} lines are supplied to
-                order and are not on our published specification sheet yet; ask and we will send the
+                {products.length - specified} of these {products.length} lines are supplied to order
+                and are not on our published specification sheet yet; ask and we will send the
                 construction detail with your quotation.
               </>
             ) : null}
@@ -129,6 +130,9 @@ function toCard(
   group: HospitalityGroup
 ): HospitalityCardProduct {
   const product = item.productSlug ? PRODUCTS[item.productSlug] : undefined;
+  // The line's own photographs win over everything else; a line without any
+  // keeps the stand-ins it had. See lib/hospitality-photos.ts.
+  const photos = LINE_PHOTOS[item.slug]?.slice(0, CARD_SHOTS);
 
   if (item.href) {
     // Bed Linen's own items key their range summary by item.slug, which is
@@ -149,7 +153,7 @@ function toCard(
       ctaLabel: item.ctaLabel,
       material,
       colours: [],
-      images: group.fallbackImages.slice(0, 2),
+      images: photos ?? group.fallbackImages.slice(0, 2),
       badge: null,
       rating: null,
     };
@@ -163,7 +167,7 @@ function toCard(
       quoteHref: `/quote?enquiry=${encodeURIComponent(item.name)}`,
       material: null,
       colours: [],
-      images: group.fallbackImages.slice(0, 2),
+      images: photos ?? group.fallbackImages.slice(0, 2),
       badge: null,
       rating: null,
     };
@@ -187,9 +191,11 @@ function toCard(
     quoteHref: `/quote?product=${product.slug}`,
     material: parts.length ? parts.join(" · ") : null,
     colours,
-    images: product.galleryImageUrls.length
-      ? product.galleryImageUrls
-      : group.fallbackImages.slice(0, 2),
+    images:
+      photos ??
+      (product.galleryImageUrls.length
+        ? product.galleryImageUrls
+        : group.fallbackImages.slice(0, 2)),
     badge: null,
     rating: null,
   };
