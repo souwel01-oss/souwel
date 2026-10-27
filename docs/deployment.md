@@ -29,9 +29,16 @@ tries to migrate.
 `prisma/migrations/20260812000000_init/` is the baseline — 13 tables, 17 foreign
 keys, verified by applying it to an empty database rather than assuming.
 
-It runs automatically: `vercel-build` is `prisma migrate deploy && next build`,
-and Vercel prefers that script over `build`. Nothing to do by hand, but if the
-deploy fails at this step the cause is almost always a missing `DIRECT_URL`.
+It runs automatically: `vercel-build` runs `scripts/vercel-build.mjs`, which
+does `prisma migrate deploy`, seeds the catalogue and then runs `next build`.
+Vercel prefers that script over `build`. Nothing to do by hand.
+
+**Without `DIRECT_URL` the migration and seed are skipped, with a warning in
+the build log**, and only the public pages are built. The deploy succeeds, but
+sign-in, the quote form, the portal and the CRM return errors until both
+database URLs are set. Until 2026-10-27 a missing `DIRECT_URL` failed the whole
+deploy instead ("Connection url is empty"), so no page changes could go live
+either.
 
 Seed content (categories, products) is optional:
 
