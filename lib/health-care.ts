@@ -42,7 +42,9 @@ export type HealthCareLine = {
   intro: string;
   /**
    * Drawn in red in the menu. Hyperbaric Use Only, at the client's request:
-   * it is the one line that must never be mistaken for general stock.
+   * it is the one line that must never be mistaken for general stock. Its
+   * Towel and Sheet sub-lines stay in the normal colour, also at the client's
+   * request.
    */
   alert?: boolean;
   /**
@@ -133,7 +135,6 @@ export const HEALTH_CARE_LINES: HealthCareLine[] = [
     productSlugs: [],
     intro:
       "Towels for hyperbaric use. This line is not on our published specification sheet yet, so construction, sizes and marking are confirmed with your quotation.",
-    alert: true,
     subLabel: "Towel",
   },
   {
@@ -142,7 +143,6 @@ export const HEALTH_CARE_LINES: HealthCareLine[] = [
     productSlugs: [],
     intro:
       "Sheets for hyperbaric use. This line is not on our published specification sheet yet, so construction, sizes and marking are confirmed with your quotation.",
-    alert: true,
     subLabel: "Sheet",
   },
   {
