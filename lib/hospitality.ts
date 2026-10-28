@@ -12,8 +12,9 @@
  * `productSlug` points at an entry in lib/product-data.ts — the catalogue built
  * from the client's product sheet. Where it is null, the line is a product the
  * client sells that is NOT on that sheet: no blend, no size, no weight, no
- * colours. Those cards say "Specification on request" and route to the quote
- * form rather than borrowing figures from a neighbouring product.
+ * colours. Those cards say "Specification on request" and open a page that
+ * asks only for a quantity, rather than borrowing figures from a neighbouring
+ * product.
  *
  * That is the whole discipline of this file. A Bath Robe card showing
  * "86/14, 24″×48″" because Bath Towel happens to sit next to it would be a
@@ -61,6 +62,12 @@ export type HospitalityItem = {
    * alongside `name`, so a link built from this label still resolves.
    */
   menuLabel?: string;
+  /**
+   * The paragraph under the title on the line's own page. Only the lines with
+   * neither a `productSlug` nor an `href` have that page; see
+   * hospitalityItemHref below.
+   */
+  intro?: string;
 };
 
 export type HospitalityGroup = {
@@ -202,9 +209,21 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         ctaLabel: "View the range",
         menuLabel: "Towel",
       },
-      { name: "Bath robes", slug: "bath-robes", productSlug: null },
+      {
+        name: "Bath robes",
+        slug: "bath-robes",
+        productSlug: null,
+        intro:
+          "Bath robes for the guest room and the spa. This line is not on our published specification sheet yet, so construction, sizes and colours are confirmed with your quotation.",
+      },
       { name: "Bath mats", slug: "bath-mats", productSlug: "bath-mat" },
-      { name: "Economy bath towels", slug: "economy-bath-towels", productSlug: null },
+      {
+        name: "Economy bath towels",
+        slug: "economy-bath-towels",
+        productSlug: null,
+        intro:
+          "Economy bath towels for the guest bathroom. This line is not on our published specification sheet yet, so construction, weight and sizes are confirmed with your quotation.",
+      },
     ],
   },
   {
@@ -222,7 +241,13 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     // page from here too. Worth asking the client whether they would rather
     // this group were folded into Food & Beverage altogether.
     items: [
-      { name: "Plain napkins", slug: "plain-napkins", productSlug: null },
+      {
+        name: "Plain napkins",
+        slug: "plain-napkins",
+        productSlug: null,
+        intro:
+          "Plain napkins for table service. This line is not on our published specification sheet yet, so fabric, size and colours are confirmed with your quotation.",
+      },
       {
         name: "Bistro stripe napkins",
         slug: "bistro-napkins",
@@ -244,7 +269,13 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         href: "/hospitality/food-beverage/napkins",
         ctaLabel: "View details",
       },
-      { name: "100% cotton napkin", slug: "cotton-napkin", productSlug: null },
+      {
+        name: "100% cotton napkin",
+        slug: "cotton-napkin",
+        productSlug: null,
+        intro:
+          "All-cotton napkins for table service. This line is not on our published specification sheet yet, so construction, size and colours are confirmed with your quotation.",
+      },
       {
         name: "Table cloths",
         slug: "table-cloths",
@@ -386,6 +417,28 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
 export function getHospitalityGroup(slug: string): HospitalityGroup | undefined {
   return HOSPITALITY_GROUPS.find((g) => g.slug === slug);
 }
+
+/**
+ * Where a line opens, from its card or the menu.
+ *
+ * A range opens its own listing (`href`), and a line on the product sheet
+ * opens its product page. A line on neither still gets a page of its own,
+ * /hospitality/<group>/<line>, in the same shape as every other product page
+ * but asking only for a quantity. Before that page existed, these cards
+ * went straight to the quote form while Bath mats beside them opened a
+ * product page, and the client asked for them all to work the same way.
+ */
+export function hospitalityItemHref(group: HospitalityGroup, item: HospitalityItem): string {
+  if (item.href) return item.href;
+  return item.productSlug
+    ? `/products/${item.productSlug}`
+    : `/hospitality/${group.slug}/${item.slug}`;
+}
+
+/** The lines served by app/(marketing)/hospitality/[group]/[item]. */
+export const HOSPITALITY_ENQUIRY_LINES = HOSPITALITY_GROUPS.flatMap((group) =>
+  group.items.filter((item) => !item.href && !item.productSlug).map((item) => ({ group, item }))
+);
 
 /** The group an item belongs to, for building a link to it from anywhere. */
 export function findHospitalityItem(

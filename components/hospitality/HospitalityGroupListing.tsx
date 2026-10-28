@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { HOSPITALITY_GROUPS, swatchColour, type HospitalityGroup } from "@/lib/hospitality";
+import {
+  HOSPITALITY_GROUPS,
+  hospitalityItemHref,
+  swatchColour,
+  type HospitalityGroup,
+} from "@/lib/hospitality";
 import { PRODUCTS } from "@/lib/product-data";
 import { NOT_SPECIFIED } from "@/lib/product-data";
 import { TERRY_BASE, terryRangeSummary } from "@/lib/terry-towels";
@@ -163,7 +168,9 @@ function toCard(
     return {
       id: item.slug,
       name: item.name,
-      href: `/quote?enquiry=${encodeURIComponent(item.name)}`,
+      // The card opens the line's own page, as Bath mats beside it does; the
+      // button still goes straight to the quote form.
+      href: hospitalityItemHref(group, item),
       quoteHref: `/quote?enquiry=${encodeURIComponent(item.name)}`,
       material: null,
       colours: [],

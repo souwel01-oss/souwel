@@ -3,7 +3,12 @@
  * Category slugs here MUST match the seeded Category.slug values in prisma/seed.ts.
  */
 import { hasProductPage } from "@/lib/product-slugs";
-import { HOSPITALITY_GROUPS, hospitalityItemByName } from "@/lib/hospitality";
+import {
+  HOSPITALITY_ENQUIRY_LINES,
+  HOSPITALITY_GROUPS,
+  hospitalityItemByName,
+  hospitalityItemHref,
+} from "@/lib/hospitality";
 import {
   HEALTH_CARE_BASE,
   HEALTH_CARE_LINES,
@@ -231,17 +236,16 @@ export function productSlug(name: string) {
  * Three targets, in order:
  *
  *   1. A product with a real detail page goes to it. Twenty-four do.
- *   2. A Hospitality line without one goes to its listing page, anchored to its
- *      own card — /hospitality/bath-linen#bath-robes. That anchor RESOLVES: the
- *      listing page renders a card for every line in the group, specification
- *      or not.
+ *   2. A Hospitality line goes wherever its card goes: its range, its product
+ *      page, or its own page — /hospitality/bath-linen/bath-robes. See
+ *      hospitalityItemHref in lib/hospitality.ts.
  *   3. Anything else falls back to an anchor on its category page.
  *
- * Branch 2 exists because twenty of the thirty-one Hospitality lines are not on
- * the client's product sheet and so have no detail page. Before it they all
- * pointed at /categories/hospitality#something, which lands on the right page
- * and then does nothing, because that page has no such anchor. A link that
- * quietly fails to move is worse than one that 404s: nobody reports it.
+ * Branch 2 exists because most Hospitality lines are not on the client's
+ * product sheet and so have no /products page. Before it they all pointed at
+ * /categories/hospitality#something, which lands on the right page and then
+ * does nothing, because that page has no such anchor. A link that quietly
+ * fails to move is worse than one that 404s: nobody reports it.
  *
  * The slug list comes from lib/product-slugs, which both this file and
  * lib/product-data import. It is deliberately a separate module: the header
@@ -263,15 +267,7 @@ export function productHref(categorySlug: string, name: string) {
   }
 
   const hospitality = hospitalityItemByName(name);
-  if (hospitality) {
-    const { group, item } = hospitality;
-    // An explicit href wins: the line is a range with a listing page of its
-    // own, not a product and not an anchor on this group's page.
-    if (item.href) return item.href;
-    return item.productSlug
-      ? `/products/${item.productSlug}`
-      : `/hospitality/${group.slug}#${item.slug}`;
-  }
+  if (hospitality) return hospitalityItemHref(hospitality.group, hospitality.item);
 
   const slug = productSlug(name);
   return hasProductPage(slug) ? `/products/${slug}` : `/categories/${categorySlug}#${slug}`;
@@ -308,6 +304,10 @@ export const LIVE_ROUTES: { href: string; label: string }[] = [
   ...HOSPITALITY_GROUPS.map((g) => ({
     href: `/hospitality/${g.slug}`,
     label: `Hospitality — ${g.title}`,
+  })),
+  ...HOSPITALITY_ENQUIRY_LINES.map(({ group, item }) => ({
+    href: hospitalityItemHref(group, item),
+    label: `Hospitality — ${group.title} — ${item.name}`,
   })),
   ...HEALTH_CARE_LINES.map((line) => ({
     href: healthCareLineHref(line),
