@@ -12,6 +12,7 @@ import {
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 import { ProductDetail, IMAGES } from "@/components/hospitality/BedLinenProductDetail";
+import { BED_LINEN_PHOTOS } from "@/lib/hospitality-photos";
 
 /**
  * One segment, two kinds of page — the same trick as
@@ -165,6 +166,7 @@ function FamilyListing({ family, members }: { family: string; members: BedLinenP
 
 function toCard(product: BedLinenProduct): HospitalityCardProduct {
   const href = bedLinenProductHref(product);
+  const photos = BED_LINEN_PHOTOS[product.slug];
   return {
     id: product.slug,
     name: product.name,
@@ -173,7 +175,7 @@ function toCard(product: BedLinenProduct): HospitalityCardProduct {
     ctaLabel: "View details",
     material: bedLinenCardSummary(product),
     colours: [],
-    images: IMAGES,
+    images: photos ? [photos.card] : IMAGES,
     badge: null,
     rating: null,
   };

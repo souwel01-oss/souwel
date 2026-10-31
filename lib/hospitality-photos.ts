@@ -5,8 +5,8 @@
  * A PHOTOGRAPH IS ATTACHED ONLY TO THE LINE IT IS OF. Every set below comes
  * from a folder in the client's shoot ("Products by Name 2026") named for the
  * product it shows, and was checked against the picture as well as the name.
- * Lines with no folder of their own — all of Bed Linen, Flour Sack, Table
- * Cloth, Bath Sheet and the rest — are simply absent from this file and keep
+ * Lines with no folder of their own — the rest of Bed Linen, Flour Sack, Table
+ * Cloth, Bath Sheet and so on — are simply absent from this file and keep
  * the stand-ins their pages already carry. A Fitted Sheet card showing a towel
  * because a towel photograph happened to exist would be a picture of a product
  * Souwel is not offering under that name.
@@ -224,6 +224,85 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
 
   // Spa Salon
   "salon-towel": SALON_TOWEL,
+};
+
+const FLAT_SHEETS = `${DIR}/flat-sheets`;
+
+const FLAT_SHEET_SOLID: Shot[] = [
+  { src: `${FLAT_SHEETS}/solid-folded.jpg`, alt: "Folded white solid flat sheet" },
+  { src: `${FLAT_SHEETS}/solid-hem.jpg`, alt: "Stitched hem at the corner of a white flat sheet" },
+];
+
+const FLAT_SHEET_STRIPE: Shot[] = [
+  { src: `${FLAT_SHEETS}/stripe-folded.jpg`, alt: "Folded white satin stripe flat sheet" },
+  {
+    src: `${FLAT_SHEETS}/stripe-hem.jpg`,
+    alt: "Stitched hem at the corner of a white satin stripe flat sheet",
+  },
+];
+
+/**
+ * Bed Linen's own shots, keyed by product slug in lib/bed-linen.ts.
+ *
+ * `card` is the listing's picture and `gallery` the product page's. Every
+ * solid row shares one gallery and differs only by its card, as the client
+ * supplied them. The client's seven card pictures are not labelled by row, so
+ * they follow the sheet's order, with the stripe picture on the stripe row.
+ *
+ * NOT THE SQUARE TREATMENT ABOVE: a card picture is a room scene already
+ * cropped to the card's 4:5 around its subject, because the card's centre crop
+ * would cut the maid or the sheet. A gallery shot is already 4:3.
+ */
+export const BED_LINEN_PHOTOS: Record<string, { card: Shot; gallery: Shot[] }> = {
+  "flat-sheet-t200-solid-55-45": {
+    card: {
+      src: `${FLAT_SHEETS}/card-1.jpg`,
+      alt: "Housekeeper carrying folded white flat sheets in a hotel room",
+    },
+    gallery: FLAT_SHEET_SOLID,
+  },
+  "flat-sheet-t250-solid-55-45": {
+    card: {
+      src: `${FLAT_SHEETS}/card-2.jpg`,
+      alt: "Housekeeper smoothing a white flat sheet over a hotel bed",
+    },
+    gallery: FLAT_SHEET_SOLID,
+  },
+  "flat-sheet-t200-solid-60-40": {
+    card: {
+      src: `${FLAT_SHEETS}/card-3.jpg`,
+      alt: "Gloved hands setting a folded white flat sheet on a bed",
+    },
+    gallery: FLAT_SHEET_SOLID,
+  },
+  "flat-sheet-t250-solid-60-40": {
+    card: {
+      src: `${FLAT_SHEETS}/card-4.jpg`,
+      alt: "Housekeeper in white gloves smoothing a flat sheet across a bed",
+    },
+    gallery: FLAT_SHEET_SOLID,
+  },
+  "flat-sheet-t210-poly-modal": {
+    card: {
+      src: `${FLAT_SHEETS}/card-5.jpg`,
+      alt: "Housekeeper spreading a white flat sheet over a bed",
+    },
+    gallery: FLAT_SHEET_SOLID,
+  },
+  "flat-sheet-t300-solid-60-40": {
+    card: {
+      src: `${FLAT_SHEETS}/card-6.jpg`,
+      alt: "Housekeeper carrying a stack of white flat sheets through a hotel suite",
+    },
+    gallery: FLAT_SHEET_SOLID,
+  },
+  "flat-sheet-t300-satin-stripes": {
+    card: {
+      src: `${FLAT_SHEETS}/card-stripe.jpg`,
+      alt: "Housekeeper laying a white satin stripe flat sheet on a bed",
+    },
+    gallery: FLAT_SHEET_STRIPE,
+  },
 };
 
 /**

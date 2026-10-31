@@ -9,6 +9,7 @@ import {
   hasBalanceHem,
   type BedLinenProduct,
 } from "@/lib/bed-linen";
+import { BED_LINEN_PHOTOS } from "@/lib/hospitality-photos";
 import { ProductGallery } from "@/components/catalog/ProductGallery";
 import { BedLinenSpecPicker } from "@/components/hospitality/BedLinenSpecPicker";
 import { BedLinenSpecTable } from "@/components/hospitality/BedLinenSpecTable";
@@ -32,13 +33,14 @@ import { Reveal } from "@/components/animation/Reveal";
  * family's listing (Flat Sheets, Fitted Sheets, Pillow Case, Duvet Cover).
  */
 
-/** Stand-ins. There is no photography for these sixteen rows yet. */
+/** Stand-ins, for the rows with no photography of their own yet. */
 export const IMAGES = [
   { src: "/images/products/bed-sheets.jpg", alt: "Bed made up in white sheets and pillows" },
   { src: "/images/products/duvet-covers.jpg", alt: "White duvet cover draped across a bed" },
 ];
 
 export function ProductDetail({ product }: { product: BedLinenProduct }) {
+  const images = BED_LINEN_PHOTOS[product.slug]?.gallery ?? IMAGES;
   const sizes = product.lines.map((line) => ({
     sku: line.sku,
     label: bedSizeLabel(line),
@@ -61,7 +63,7 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
         kind: "bed",
         slug: product.slug,
         name: product.name,
-        image: IMAGES[0].src,
+        image: images[0].src,
         href: bedLinenProductHref(product),
       }}
       // The step is this product's own case pack, the same figure the picker
@@ -90,7 +92,7 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
         <section className="py-12 sm:py-16">
           <div className="mx-auto grid w-full max-w-6xl gap-10 px-5 sm:px-8 lg:grid-cols-2 lg:gap-14">
             <Reveal variant="fade-up">
-              <ProductGallery images={IMAGES} />
+              <ProductGallery images={images} />
             </Reveal>
 
             <div className="flex flex-col justify-center">
