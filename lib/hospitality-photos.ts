@@ -195,37 +195,6 @@ const APRONS: Shot[] = [
   { src: `${DIR}/aprons/black-2.jpg`, alt: "Black bib apron, side", colour: "Black" },
 ];
 
-/**
- * Photographs per Hospitality line, keyed by the line's slug in
- * lib/hospitality.ts. For Food & Beverage that slug is also the family slug in
- * lib/food-beverage.ts, and for Spa Salon the product slug in lib/spa-salon.ts,
- * so the range pages look up by the same key.
- */
-export const LINE_PHOTOS: Record<string, Shot[]> = {
-  // Bath Linen
-  "terry-towels": TERRY,
-  "bath-robes": BATH_ROBES,
-  "bath-mats": BATH_MATS,
-
-  // Table Linen. These three are the same products as their Food & Beverage
-  // namesakes (see the note on the Table Linen group), so the same shots.
-  "bistro-napkins": BISTRO_NAPKIN,
-  "momi-napkins": MOMMIE_NAPKIN,
-  "polyester-napkin": NAPKINS,
-
-  // Food & Beverage
-  "bar-mop": BAR_MOP,
-  "kitchen-towel": KITCHEN_TOWEL,
-  "glass-towel": GLASS_TOWEL,
-  "bistro-napkin": BISTRO_NAPKIN,
-  "mommie-napkin": MOMMIE_NAPKIN,
-  aprons: APRONS,
-  napkins: NAPKINS,
-
-  // Spa Salon
-  "salon-towel": SALON_TOWEL,
-};
-
 const FLAT_SHEETS = `${DIR}/flat-sheets`;
 
 const FLAT_SHEET_SOLID: Shot[] = [
@@ -331,6 +300,50 @@ export const BED_LINEN_PHOTOS: Record<string, { card: Shot; gallery: Shot[] }> =
     },
     gallery: FITTED_SHEET,
   },
+};
+
+/**
+ * Photographs per Hospitality line, keyed by the line's slug in
+ * lib/hospitality.ts. For Food & Beverage that slug is also the family slug in
+ * lib/food-beverage.ts, and for Spa Salon the product slug in lib/spa-salon.ts,
+ * so the range pages look up by the same key.
+ */
+export const LINE_PHOTOS: Record<string, Shot[]> = {
+  // Bed Linen. The family's own card pictures, so the range card and the family
+  // page cannot show different sheets.
+  "flat-sheets": [
+    BED_LINEN_PHOTOS["flat-sheet-t200-solid-55-45"].card,
+    BED_LINEN_PHOTOS["flat-sheet-t210-poly-modal"].card,
+    BED_LINEN_PHOTOS["flat-sheet-t300-satin-stripes"].card,
+  ],
+  "fitted-sheets": [
+    BED_LINEN_PHOTOS["fitted-sheet-t200-60-40"].card,
+    BED_LINEN_PHOTOS["fitted-sheet-t200-55-45"].card,
+    BED_LINEN_PHOTOS["fitted-sheet-t300-55-45"].card,
+  ],
+
+  // Bath Linen
+  "terry-towels": TERRY,
+  "bath-robes": BATH_ROBES,
+  "bath-mats": BATH_MATS,
+
+  // Table Linen. These three are the same products as their Food & Beverage
+  // namesakes (see the note on the Table Linen group), so the same shots.
+  "bistro-napkins": BISTRO_NAPKIN,
+  "momi-napkins": MOMMIE_NAPKIN,
+  "polyester-napkin": NAPKINS,
+
+  // Food & Beverage
+  "bar-mop": BAR_MOP,
+  "kitchen-towel": KITCHEN_TOWEL,
+  "glass-towel": GLASS_TOWEL,
+  "bistro-napkin": BISTRO_NAPKIN,
+  "mommie-napkin": MOMMIE_NAPKIN,
+  aprons: APRONS,
+  napkins: NAPKINS,
+
+  // Spa Salon
+  "salon-towel": SALON_TOWEL,
 };
 
 /**

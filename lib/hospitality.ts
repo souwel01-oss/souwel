@@ -106,7 +106,7 @@ const IMG = {
 /**
  * The client's own photographs, for the range cards on /hospitality. Plain
  * paths rather than an import of lib/hospitality-photos.ts — see the note on
- * imports at the top of this file. Bed Linen has no photography yet.
+ * imports at the top of this file. Bed Linen's card keeps its stand-in.
  */
 const PHOTO = {
   towels: {
