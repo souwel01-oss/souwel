@@ -241,13 +241,20 @@ const FLAT_SHEET_STRIPE: Shot[] = [
   },
 ];
 
+const FITTED_SHEETS = `${DIR}/fitted-sheets`;
+
+const FITTED_SHEET: Shot[] = [
+  { src: `${FITTED_SHEETS}/folded.jpg`, alt: "Folded white fitted sheet" },
+  { src: `${FITTED_SHEETS}/elastic.jpg`, alt: "Elasticated edge of a white fitted sheet" },
+];
+
 /**
  * Bed Linen's own shots, keyed by product slug in lib/bed-linen.ts.
  *
- * `card` is the listing's picture and `gallery` the product page's. Every
- * solid row shares one gallery and differs only by its card, as the client
- * supplied them. The client's seven card pictures are not labelled by row, so
- * they follow the sheet's order, with the stripe picture on the stripe row.
+ * `card` is the listing's picture and `gallery` the product page's. Rows of
+ * one look share a gallery and differ only by their card, as the client
+ * supplied them. The client's card pictures are not labelled by row, so they
+ * follow the sheet's order, with the stripe picture on the stripe row.
  *
  * NOT THE SQUARE TREATMENT ABOVE: a card picture is a room scene already
  * cropped to the card's 4:5 around its subject, because the card's centre crop
@@ -302,6 +309,27 @@ export const BED_LINEN_PHOTOS: Record<string, { card: Shot; gallery: Shot[] }> =
       alt: "Housekeeper laying a white satin stripe flat sheet on a bed",
     },
     gallery: FLAT_SHEET_STRIPE,
+  },
+  "fitted-sheet-t200-55-45": {
+    card: {
+      src: `${FITTED_SHEETS}/card-1.jpg`,
+      alt: "Housekeeper checking the elastic edge of a white fitted sheet",
+    },
+    gallery: FITTED_SHEET,
+  },
+  "fitted-sheet-t200-60-40": {
+    card: {
+      src: `${FITTED_SHEETS}/card-2.jpg`,
+      alt: "Housekeeper fitting a white sheet over the corner of a mattress",
+    },
+    gallery: FITTED_SHEET,
+  },
+  "fitted-sheet-t300-55-45": {
+    card: {
+      src: `${FITTED_SHEETS}/card-3.jpg`,
+      alt: "Housekeeper smoothing a white fitted sheet across a bed",
+    },
+    gallery: FITTED_SHEET,
   },
 };
 
