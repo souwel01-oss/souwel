@@ -318,6 +318,7 @@ export const LIVE_ROUTES: { href: string; label: string }[] = [
     label: `Commercial — ${group.title} — ${item.name}`,
   })),
   { href: "/quote", label: "Request a Quote" },
+  { href: "/par-calculator", label: "Par Calculators" },
   { href: "/contact", label: "Contact Us" },
 ];
 
@@ -369,6 +370,7 @@ export const MAIN_NAV = [
     href: categoryHref(c.slug),
     label: c.shortName,
   })),
+  { href: "/par-calculator", label: "Par Calculator" },
   { href: "/contact", label: "Contact Us" },
 ];
 

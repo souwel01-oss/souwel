@@ -1,5 +1,7 @@
 /**
- * Outbound transactional email for the auth flows (verification, password reset).
+ * Outbound transactional email for the auth flows (verification, password
+ * reset), and the one non-auth message that shares their transport: the PAR
+ * calculator's results (sendReportEmail, below).
  *
  * THERE IS NO EMAIL PROVIDER WIRED UP YET, and that is a deliberate, visible
  * state rather than a gap. Both flows are fully implemented — token issue,
@@ -77,6 +79,54 @@ export async function sendAuthEmail({ to, subject, body, url, action }: AuthEmai
   }
 }
 
+type ReportEmail = {
+  to: string;
+  subject: string;
+  /** Plain-text body, sent as the text part. */
+  text: string;
+  intro: string;
+  sections: { heading: string; rows: { label: string; value: string }[] }[];
+  totals: { label: string; value: string }[];
+};
+
+/**
+ * A results email with no action link: the PAR calculator's report.
+ *
+ * RETURNS FALSE INSTEAD OF THROWING when nothing was sent, whether because no
+ * transport is configured or because Resend refused it. The caller still has
+ * the report and shows it on screen; a buyer who asked for their numbers
+ * should get them even when the email does not go.
+ */
+export async function sendReportEmail(email: ReportEmail): Promise<boolean> {
+  if (!emailTransportConfigured()) {
+    console.info(`Report email not sent (no transport configured): "${email.subject}"`);
+    return false;
+  }
+
+  try {
+    const res = await fetch(RESEND_ENDPOINT, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: process.env.AUTH_EMAIL_FROM,
+        to: [email.to],
+        subject: email.subject,
+        text: email.text,
+        html: renderReportHtml(email),
+      }),
+    });
+    if (res.ok) return true;
+    const detail = await res.text().catch(() => "");
+    console.error(`Report email failed (${res.status}): ${detail.slice(0, 300)}`);
+  } catch (error) {
+    console.error("Report email failed:", error);
+  }
+  return false;
+}
+
 function logUnsentEmail({
   to,
   subject,
@@ -124,6 +174,44 @@ function renderHtml({ body, url, action }: Pick<AuthEmail, "body" | "url" | "act
     <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:${navy}">${escapeHtml(body)}</p>
     <a href="${escapeHtml(url)}" style="display:inline-block;background:${blue};color:#fff;text-decoration:none;padding:12px 24px;border-radius:6px;font-size:14px;font-weight:600">${escapeHtml(action)}</a>
     <p style="margin:24px 0 0;font-size:12px;line-height:1.6;color:rgba(10,37,64,.6)">If the button does not work, paste this into your browser:<br><span style="word-break:break-all">${escapeHtml(url)}</span></p>
+  </div>
+</div>`;
+}
+
+/** The results email, in the same frame as renderHtml. */
+function renderReportHtml({ intro, sections, totals }: ReportEmail) {
+  const navy = "#0A2540";
+  const ivory = "#FAF6EF";
+  const blue = "#0b97ff";
+  const gold = "#C9A84C";
+
+  const rows = (list: { label: string; value: string }[]) =>
+    list
+      .map(
+        (row) =>
+          `<tr><td style="padding:6px 0;font-size:14px;color:rgba(10,37,64,.7)">${escapeHtml(row.label)}</td>` +
+          `<td style="padding:6px 0;font-size:14px;color:${navy};text-align:right;font-weight:600">${escapeHtml(row.value)}</td></tr>`
+      )
+      .join("");
+
+  return `<div style="background:${ivory};padding:40px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <div style="max-width:560px;margin:0 auto;background:#fff;border-top:3px solid ${gold};padding:36px 32px">
+    <p style="margin:0 0 8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:${gold}">Souwel</p>
+    <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:${navy}">${escapeHtml(intro)}</p>
+    ${totals
+      .map(
+        (t) =>
+          `<p style="margin:0 0 6px;font-size:13px;color:rgba(10,37,64,.7)">${escapeHtml(t.label)}</p>` +
+          `<p style="margin:0 0 18px;font-size:30px;font-weight:700;color:${blue}">${escapeHtml(t.value)}</p>`
+      )
+      .join("")}
+    ${sections
+      .map(
+        (s) =>
+          `<p style="margin:24px 0 8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:${gold}">${escapeHtml(s.heading)}</p>` +
+          `<table role="presentation" width="100%" style="border-collapse:collapse">${rows(s.rows)}</table>`
+      )
+      .join("")}
   </div>
 </div>`;
 }
