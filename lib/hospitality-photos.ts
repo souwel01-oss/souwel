@@ -217,6 +217,22 @@ const FITTED_SHEET: Shot[] = [
   { src: `${FITTED_SHEETS}/elastic.jpg`, alt: "Elasticated edge of a white fitted sheet" },
 ];
 
+const PILLOW_CASES = `${DIR}/pillow-case`;
+
+const PILLOW_CASE_PLAIN: Shot[] = [
+  { src: `${PILLOW_CASES}/plain-pair.jpg`, alt: "Two pillows in white plain pillow cases" },
+  { src: `${PILLOW_CASES}/plain-stacked.jpg`, alt: "Two white pillow cases stacked flat" },
+  { src: `${PILLOW_CASES}/plain-flat.jpg`, alt: "White pillow cases laid flat, showing the hem" },
+];
+
+// The client also sent an "Easy Fit (Narrow Side Opening)" shot. It is left
+// out because that opening is not on the sheet; add it once the client
+// confirms the stripe case is made that way.
+const PILLOW_CASE_STRIPE: Shot[] = [
+  { src: `${PILLOW_CASES}/stripe-pair.jpg`, alt: "Two pillows in white satin stripe pillow cases" },
+  { src: `${PILLOW_CASES}/stripe-single.jpg`, alt: "A pillow in a white satin stripe pillow case" },
+];
+
 /**
  * Bed Linen's own shots, keyed by product slug in lib/bed-linen.ts.
  *
@@ -300,6 +316,34 @@ export const BED_LINEN_PHOTOS: Record<string, { card: Shot; gallery: Shot[] }> =
     },
     gallery: FITTED_SHEET,
   },
+  "pillow-case-t200-percale-55-45": {
+    card: {
+      src: `${PILLOW_CASES}/card-1.jpg`,
+      alt: "Room attendant holding a pillow in a white pillow case",
+    },
+    gallery: PILLOW_CASE_PLAIN,
+  },
+  "pillow-case-t250-percale-60-40": {
+    card: {
+      src: `${PILLOW_CASES}/card-2.jpg`,
+      alt: "Room attendant setting a white pillow against a headboard",
+    },
+    gallery: PILLOW_CASE_PLAIN,
+  },
+  "pillow-case-t300-plain-60-40": {
+    card: {
+      src: `${PILLOW_CASES}/card-3.jpg`,
+      alt: "Room attendant placing a white pillow on a made hotel bed",
+    },
+    gallery: PILLOW_CASE_PLAIN,
+  },
+  "pillow-case-t300-satin-stripes": {
+    card: {
+      src: `${PILLOW_CASES}/card-stripe.jpg`,
+      alt: "Housekeeper arranging satin stripe pillow cases on a hotel bed",
+    },
+    gallery: PILLOW_CASE_STRIPE,
+  },
 };
 
 /**
@@ -320,6 +364,11 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
     BED_LINEN_PHOTOS["fitted-sheet-t200-60-40"].card,
     BED_LINEN_PHOTOS["fitted-sheet-t200-55-45"].card,
     BED_LINEN_PHOTOS["fitted-sheet-t300-55-45"].card,
+  ],
+  "pillow-case": [
+    BED_LINEN_PHOTOS["pillow-case-t200-percale-55-45"].card,
+    BED_LINEN_PHOTOS["pillow-case-t250-percale-60-40"].card,
+    BED_LINEN_PHOTOS["pillow-case-t300-satin-stripes"].card,
   ],
 
   // Bath Linen
