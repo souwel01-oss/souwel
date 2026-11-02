@@ -225,12 +225,15 @@ const PILLOW_CASE_PLAIN: Shot[] = [
   { src: `${PILLOW_CASES}/plain-flat.jpg`, alt: "White pillow cases laid flat, showing the hem" },
 ];
 
-// The client also sent an "Easy Fit (Narrow Side Opening)" shot. It is left
-// out because that opening is not on the sheet; add it once the client
-// confirms the stripe case is made that way.
+// The easy-fit shot belongs here only: the sheet gives this row the EZ Fit hem,
+// and the plain rows an open end.
 const PILLOW_CASE_STRIPE: Shot[] = [
   { src: `${PILLOW_CASES}/stripe-pair.jpg`, alt: "Two pillows in white satin stripe pillow cases" },
   { src: `${PILLOW_CASES}/stripe-single.jpg`, alt: "A pillow in a white satin stripe pillow case" },
+  {
+    src: `${PILLOW_CASES}/stripe-easy-fit.jpg`,
+    alt: "Satin stripe pillow cases with a close-up of the easy-fit side opening",
+  },
 ];
 
 /**
