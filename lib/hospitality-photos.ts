@@ -5,9 +5,8 @@
  * A PHOTOGRAPH IS ATTACHED ONLY TO THE LINE IT IS OF. Every set below comes
  * from a folder in the client's shoot ("Products by Name 2026") named for the
  * product it shows, and was checked against the picture as well as the name.
- * Lines with no folder of their own — the rest of Bed Linen, Flour Sack, Table
- * Cloth, Bath Sheet and so on — are simply absent from this file and keep
- * the stand-ins their pages already carry. A Fitted Sheet card showing a towel
+ * Lines with no photography yet — Hair Wash/Dye Towel and the like — are simply
+ * absent from this file and keep the stand-ins their pages already carry. A Fitted Sheet card showing a towel
  * because a towel photograph happened to exist would be a picture of a product
  * Souwel is not offering under that name.
  *
@@ -64,9 +63,15 @@ const BATH_MATS: Shot[] = [
 ];
 
 const BATH_ROBES: Shot[] = [
-  { src: `${DIR}/bath-robes/robe-1.jpg`, alt: "White terry bath robe with tie belt" },
-  { src: `${DIR}/bath-robes/robe-2.jpg`, alt: "White shawl-collar bath robe" },
-  { src: `${DIR}/bath-robes/slippers.jpg`, alt: "Pair of white terry slippers" },
+  { src: `${DIR}/bath-robes/new-shawl-front.jpg`, alt: "White terry shawl-collar bath robe, front" },
+  { src: `${DIR}/bath-robes/new-honeycomb-front.jpg`, alt: "White honeycomb kimono bath robe, front" },
+  { src: `${DIR}/bath-robes/new-kimono-front.jpg`, alt: "White ribbed terry kimono bath robe, front" },
+  { src: `${DIR}/bath-robes/new-waffle-shawl.jpg`, alt: "White waffle-weave shawl-collar bath robe" },
+  { src: `${DIR}/bath-robes/new-shawl-back.jpg`, alt: "White terry shawl-collar bath robe, back" },
+  { src: `${DIR}/bath-robes/new-honeycomb-back.jpg`, alt: "White honeycomb bath robe, back" },
+  { src: `${DIR}/bath-robes/new-kimono-back.jpg`, alt: "White terry kimono bath robe, back" },
+  { src: `${DIR}/bath-robes/new-waffle-back.jpg`, alt: "White waffle-weave bath robe, back" },
+  { src: `${DIR}/bath-robes/new-slippers.jpg`, alt: "Pair of white terry hotel slippers" },
 ];
 
 // The shoot's four SALON TOWEL folders. Worth raising with the client: the
@@ -191,9 +196,78 @@ const NAPKINS: Shot[] = [
 ];
 
 const APRONS: Shot[] = [
+  { src: `${DIR}/aprons/black-front-new.jpg`, alt: "Black bib apron with pocket, front", colour: "Black" },
+  { src: `${DIR}/aprons/white-front.jpg`, alt: "White bib apron with pocket, front", colour: "White" },
+  { src: `${DIR}/aprons/black-back-new.jpg`, alt: "Black bib apron, back, with tied waist bow", colour: "Black" },
+  { src: `${DIR}/aprons/white-back.jpg`, alt: "White bib apron, back, with tied waist bow", colour: "White" },
   { src: `${DIR}/aprons/black-1.jpg`, alt: "Black bib apron, front", colour: "Black" },
   { src: `${DIR}/aprons/black-2.jpg`, alt: "Black bib apron, side", colour: "Black" },
 ];
+
+const TABLE_CLOTH: Shot[] = [
+  { src: `${DIR}/table-cloth/colourful.jpg`, alt: "Folded table cloths in red, cream, tan, green, blue, black and white" },
+  { src: `${DIR}/table-cloth/black-1.jpg`, alt: "Stack of folded black table cloths", colour: "Black" },
+  { src: `${DIR}/table-cloth/black-2.jpg`, alt: "Folded black table cloths, one opened out", colour: "Black" },
+];
+
+const FLOUR_SACK: Shot[] = [
+  { src: `${DIR}/flour-sack/a.jpg`, alt: "Stack of folded flour sack towels" },
+  { src: `${DIR}/flour-sack/b.jpg`, alt: "Flour sack towels folded in a pile" },
+  { src: `${DIR}/flour-sack/c.jpg`, alt: "Tall stack of flour sack towels" },
+];
+
+// Bath Sheet is made in White and Beige on the salon sheet. A shows both.
+const BATH_SHEET: Shot[] = [
+  { src: `${DIR}/bath-sheet/a.jpg`, alt: "Stacks of white and beige bath sheets" },
+  { src: `${DIR}/bath-sheet/c.jpg`, alt: "Stack of white bath sheets", colour: "White" },
+  { src: `${DIR}/bath-sheet/b.jpg`, alt: "Stack of beige bath sheets", colour: "Beige" },
+];
+
+const SPA_SHEET: Shot[] = [
+  { src: `${DIR}/spa-sheet/plain.jpg`, alt: "Folded white spa sheet" },
+  { src: `${DIR}/spa-sheet/a.jpg`, alt: "White spa sheet with its edge folded back" },
+  { src: `${DIR}/spa-sheet/c.jpg`, alt: "Hemmed corner of a white spa sheet" },
+];
+
+const DUVET_COVERS = `${DIR}/duvet-cover`;
+
+const DUVET_PLAIN: Shot[] = [
+  { src: `${DUVET_COVERS}/plain-folded.jpg`, alt: "Folded white duvet cover" },
+  { src: `${DUVET_COVERS}/plain-neat.jpg`, alt: "Neatly folded white duvet cover" },
+  { src: `${DUVET_COVERS}/plain-rolled.jpg`, alt: "Neatly rolled white duvet cover" },
+];
+
+const DUVET_STRIPE: Shot[] = [
+  { src: `${DUVET_COVERS}/stripe-folded.jpg`, alt: "Folded white satin-stripe duvet cover" },
+  { src: `${DUVET_COVERS}/stripe-hotel.jpg`, alt: "White satin-stripe hotel bedding, folded" },
+  { src: `${DUVET_COVERS}/stripe-stack.jpg`, alt: "Stack of white satin-stripe duvet covers" },
+];
+
+const MATTRESS_PROTECTORS = `${DIR}/mattress-protector`;
+
+const MATTRESS_PROTECTOR: Shot[] = [
+  { src: `${MATTRESS_PROTECTORS}/rolled.jpg`, alt: "Quilted white mattress protector, folded" },
+  { src: `${MATTRESS_PROTECTORS}/folded.jpg`, alt: "Quilted white mattress protector, folded in thirds" },
+  { src: `${MATTRESS_PROTECTORS}/closeup.jpg`, alt: "Close-up of a quilted mattress protector corner with its elastic strap" },
+];
+
+const MATTRESS_PROTECTOR_CARDS: Shot[] = [1, 2, 3].map((n) => ({
+  src: `${MATTRESS_PROTECTORS}/card-${n}.jpg`,
+  alt: MATTRESS_PROTECTOR[n - 1].alt,
+}));
+
+const PILLOW_PROTECTORS = `${DIR}/pillow-protector`;
+
+const PILLOW_PROTECTOR: Shot[] = [
+  { src: `${PILLOW_PROTECTORS}/pair-a.jpg`, alt: "Pair of white pillows in protectors" },
+  { src: `${PILLOW_PROTECTORS}/pair-c.jpg`, alt: "Two white pillow protectors stacked" },
+  { src: `${PILLOW_PROTECTORS}/zip.jpg`, alt: "White pillow protector with its zip partly open" },
+];
+
+const PILLOW_PROTECTOR_CARDS: Shot[] = [1, 2, 3].map((n) => ({
+  src: `${PILLOW_PROTECTORS}/card-${n}.jpg`,
+  alt: PILLOW_PROTECTOR[n - 1].alt,
+}));
 
 const FLAT_SHEETS = `${DIR}/flat-sheets`;
 
@@ -347,6 +421,31 @@ export const BED_LINEN_PHOTOS: Record<string, { card: Shot; gallery: Shot[] }> =
     },
     gallery: PILLOW_CASE_STRIPE,
   },
+  // Duvet cover. The client's three room-scene thumbnails are unlabelled, so
+  // they follow the sheet's order with the stripe scene on the stripe row.
+  "duvet-cover-t200-plain": {
+    card: {
+      src: `${DUVET_COVERS}/card-1.jpg`,
+      alt: "Housekeeper shaking out a white duvet cover in a hotel room",
+    },
+    gallery: DUVET_PLAIN,
+  },
+  "duvet-cover-t300-plain": {
+    card: {
+      src: `${DUVET_COVERS}/card-2.jpg`,
+      alt: "Housekeeper dressing a hotel bed with a white duvet cover",
+    },
+    gallery: DUVET_PLAIN,
+  },
+  "duvet-cover-t300-satin-stripes": {
+    card: {
+      src: `${DUVET_COVERS}/card-stripe.jpg`,
+      alt: "Housekeeper making a hotel bed with a white satin-stripe duvet cover",
+    },
+    gallery: DUVET_STRIPE,
+  },
+  "mattress-protector": { card: MATTRESS_PROTECTOR_CARDS[0], gallery: MATTRESS_PROTECTOR },
+  "pillow-protector": { card: PILLOW_PROTECTOR_CARDS[0], gallery: PILLOW_PROTECTOR },
 };
 
 /**
@@ -374,6 +473,14 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
     BED_LINEN_PHOTOS["pillow-case-t300-satin-stripes"].card,
   ],
 
+  "duvet-cover": [
+    BED_LINEN_PHOTOS["duvet-cover-t200-plain"].card,
+    BED_LINEN_PHOTOS["duvet-cover-t300-plain"].card,
+    BED_LINEN_PHOTOS["duvet-cover-t300-satin-stripes"].card,
+  ],
+  "mattress-protector": MATTRESS_PROTECTOR_CARDS,
+  "pillow-protector": PILLOW_PROTECTOR_CARDS,
+
   // Bath Linen
   "terry-towels": TERRY,
   "bath-robes": BATH_ROBES,
@@ -384,6 +491,7 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
   "bistro-napkins": BISTRO_NAPKIN,
   "momi-napkins": MOMMIE_NAPKIN,
   "polyester-napkin": NAPKINS,
+  "table-cloths": TABLE_CLOTH,
 
   // Food & Beverage
   "bar-mop": BAR_MOP,
@@ -393,9 +501,13 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
   "mommie-napkin": MOMMIE_NAPKIN,
   aprons: APRONS,
   napkins: NAPKINS,
+  "flour-sack": FLOUR_SACK,
+  "table-cloth": TABLE_CLOTH,
 
   // Spa Salon
   "salon-towel": SALON_TOWEL,
+  "bath-sheet": BATH_SHEET,
+  "spa-sheet": SPA_SHEET,
 };
 
 /**
