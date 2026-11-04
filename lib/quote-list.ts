@@ -34,6 +34,7 @@ export const QUOTE_LIST_KINDS = [
   "terry",
   "bed",
   "spa",
+  "hcp",
   "fb",
   "cat",
   "hc",
@@ -88,7 +89,7 @@ export type QuoteListItem = QuoteListProductRef & {
  * derives (lib/catalogue-lines.ts), which mean nothing outside it.
  */
 export function hasStockCodes(kind: QuoteListKind): boolean {
-  return kind === "terry" || kind === "bed" || kind === "spa" || kind === "fb";
+  return kind === "terry" || kind === "bed" || kind === "spa" || kind === "fb" || kind === "hcp";
 }
 
 export function quoteListId(kind: QuoteListKind, slug: string): string {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { HEALTH_CARE_LINES, healthCareLineHref, type HealthCareLine } from "@/lib/health-care";
 import { LINE_PHOTOS, STAND_INS } from "@/lib/health-care-photos";
 import { CARD_SHOTS } from "@/lib/hospitality-photos";
-import { catalogueSummary } from "@/lib/catalogue-summary";
+import { healthCareProducts } from "@/lib/health-care-sheet";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 import { RangeVideoBand } from "@/components/marketing/RangeVideoBand";
@@ -11,7 +11,7 @@ import { RangeQuotePrompt } from "@/components/marketing/RangeQuotePrompt";
 export const metadata: Metadata = {
   title: "Health-Care",
   description:
-    "Towels, blankets, gowns and bed linen for the ward, the nursery, the treatment room and the hyperbaric chamber, with full specifications where our product sheet publishes them.",
+    "Towels, blankets, gowns and bed linen for the ward, the nursery, the treatment room and the hyperbaric chamber, with a stock code for every product.",
   alternates: { canonical: "/health-care" },
 };
 
@@ -25,7 +25,6 @@ export const metadata: Metadata = {
 
 export default function HealthCarePage() {
   const cards = HEALTH_CARE_LINES.map(toCard);
-  const specified = HEALTH_CARE_LINES.filter((line) => line.productSlugs.length > 0).length;
 
   return (
     <main className="bg-background">
@@ -43,8 +42,8 @@ export default function HealthCarePage() {
             </h1>
             <p className="text-muted-foreground mt-6 max-w-2xl text-lg leading-relaxed text-pretty">
               Towels, blankets, gowns and bed linen for the ward, the nursery and the treatment
-              room. Open a line for its photographs and, where we publish one, its full
-              specification.
+              room. Open a category to see its products, then a product for its specification and
+              stock codes.
             </p>
           </Reveal>
         </div>
@@ -63,17 +62,17 @@ export default function HealthCarePage() {
             ))}
           </Reveal>
 
-          <p className="text-muted-foreground border-border mt-12 border-t pt-6 text-[13px] leading-relaxed">
-            {HEALTH_CARE_LINES.length - specified} of these {HEALTH_CARE_LINES.length} lines are
-            made to order and are not on our published specification sheet yet; ask and we will send
-            the construction detail with your quotation.
-          </p>
         </div>
       </section>
 
       <RangeQuotePrompt />
     </main>
   );
+}
+
+function productCount(slug: string): string {
+  const n = healthCareProducts(slug).length;
+  return `${n} ${n === 1 ? "product" : "products"}`;
 }
 
 function toCard(line: HealthCareLine): HospitalityCardProduct {
@@ -84,7 +83,7 @@ function toCard(line: HealthCareLine): HospitalityCardProduct {
     href,
     quoteHref: href,
     ctaLabel: "View details",
-    material: catalogueSummary(line.productSlugs),
+    material: productCount(line.slug),
     colours: [],
     images: (LINE_PHOTOS[line.slug] ?? STAND_INS).slice(0, CARD_SHOTS),
     badge: null,

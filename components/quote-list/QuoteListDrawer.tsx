@@ -21,6 +21,7 @@ import {
   useQuoteList,
 } from "@/lib/quote-list-store";
 import { QuantityStepper } from "@/components/quote-list/QuantityStepper";
+import { LineParCalculator } from "@/components/quote-list/LineParCalculator";
 
 /**
  * The quote list, as a drawer from the right. There is no list PAGE: the list
@@ -265,6 +266,16 @@ function ListRow({ row, onNavigate }: { row: ListRowData; onNavigate: () => void
           max={line ? QUOTE_LIST_MAX_LINE_QUANTITY : QUOTE_LIST_MAX_QUANTITY}
           name={rowName}
           onChange={(next) =>
+            line
+              ? setQuoteListLineQuantity(item.id, line.sku, next)
+              : setQuoteListQuantity(item.id, next)
+          }
+        />
+
+        <LineParCalculator
+          step={line?.step ?? 1}
+          max={line ? QUOTE_LIST_MAX_LINE_QUANTITY : QUOTE_LIST_MAX_QUANTITY}
+          onApply={(next) =>
             line
               ? setQuoteListLineQuantity(item.id, line.sku, next)
               : setQuoteListQuantity(item.id, next)

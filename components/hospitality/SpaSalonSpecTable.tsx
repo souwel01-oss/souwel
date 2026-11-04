@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check, Trash2 } from "lucide-react";
 import { SPA_SALON_BASE, encodeSpaSalonLines } from "@/lib/spa-salon";
+import { encodeHealthCareLines } from "@/lib/health-care-sheet";
 import { RangeListScopeNote, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -19,25 +20,41 @@ import { cn } from "@/lib/utils";
 export type SpaSalonSpecRow = {
   sku: string;
   colour: string;
-  /** Indicative swatch, or null when the shade name has no mapping. */
-  hex: string | null;
+  /** Indicative swatch, or null when the shade name has no mapping. Left out
+   *  where the row is a weight or a size and has no swatch to draw. */
+  hex?: string | null;
 };
 
 export function SpaSalonSpecTable({
   productSlug,
   pack,
   rows,
+  noun = "colour",
+  unit = "pieces",
+  quoteParam = "spa",
+  rangeHref = SPA_SALON_BASE,
 }: {
   productSlug: string;
   pack: number;
   rows: SpaSalonSpecRow[];
+  /** What a row is: "colour" here, "weight" or "size" on Health-Care. */
+  noun?: string;
+  /** What a quantity is counted in: "pieces", or "dozen" on a Health-Care case. */
+  unit?: string;
+  /** The quote link's product parameter: `spa`, or `hcp` on Health-Care. */
+  quoteParam?: string;
+  /** Where "the rest of the range" goes. */
+  rangeHref?: string;
 }) {
+  const Noun = noun.charAt(0).toUpperCase() + noun.slice(1);
+  // Chosen here, not passed in: a function cannot cross from a server page.
+  const encodeLines = quoteParam === "hcp" ? encodeHealthCareLines : encodeSpaSalonLines;
   const { lines, setLine, removeLine, quantityOf, selected } = useRangeOrderList();
 
   const href =
     lines.length > 0
-      ? `/quote?spa=${encodeURIComponent(productSlug)}&lines=${encodeURIComponent(
-          encodeSpaSalonLines(lines)
+      ? `/quote?${quoteParam}=${encodeURIComponent(productSlug)}&lines=${encodeURIComponent(
+          encodeLines(lines)
         )}`
       : null;
 
@@ -48,11 +65,11 @@ export function SpaSalonSpecTable({
       <div className="border-premium/25 bg-card relative overflow-x-auto rounded-xl border">
         <table className="w-full min-w-[34rem] text-sm">
           <caption className="sr-only">
-            Colours and stock codes for this product, with a quantity box per row
+            {Noun}s and stock codes for this product, with a quantity box per row
           </caption>
           <thead>
             <tr className="border-premium/20 border-b">
-              {["Colour", "SKU", "Quantity", ""].map((h, i) => (
+              {[Noun, "SKU", "Quantity", ""].map((h, i) => (
                 <th
                   key={h || i}
                   scope="col"
@@ -69,6 +86,7 @@ export function SpaSalonSpecTable({
                 key={row.sku}
                 row={row}
                 pack={pack}
+                noun={noun}
                 listed={quantityOf(row.sku)}
                 highlighted={row.sku === selected}
                 onAdd={(qty) => setLine(row.sku, qty)}
@@ -83,7 +101,7 @@ export function SpaSalonSpecTable({
         <h3 className="text-foreground text-[15px] font-semibold">
           Your list{" "}
           <span className="text-muted-foreground font-normal">
-            ({lines.length} {lines.length === 1 ? "colour" : "colours"} selected)
+            ({lines.length} {lines.length === 1 ? noun : `${noun}s`} selected)
           </span>
         </h3>
 
@@ -101,11 +119,13 @@ export function SpaSalonSpecTable({
                   key={line.sku}
                   className="border-border flex flex-wrap items-center gap-x-4 gap-y-1 rounded-lg border px-4 py-3 text-[13.5px]"
                 >
-                  <span
-                    aria-hidden
-                    className="border-foreground/25 block size-4 shrink-0 rounded-[3px] border shadow-[inset_0_0_0_1px_rgb(255_255_255/0.6)]"
-                    style={row.hex ? { backgroundColor: row.hex } : undefined}
-                  />
+                  {row.hex !== undefined ? (
+                    <span
+                      aria-hidden
+                      className="border-foreground/25 block size-4 shrink-0 rounded-[3px] border shadow-[inset_0_0_0_1px_rgb(255_255_255/0.6)]"
+                      style={row.hex ? { backgroundColor: row.hex } : undefined}
+                    />
+                  ) : null}
                   <span className="text-foreground font-medium">{row.colour}</span>
                   <span className="text-muted-foreground font-mono text-[12px]">{row.sku}</span>
                   <span className="text-foreground ml-auto font-semibold tabular-nums">
@@ -149,7 +169,7 @@ export function SpaSalonSpecTable({
           )}
           <p className="text-muted-foreground mt-3 text-[13px]">
             {lines.length === 0
-              ? "Add at least one colour to request a quote."
+              ? `Add at least one ${noun} to request a quote.`
               : "Priced by quotation against your specification and volume. No account needed to ask."}
           </p>
           <RangeListScopeNote />
@@ -157,9 +177,14 @@ export function SpaSalonSpecTable({
       </div>
 
       <p className="text-muted-foreground mt-6 max-w-2xl text-[13px] leading-relaxed">
-        Colours not listed are not part of this line. Shades are matched from a physical sample when
-        we quote, and quantities are supplied in packs of {pack} and round up to the next pack.{" "}
-        <Link href={SPA_SALON_BASE} className="underline underline-offset-4">
+        {Noun}s not listed are not part of this line.{" "}
+        {rows.some((r) => r.hex !== undefined)
+          ? "Shades are matched from a physical sample when we quote, and quantities are "
+          : "Quantities are "}
+        {pack > 1
+          ? `supplied in packs of ${pack} ${unit} and round up to the next pack.`
+          : `counted in ${unit}.`}{" "}
+        <Link href={rangeHref} className="underline underline-offset-4">
           The rest of the range
         </Link>{" "}
         can be added to the same list.
@@ -171,12 +196,14 @@ export function SpaSalonSpecTable({
 function SpecTableRow({
   row,
   pack,
+  noun,
   listed,
   highlighted,
   onAdd,
 }: {
   row: SpaSalonSpecRow;
   pack: number;
+  noun: string;
   listed: number | null;
   highlighted: boolean;
   onAdd: (quantity: number) => void;
@@ -198,11 +225,13 @@ function SpecTableRow({
     >
       <th scope="row" className="text-foreground px-5 py-3.5 text-left font-medium">
         <span className="flex items-center gap-2.5">
-          <span
-            aria-hidden
-            className="border-foreground/25 block size-4 shrink-0 rounded-[3px] border shadow-[inset_0_0_0_1px_rgb(255_255_255/0.6)]"
-            style={row.hex ? { backgroundColor: row.hex } : undefined}
-          />
+          {row.hex !== undefined ? (
+            <span
+              aria-hidden
+              className="border-foreground/25 block size-4 shrink-0 rounded-[3px] border shadow-[inset_0_0_0_1px_rgb(255_255_255/0.6)]"
+              style={row.hex ? { backgroundColor: row.hex } : undefined}
+            />
+          ) : null}
           {row.colour}
           {listed !== null ? (
             <span className="text-primary-strong dark:text-primary inline-flex items-center gap-1 text-[11.5px] font-semibold">

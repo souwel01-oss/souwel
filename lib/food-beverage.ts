@@ -219,8 +219,8 @@ export const FB_PRODUCTS: FbProduct[] = [
     // rounding rule — a quantity is taken as entered.
     slug: "bistro-napkin",
     name: "Bistro Napkin",
-    family: "bistro-napkin",
-    familyLabel: "Bistro Napkin",
+    family: "napkin",
+    familyLabel: "Napkin",
     description: "Bistro Stripe Napkin",
     blend: "100% Cotton",
     weight: null,
@@ -240,8 +240,8 @@ export const FB_PRODUCTS: FbProduct[] = [
   {
     slug: "mommie-napkin",
     name: "Momie Napkin",
-    family: "mommie-napkin",
-    familyLabel: "Momie Napkin",
+    family: "napkin",
+    familyLabel: "Napkin",
     description: "Mercerised Momie Napkin Cotton",
     blend: "100% Cotton",
     weight: null,
@@ -334,9 +334,9 @@ export const FB_PRODUCTS: FbProduct[] = [
   /* ── Napkins ─────────────────────────────────────────────────────────── */
   {
     slug: "napkins-spun-polyester",
-    name: "Napkins — Spun Polyester",
-    family: "napkins",
-    familyLabel: "Napkins",
+    name: "Spun Poly Napkins",
+    family: "napkin",
+    familyLabel: "Napkin",
     description: "Spun Polyester",
     blend: "100% Polyester",
     weight: null,
@@ -438,8 +438,8 @@ export function fbFamilySlugs(): string[] {
 /**
  * Where a click on this product's card, or the mega-menu, should land.
  *
- * A FAMILY WITH ONE MEMBER HAS NO LISTING PAGE — only Bar Mop and Aprons have
- * several builds, so only those two get one. A listing page holding exactly
+ * A FAMILY WITH ONE MEMBER HAS NO LISTING PAGE — only Bar Mop, Aprons and
+ * Napkin have several products, so only those three get one. A listing page holding exactly
  * one card is a click that exists only to be clicked through.
  */
 export function fbProductHref(product: FbProduct): string {

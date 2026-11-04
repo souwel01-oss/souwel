@@ -30,19 +30,26 @@ export type SpaSalonPickerColour = {
   /** The client's stock code — the line's identity everywhere. */
   sku: string;
   colour: string;
-  /** Indicative swatch, or null when the shade name has no mapping. */
-  hex: string | null;
+  /** Indicative swatch, or null when the shade name has no mapping. Left out
+   *  where the option is a weight or a size and has no swatch to draw. */
+  hex?: string | null;
 };
 
 export function SpaSalonSpecPicker({
   facts,
   pack,
   colours,
+  noun = "colour",
+  unit = "pieces",
 }: {
   /** Fixed facts shown above the choice — thread count, size, weight, pack. */
   facts: { label: string; value: string }[];
   pack: number;
   colours: SpaSalonPickerColour[];
+  /** What the options are: "colour" here, "weight" or "size" on Health-Care. */
+  noun?: string;
+  /** What a quantity is counted in: "pieces", or "dozen" on a Health-Care case. */
+  unit?: string;
 }) {
   const { setLine, setSelected, selected } = useRangeOrderList();
   const [quantity, setQuantity] = useState("");
@@ -52,7 +59,11 @@ export function SpaSalonSpecPicker({
   const qtyHelpId = useId();
   const helpId = useId();
 
-  const chosen = colours.find((c) => c.sku === selected) ?? null;
+  // One option is no choice: it is selected for the buyer.
+  const chosen =
+    colours.find((c) => c.sku === selected) ?? (colours.length === 1 ? colours[0] : null);
+  const hasSwatches = colours.some((c) => c.hex !== undefined);
+  const Noun = noun.charAt(0).toUpperCase() + noun.slice(1);
 
   const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
   const qty = typed !== null && typed > 0 && typed % pack === 0 ? typed : null;
@@ -97,7 +108,7 @@ export function SpaSalonSpecPicker({
       {/* ── Colour ───────────────────────────────────────────────────── */}
       <fieldset className="mt-6">
         <legend className="text-foreground/80 text-[13px] font-semibold">
-          Colour <span className="text-muted-foreground font-normal">(required)</span>
+          {Noun} <span className="text-muted-foreground font-normal">(required)</span>
         </legend>
         <div className="mt-3 flex flex-wrap gap-2.5">
           {colours.map((option) => {
@@ -117,11 +128,13 @@ export function SpaSalonSpecPicker({
               >
                 {/* The inset white ring is what keeps a pale shade — ivory,
                     beige, white — visible against an ivory page. */}
-                <span
-                  aria-hidden
-                  className="border-foreground/25 block size-5 shrink-0 rounded-[4px] border shadow-[inset_0_0_0_1px_rgb(255_255_255/0.6)]"
-                  style={option.hex ? { backgroundColor: option.hex } : undefined}
-                />
+                {option.hex !== undefined ? (
+                  <span
+                    aria-hidden
+                    className="border-foreground/25 block size-5 shrink-0 rounded-[4px] border shadow-[inset_0_0_0_1px_rgb(255_255_255/0.6)]"
+                    style={option.hex ? { backgroundColor: option.hex } : undefined}
+                  />
+                ) : null}
                 <span>
                   <span className="block text-[14px] font-medium">{option.colour}</span>
                   {/* The code on the button itself: it is what a buyer quotes
@@ -137,9 +150,11 @@ export function SpaSalonSpecPicker({
         </div>
       </fieldset>
 
-      <p className="text-muted-foreground mt-4 text-[12.5px] leading-relaxed">
-        Swatches are indicative only — shades are matched from a physical sample when we quote.
-      </p>
+      {hasSwatches ? (
+        <p className="text-muted-foreground mt-4 text-[12.5px] leading-relaxed">
+          Swatches are indicative only — shades are matched from a physical sample when we quote.
+        </p>
+      ) : null}
 
       {/* ── Quantity ─────────────────────────────────────────────────── */}
       <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
@@ -168,8 +183,10 @@ export function SpaSalonSpecPicker({
             <span className="text-foreground font-medium">
               Rounded up from {roundedFrom.toLocaleString("en-US")} — supplied in packs of {pack}.
             </span>
+          ) : pack > 1 ? (
+            `Supplied in packs of ${pack} ${unit}, so quantities go up in ${pack}s.`
           ) : (
-            `Supplied in packs of ${pack} pieces, so quantities go up in ${pack}s.`
+            `Quantity in ${unit}.`
           )}
         </p>
       </div>
@@ -194,10 +211,12 @@ export function SpaSalonSpecPicker({
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
           {!chosen
-            ? "Choose a colour above to continue."
+            ? `Choose a ${noun} above to continue.`
             : !qty
-              ? `Enter a quantity in multiples of ${pack} to continue.`
-              : "Adds this to your list and takes you to the full table, where you can add more colours."}
+              ? pack > 1
+                ? `Enter a quantity in multiples of ${pack} to continue.`
+                : "Enter a quantity to continue."
+              : `Adds this to your list and takes you to the full table, where you can add more ${noun}s.`}
         </p>
       </div>
     </div>

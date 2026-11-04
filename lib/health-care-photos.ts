@@ -276,3 +276,100 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
   ],
   "hyperbaric-use-only": HYPERBARIC,
 };
+
+/* ───────────────────────────────────────────────────────────────────────────
+   Photographs per PRODUCT on the category sheet (lib/health-care-sheet.ts)
+   ─────────────────────────────────────────────────────────────────────────── */
+
+const cam = (name: string, alt: string): Shot[] =>
+  [1, 2, 3].map((n) => ({ src: `${DIR}/towels/${name}-${n}.jpg`, alt }));
+
+/**
+ * Keyed by the product's slug on the category sheet. A product with an entry
+ * shows its own photographs; one without shows its category's. A photograph is
+ * attached only where the shoot's folder names the same product:
+ *
+ *   - the sheet's codes end SC / SCB for single cam and DCB for double cam, and
+ *     the shoot's folders say SNG CAM and DBL CAM, so 1627SC275, 2244SC6,
+ *     2448SCB and 2448DCB each take their own folder. 24X50 has no folder.
+ *   - Surged wash cloth, 24X50 bath towels, Natural bath blanket, Multistripe,
+ *     Open Weave, Checkers, Odyssey and Little Hands have no folder, so they
+ *     show their category's set rather than a neighbour's photograph.
+ *   - The knitted fitted sheet folder does not say which weight it is, so the
+ *     24 Oz and the 27 Oz show it both.
+ *   - Hyperbaric Towel, Sheets and Pillow Case have no folder of their own and
+ *     must not show the blanket, which is not what they are.
+ */
+export const HEALTH_CARE_SHEET_PHOTOS: Record<string, Shot[]> = {
+  // Towels
+  "wash-cloth-hemmed": cam("wash-cloth-hemmed", "Stack of white hemmed wash cloths"),
+  "hand-towel": cam("hand-towel-sng-cam", "Stack of white single cam hand towels"),
+  "bath-towel-22x44": cam("bath-22x44-scb", "Stack of white single cam bath towels, 22X44"),
+  "bath-towel-24x48-scb": cam("bath-24x48-scb", "Stack of white single cam bath towels, 24X48"),
+  "bath-towel-24x48-dcb": cam("bath-24x48-dcb", "Stack of white double cam bath towels, 24X48"),
+
+  // Sheets
+  "knitted-fitted-sheet-24-oz": [
+    { src: `${DIR}/sheets/knitted-fitted.jpg`, alt: "White knitted fitted sheet laid flat" },
+    { src: `${DIR}/sheets/knitted-fitted-folded.jpg`, alt: "White knitted fitted sheet, folded" },
+  ],
+  "knitted-fitted-sheet-27-oz": [
+    { src: `${DIR}/sheets/knitted-fitted.jpg`, alt: "White knitted fitted sheet laid flat" },
+    { src: `${DIR}/sheets/knitted-fitted-folded.jpg`, alt: "White knitted fitted sheet, folded" },
+  ],
+
+  // Bath blankets
+  "white-bath-blanket": [BATH_BLANKET[2]],
+  "blue-stripe-bath-blanket": [BATH_BLANKET[0], BATH_BLANKET[1]],
+
+  // Spread blankets
+  "herringbone-spread-blanket": HERRINGBONE,
+  "septerine-spread-blanket": SERPENTINE,
+  "spectrum-spread-blanket": [SPECTRUM[0]],
+  "spectrum-spread-blanket-links": SPECTRUM_LINKS,
+  "chevron-spread-blanket": CHEVRON,
+  "chevron-spread-blanket-polyester": CHEVRON,
+
+  // Patient gowns
+  "multistripe-print-twill-weave": [
+    {
+      src: `${DIR}/patient-gown/stripes-blue.jpg`,
+      alt: "Patient gown in a blue multi-stripe print",
+      colour: "Blue",
+    },
+    {
+      src: `${DIR}/patient-gown/stripes-green.jpg`,
+      alt: "Patient gown in a green multi-stripe print",
+      colour: "Green",
+    },
+    {
+      src: `${DIR}/patient-gown/stripes-blue-neck.jpg`,
+      alt: "Neckline of the blue multi-stripe patient gown",
+      colour: "Blue",
+    },
+  ],
+  "snow-flake-print": [
+    { src: `${DIR}/patient-gown/snowflake.jpg`, alt: "Patient gown in a white snowflake print" },
+  ],
+
+  // Absorbent towels
+  "absorbent-towels": ABSORBENT_TOWEL,
+
+  // Hyperbaric: only the blanket is photographed
+  "hyperbaric-flannel-blanket": HYPERBARIC,
+  "hyperbaric-towel": STAND_INS,
+  "hyperbaric-sheet-t180": STAND_INS,
+  "hyperbaric-sheet-180": STAND_INS,
+  "hyperbaric-pillow-case": STAND_INS,
+
+  // Baby receiving blankets
+  "printed-baby-blanket": [RECEIVING_BLANKET[3]],
+  "woven-stripes-baby-blanket": [RECEIVING_BLANKET[0]],
+  "little-foot-print-baby-blanket": [RECEIVING_BLANKET[1]],
+  "duck-print-baby-blanket": [RECEIVING_BLANKET[2]],
+};
+
+/** A product's photographs, else its category's, else the stand-ins. */
+export function healthCareProductShots(categorySlug: string, productSlug: string): Shot[] {
+  return HEALTH_CARE_SHEET_PHOTOS[productSlug] ?? LINE_PHOTOS[categorySlug] ?? STAND_INS;
+}

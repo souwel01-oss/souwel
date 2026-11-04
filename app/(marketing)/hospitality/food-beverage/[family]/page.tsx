@@ -22,8 +22,8 @@ import { CARD_SHOTS } from "@/lib/hospitality-photos";
  *   /hospitality/food-beverage/bar-mop      → the LISTING (three builds)
  *   /hospitality/food-beverage/flour-sack   → the DETAIL page directly
  *
- * Only Bar Mop and Aprons have more than one build on the sheet, so only
- * those two get a listing. The other seven families are one product each and
+ * Only Bar Mop, Aprons and Napkin have more than one product on the sheet, so
+ * only those three get a listing. The other four families are one product each and
  * open straight to it — a listing page holding one card is a click that
  * exists only to be clicked through.
  */
@@ -108,8 +108,8 @@ function FamilyListing({ members }: { members: FbProduct[] }) {
               {label}
             </h1>
             <p className="text-muted-foreground mt-5 max-w-2xl text-[15.5px] leading-relaxed text-pretty">
-              {members.length} builds from our Food &amp; Beverage sheet, each with its own blend
-              and weight. Open one to choose its colour and quantity.
+              {members.length} products from our Food &amp; Beverage sheet, each with its own
+              blend and size. Open one to choose its colour and quantity.
             </p>
           </Reveal>
         </div>

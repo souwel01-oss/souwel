@@ -195,6 +195,17 @@ const NAPKINS: Shot[] = [
   { src: `${DIR}/napkins/black-2.jpg`, alt: "Stack of folded black napkins", colour: "Black" },
 ];
 
+const ECONOMY_BATH_TOWEL: Shot[] = [
+  { src: `${DIR}/economy-bath-towels/single-cam-front.jpg`, alt: "Stack of white single cam bath towels" },
+  { src: `${DIR}/economy-bath-towels/double-cam-front.jpg`, alt: "Stack of white double cam bath towels" },
+  { src: `${DIR}/economy-bath-towels/single-cam-stack.jpg`, alt: "White single cam bath towels, folded in a stack" },
+  { src: `${DIR}/economy-bath-towels/double-cam-stack.jpg`, alt: "White double cam bath towels, folded in a stack" },
+  { src: `${DIR}/economy-bath-towels/single-cam-top.jpg`, alt: "White single cam bath towel from above, showing the cam border" },
+  { src: `${DIR}/economy-bath-towels/double-cam-top.jpg`, alt: "White double cam bath towel from above, showing the double cam border" },
+  { src: `${DIR}/economy-bath-towels/single-cam-22-front.jpg`, alt: "Stack of white single cam bath towels, smaller size" },
+  { src: `${DIR}/economy-bath-towels/single-cam-angle.jpg`, alt: "White single cam bath towels stacked, seen from an angle" },
+];
+
 const APRONS: Shot[] = [
   { src: `${DIR}/aprons/black-front-new.jpg`, alt: "Black bib apron with pocket, front", colour: "Black" },
   { src: `${DIR}/aprons/white-front.jpg`, alt: "White bib apron with pocket, front", colour: "White" },
@@ -485,6 +496,7 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
   "terry-towels": TERRY,
   "bath-robes": BATH_ROBES,
   "bath-mats": BATH_MATS,
+  "economy-bath-towels": ECONOMY_BATH_TOWEL,
 
   // Table Linen. These three are the same products as their Food & Beverage
   // namesakes (see the note on the Table Linen group), so the same shots.
@@ -501,6 +513,9 @@ export const LINE_PHOTOS: Record<string, Shot[]> = {
   "mommie-napkin": MOMMIE_NAPKIN,
   aprons: APRONS,
   napkins: NAPKINS,
+  "napkins-spun-polyester": NAPKINS,
+  // The Napkin line's card: one shot of each of its three products.
+  napkin: [BISTRO_NAPKIN[0], MOMMIE_NAPKIN[0], NAPKINS[0]],
   "flour-sack": FLOUR_SACK,
   "table-cloth": TABLE_CLOTH,
 

@@ -39,7 +39,11 @@ const IMAGES = [
  * not share a colour list — see lib/hospitality-photos.ts.
  */
 export function fbImages(product: FbProduct): Shot[] {
-  const shots = shotsInColours(LINE_PHOTOS[product.family], product.colours);
+  // The product's own set where it has one (the three napkins), else its family's.
+  const shots = shotsInColours(
+    LINE_PHOTOS[product.slug] ?? LINE_PHOTOS[product.family],
+    product.colours
+  );
   return shots.length ? shots : IMAGES;
 }
 

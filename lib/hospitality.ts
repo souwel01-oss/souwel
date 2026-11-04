@@ -252,21 +252,21 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         name: "Bistro stripe napkins",
         slug: "bistro-napkins",
         productSlug: "bistro-napkin",
-        href: "/hospitality/food-beverage/bistro-napkin",
+        href: "/hospitality/food-beverage/napkin/bistro-napkin",
         ctaLabel: "View details",
       },
       {
         name: "Momie napkins",
         slug: "momi-napkins",
         productSlug: null,
-        href: "/hospitality/food-beverage/mommie-napkin",
+        href: "/hospitality/food-beverage/napkin/mommie-napkin",
         ctaLabel: "View details",
       },
       {
         name: "Polyester napkin",
         slug: "polyester-napkin",
         productSlug: "napkin",
-        href: "/hospitality/food-beverage/napkins",
+        href: "/hospitality/food-beverage/napkin/napkins-spun-polyester",
         ctaLabel: "View details",
       },
       {
@@ -287,8 +287,9 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
   },
   {
     // Renamed from "Kitchen Linen" at the client's request, and re-stocked
-    // from their Food & Beverage sheet — see lib/food-beverage.ts. The nine
-    // lines below are exactly that sheet's items. Two lines the old Kitchen
+    // from their Food & Beverage sheet — see lib/food-beverage.ts. The seven
+    // lines below are the client's own list (the three napkins are one line,
+    // Napkin, which opens a card for each). Two lines the old Kitchen
     // Linen list carried, "Dish towels" and "Kitchen towels – checks", are
     // not on it and so are not here; their catalogue pages still exist.
     slug: "food-beverage",
@@ -300,46 +301,41 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
     fallbackImages: [IMG.barmops, IMG.napkins],
     items: [
       {
-        name: "Bar mops",
+        name: "Bar Mops",
         slug: "bar-mop",
         productSlug: "bar-mop",
         href: "/hospitality/food-beverage/bar-mop",
         ctaLabel: "View the range",
       },
       {
-        name: "Kitchen towels – herringbone",
+        name: "Kitchen Towel",
         slug: "kitchen-towel",
         productSlug: "kitchen-towel-herringbone",
         href: "/hospitality/food-beverage/kitchen-towel",
         ctaLabel: "View details",
       },
       {
-        name: "Flour sacks",
-        slug: "flour-sack",
-        productSlug: null,
-        href: "/hospitality/food-beverage/flour-sack",
-        ctaLabel: "View details",
-      },
-      {
-        name: "Glass towels",
+        name: "Glass Towel",
         slug: "glass-towel",
         productSlug: "glass-towel",
         href: "/hospitality/food-beverage/glass-towel",
         ctaLabel: "View details",
       },
       {
-        name: "Bistro napkins",
-        slug: "bistro-napkin",
-        productSlug: "bistro-napkin",
-        href: "/hospitality/food-beverage/bistro-napkin",
+        name: "Flour Sacks",
+        slug: "flour-sack",
+        productSlug: null,
+        href: "/hospitality/food-beverage/flour-sack",
         ctaLabel: "View details",
       },
       {
-        name: "Momie napkins",
-        slug: "mommie-napkin",
+        // One line for the three napkins on the sheet; it opens a page with a
+        // card for each (Bistro, Momie and Spun Poly).
+        name: "Napkin",
+        slug: "napkin",
         productSlug: null,
-        href: "/hospitality/food-beverage/mommie-napkin",
-        ctaLabel: "View details",
+        href: "/hospitality/food-beverage/napkin",
+        ctaLabel: "View the range",
       },
       {
         name: "Aprons",
@@ -349,14 +345,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         ctaLabel: "View the range",
       },
       {
-        name: "Napkins",
-        slug: "napkins",
-        productSlug: null,
-        href: "/hospitality/food-beverage/napkins",
-        ctaLabel: "View details",
-      },
-      {
-        name: "Table cloths",
+        name: "Table Cloth",
         slug: "table-cloth",
         productSlug: null,
         href: "/hospitality/food-beverage/table-cloth",

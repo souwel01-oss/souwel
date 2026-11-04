@@ -5,7 +5,12 @@ import { PRODUCTS } from "@/lib/product-data";
 import { CATEGORIES } from "@/lib/site-config";
 import { hasProductPage } from "@/lib/product-slugs";
 import { hospitalityItemByName } from "@/lib/hospitality";
-import { getHealthCareLine, healthCareLineByName } from "@/lib/health-care";
+import { healthCareLineByName } from "@/lib/health-care";
+import {
+  findHealthCareProduct,
+  healthCareUnit,
+  parseHealthCareLines,
+} from "@/lib/health-care-sheet";
 import { commercialItemByName, getCommercialItem } from "@/lib/commercial";
 import { parseCatalogueLines, type CatalogueOrderItem } from "@/lib/catalogue-lines";
 import {
@@ -185,6 +190,41 @@ function readSpaSalonRequest(params: { spa?: string; lines?: string }): RangeReq
 }
 
 /**
+ * A Health-Care request, rebuilt from the query string. Same trust rule as the
+ * ones above: only the product slug and the stock codes in `?lines=` are looked
+ * at, and only after both are checked against lib/health-care-sheet.ts.
+ */
+function readHealthCareRequest(params: { hcp?: string; lines?: string }): RangeRequest | null {
+  if (!params.hcp) return null;
+  const found = findHealthCareProduct(params.hcp);
+  if (!found) return null;
+  const { product } = found;
+
+  const lines = parseHealthCareLines(product, params.lines);
+  if (lines.length === 0) return null;
+
+  const unit = healthCareUnit(product);
+  const body = lines.map(
+    (l) => `- ${l.label} (${l.sku}) — qty ${l.quantity.toLocaleString("en-US")} ${unit}`
+  );
+
+  const facts = [
+    product.blend ? `Blend: ${product.blend}` : null,
+    ...product.facts.map((f) => `${f.label}: ${f.value}`),
+    product.packing ? `Packing: ${product.packing}` : null,
+  ].filter((v): v is string => Boolean(v));
+
+  const name = `${product.name} — ${lines.length} ${lines.length === 1 ? "line" : "lines"}`;
+
+  return {
+    id: quoteListId("hcp", product.slug),
+    title: product.name,
+    name,
+    message: [...facts, "", ...body, "", ""].join("\n"),
+  };
+}
+
+/**
  * A Food & Beverage request, rebuilt from the query string. Same trust rule
  * as the three above: only the product slug and the stock codes in `?lines=`
  * are looked at, and only after both are checked against lib/food-beverage.ts.
@@ -237,6 +277,8 @@ function readRangeEntry(entry: Exclude<QuoteListRequestEntry, { kind: "product" 
       return readSpaSalonRequest({ spa: slug, lines });
     case "fb":
       return readFbRequest({ fb: slug, lines });
+    case "hcp":
+      return readHealthCareRequest({ hcp: slug, lines });
     default:
       return null;
   }
@@ -255,7 +297,7 @@ function readCatalogueEntry(
 ): CatalogueOrderItem[] {
   const line =
     kind === "hc"
-      ? getHealthCareLine(slug)
+      ? undefined
       : kind === "com"
         ? getCommercialItem(slug)?.item
         : hasProductPage(slug)
@@ -360,6 +402,7 @@ export default async function QuotePage({
     bed?: string;
     spa?: string;
     fb?: string;
+    hcp?: string;
     lines?: string;
     list?: string;
     qty?: string;
@@ -387,15 +430,6 @@ export default async function QuotePage({
       ? params.enquiry
       : undefined;
 
-  // A Health-Care line of several builds (Towels, Spread Blanket) IS
-  // specified — just not as one product — so the default note, which says we
-  // publish no specification, would be wrong for it.
-  const healthCareLine = enquiryName ? healthCareLineByName(enquiryName) : undefined;
-  const enquiryNote =
-    healthCareLine && healthCareLine.productSlugs.length > 1
-      ? "Pick the builds you need below, or name them in the message with your volumes, and send it."
-      : undefined;
-
   // `?qty=` comes with `?enquiry=` from a line with no specification: the
   // quantity the buyer typed on that line's page. Digits only, seven at most,
   // and it is only ever written into the message as a number.
@@ -414,7 +448,8 @@ export default async function QuotePage({
     readTerryRequest(params) ??
     readBedLinenRequest(params) ??
     readSpaSalonRequest(params) ??
-    readFbRequest(params);
+    readFbRequest(params) ??
+    readHealthCareRequest(params);
 
   // `?list=` is the buyer's whole quote list, sent from the drawer. It wins
   // over everything above: a link only ever carries one of these, and a list
@@ -489,7 +524,7 @@ export default async function QuotePage({
             enquiryNote={
               range
                 ? "Your list and its specification are below. Fill in your details and send it."
-                : enquiryNote
+                : undefined
             }
             messagePrefill={
               range?.message ??
