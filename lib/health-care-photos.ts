@@ -300,13 +300,29 @@ const cam = (name: string, alt: string): Shot[] =>
  *   - Hyperbaric Towel, Sheets and Pillow Case have no folder of their own and
  *     must not show the blanket, which is not what they are.
  */
+const BATH_TOWEL_PLAIN: Shot[] = cam("bath-towel-plain-27x54", "Stack of white plain bath towels");
+
 export const HEALTH_CARE_SHEET_PHOTOS: Record<string, Shot[]> = {
   // Towels
   "wash-cloth-hemmed": cam("wash-cloth-hemmed", "Stack of white hemmed wash cloths"),
   "hand-towel": cam("hand-towel-sng-cam", "Stack of white single cam hand towels"),
-  "bath-towel-22x44": cam("bath-22x44-scb", "Stack of white single cam bath towels, 22X44"),
-  "bath-towel-24x48-scb": cam("bath-24x48-scb", "Stack of white single cam bath towels, 24X48"),
-  "bath-towel-24x48-dcb": cam("bath-24x48-dcb", "Stack of white double cam bath towels, 24X48"),
+  // The three terry towels from "Health Care Addition". Single and double cam
+  // take their cam folders; "FT" in the shoot's hand towel and wash cloth
+  // folders is full terry.
+  "single-cam-terry-towel": cam("bath-24x48-scb", "Stack of white single cam towels"),
+  "double-cam-terry-towel": cam("bath-24x48-dcb", "Stack of white double cam towels"),
+  "full-terry-towel": [
+    ...cam("full-terry-hand", "Stack of white full terry hand towels"),
+    ...cam("full-terry-wash", "Stack of white full terry wash cloths"),
+  ],
+
+  // All five bath towels show the shoot's "BATH TOWEL PLAIN 27X54" folder, at the
+  // client's request, in place of the cam-border photographs.
+  "bath-towel-22x44": BATH_TOWEL_PLAIN,
+  "bath-towel-24x48-scb": BATH_TOWEL_PLAIN,
+  "bath-towel-24x48-dcb": BATH_TOWEL_PLAIN,
+  "bath-towel-24x50-scb": BATH_TOWEL_PLAIN,
+  "bath-towel-24x50-dcb": BATH_TOWEL_PLAIN,
 
   // Sheets
   "knitted-fitted-sheet-24-oz": [

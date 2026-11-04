@@ -105,6 +105,25 @@ const towel = (
     variants: [v(sku, lbs)],
   });
 
+/**
+ * A terry towel on the "Health Care Addition" sheet: a hem, then a weight and a
+ * code per size. The sheet prints no size heading, so each size is read from
+ * its own code (1627SCB is 16X27, 2450SCB is 24X50) and shown beside the
+ * weight. It gives no packing either, so a quantity is taken as entered.
+ */
+const terrySizes = (
+  slug: string,
+  name: string,
+  blend: string,
+  rows: [dims: string, lbs: string, sku: string][]
+) =>
+  product(slug, name, {
+    blend,
+    facts: [{ label: "Hem", value: "Plain" }],
+    variantLabel: "Size",
+    variants: rows.map(([dims, lbs, sku]) => v(sku, `${dims} · ${lbs}`)),
+  });
+
 const spread = (
   slug: string,
   name: string,
@@ -173,6 +192,29 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
     towel("bath-towel-24x48-dcb", "Bath Towel 24X48 DCB", 25, "24X48", "8 LBS", "2448DCB"),
     towel("bath-towel-24x50-scb", "Bath Towel 24X50 SCB", 15, "24X50", "10.5 LBS", "2450SCB"),
     towel("bath-towel-24x50-dcb", "Bath Towel 24X50 DCB", 15, "24X50", "10.5 LBS", "2450DCB"),
+    // From "Health Care Addition": three terry towels, each in a run of sizes.
+    terrySizes("single-cam-terry-towel", "Single Cam Terry Towel", "86% Cot / 14% Poly", [
+      ["12X12", "1 LBS", "1212SCB"],
+      ["13X13", "1.5 LBS", "1313SCB"],
+      ["16X27", "3 LBS", "1627SCB"],
+      ["22X44", "6.75 LBS", "2244SCB"],
+      ["24X48", "8 LBS", "2448SCB"],
+      ["24X50", "10.5 LBS", "2450SCB"],
+      ["20X30", "6.5 LBS", "2030SPF"],
+    ]),
+    terrySizes("double-cam-terry-towel", "Double Cam Terry Towel", "78% Cot / 22% Poly", [
+      ["12X12", "1 LBS", "1212DCB"],
+      ["13X13", "1.5 LBS", "1313DCB"],
+      ["16X27", "3 LBS", "1627DCB"],
+      ["22X44", "6.75 LBS", "2244DCB"],
+      ["24X48", "8 LBS", "2448DCB"],
+      ["24X50", "10.5 LBS", "2450DCB"],
+      ["20X30", "6.5 LBS", "2030DPF"],
+    ]),
+    terrySizes("full-terry-towel", "Full Terry Towel", "100% Cotton", [
+      ["12X12", "1 LBS", "1212FTC"],
+      ["13X13", "1.5 LBS", "1313FTC"],
+    ]),
   ],
 
   sheets: [
