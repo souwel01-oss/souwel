@@ -152,10 +152,28 @@ const gown = (slug: string, name: string, dozens: number, fabric: string | null,
     variants: [v(sku, name)],
   });
 
-const hyperbaric = (slug: string, name: string, dims: string, sku: string) =>
+/**
+ * A row of the "HYPERBARIC USE ONLY" sheet: size, code, packing and, where the
+ * sheet gives one, a weight. The towel is weighed per dozen and the blanket per
+ * piece, so the weight is kept as the sheet writes it.
+ */
+const hyperbaric = (
+  slug: string,
+  name: string,
+  dims: string,
+  sku: string,
+  packing: { text: string; case: HcCase },
+  lbs?: string
+) =>
   product(slug, name, {
     blend: "100% Cotton",
-    facts: [size(dims), { label: "Marking", value: "“HYPERBARIC USE ONLY”" }],
+    packing: packing.text,
+    case: packing.case,
+    facts: [
+      size(dims),
+      ...(lbs ? [weight(lbs)] : []),
+      { label: "Marking", value: "“HYPERBARIC USE ONLY”" },
+    ],
     variantLabel: "Size",
     variants: [v(sku, dims)],
   });
@@ -163,6 +181,8 @@ const hyperbaric = (slug: string, name: string, dims: string, sku: string) =>
 const baby = (slug: string, name: string, dims: string, lbs: string, sku: string) =>
   product(slug, name, {
     blend: "100% Cotton",
+    packing: "25 DZ / BULK CASE",
+    case: DZ(25),
     facts: [size(dims), weight(lbs)],
     variantLabel: "Design",
     variants: [v(sku, name)],
@@ -372,6 +392,8 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
   "absorbent-towel": [
     product("absorbent-towels", "Absorbent Towels", {
       blend: "100% Cotton",
+      packing: "25 DZ / BULK CASE",
+      case: DZ(25),
       facts: [size("18X33"), weight("2.40 LBS")],
       variantLabel: "Colour",
       variants: [
@@ -384,11 +406,11 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
   ],
 
   "hyperbaric-use-only": [
-    hyperbaric("hyperbaric-towel", "Towel", "24X48", "HYPR2448TWL"),
-    hyperbaric("hyperbaric-sheet-t180", "Sheet T180", "66X107", "HYPR66107SHT"),
-    hyperbaric("hyperbaric-sheet-180", "Sheet 180", "66X115", "HYPR66115SHT"),
-    hyperbaric("hyperbaric-pillow-case", "Pillow Case", "42X34", "HYPR4234PLW"),
-    hyperbaric("hyperbaric-flannel-blanket", "Flannel Blanket", "70X90", "HYPR7090BLNKT"),
+    hyperbaric("hyperbaric-towel", "Towel", "24X48", "HYPR2448TWL", { text: "10 DZ / BULK CASE", case: DZ(10) }, "8 LBS / DZ"),
+    hyperbaric("hyperbaric-sheet-t180", "Sheet T180", "66X107", "HYPR66107SHT", { text: "15 DZ / BULK CASE", case: DZ(15) }),
+    hyperbaric("hyperbaric-sheet-180", "Sheet 180", "66X115", "HYPR66115SHT", { text: "25 DZ / BULK CASE", case: DZ(25) }),
+    hyperbaric("hyperbaric-pillow-case", "Pillow Case", "42X34", "HYPR4234PLW", { text: "25 DZ / BULK CASE", case: DZ(25) }),
+    hyperbaric("hyperbaric-flannel-blanket", "Flannel Blanket", "70X90", "HYPR7090BLNKT", { text: "60 PIECES / BULK CASE", case: EA(60) }, "2 LBS / PIECE"),
   ],
 
   "receiving-blanket": [
