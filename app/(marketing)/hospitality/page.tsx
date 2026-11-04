@@ -116,7 +116,7 @@ export default function HospitalityPage() {
                 </p>
 
                 <span className="text-primary-strong dark:text-primary mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold">
-                  {group.items.length} lines
+                  {group.items.length} {group.items.length === 1 ? "product" : "products"}
                   <ArrowRight
                     aria-hidden
                     className="size-3.5 transition-transform duration-300 group-hover:translate-x-1"

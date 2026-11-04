@@ -90,7 +90,7 @@ export function HospitalityGroupListing({ group }: { group: HospitalityGroup }) 
             {specified < products.length ? (
               <>
                 {" "}
-                {products.length - specified} of these {products.length} lines are supplied to order
+                {products.length - specified} of these {products.length} products are supplied to order
                 and are not on our published specification sheet yet; ask and we will send the
                 construction detail with your quotation.
               </>
