@@ -122,8 +122,9 @@ export function nestedItems(group: ProductGroup): { name: string; subs: string[]
 }
 
 /**
- * The client's arrangement of the five Hospitality blocks in the mega-menu:
- * one row, one column each, in this order.
+ * The client's arrangement of the four Hospitality blocks in the mega-menu:
+ * one row, one column each, in this order. Table Linen is not in the menu at the
+ * client's request (its page and its card on /hospitality are untouched).
  *
  * SET BY HAND, BECAUSE NO RULE PRODUCES IT. This is the order the client reads
  * the range in, not the order the source list happens to be written in, so it is
@@ -136,8 +137,7 @@ const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> =
   "bath-linen": { col: 1, row: 1 },
   "bed-linen": { col: 2, row: 1 },
   "food-beverage": { col: 3, row: 1 },
-  "table-linen": { col: 4, row: 1 },
-  "spa-salon": { col: 5, row: 1 },
+  "spa-salon": { col: 4, row: 1 },
 };
 
 /**
@@ -167,7 +167,7 @@ const HOSPITALITY_MENU_PLACEMENT: Record<string, { col: number; row: number }> =
  * to import for the same reason: it holds no specifications either.
  */
 export const CATEGORY_PRODUCTS: Partial<Record<string, ProductGroup[]>> = {
-  hospitality: HOSPITALITY_GROUPS.map((g) => ({
+  hospitality: HOSPITALITY_GROUPS.filter((g) => g.slug in HOSPITALITY_MENU_PLACEMENT).map((g) => ({
     title: g.title,
     // menuLabel, when a line has one, wins for the nav's list only — the
     // Bath Linen listing page and everywhere else keep reading `name`.

@@ -1,29 +1,48 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 import { RangeLinePage } from "@/components/catalog/RangeLinePage";
 import {
   HOSPITALITY_ENQUIRY_LINES,
+  getHospitalityGroup,
   hospitalityItemHref,
   type HospitalityGroup,
   type HospitalityItem,
 } from "@/lib/hospitality";
-import { LINE_PHOTOS } from "@/lib/hospitality-photos";
+import { CARD_SHOTS, LINE_PHOTOS } from "@/lib/hospitality-photos";
+import { healthCareCardSummary } from "@/lib/health-care-sheet";
+import {
+  SHEET_LINES,
+  getSheetLine,
+  sheetLineProductHref,
+  type SheetLine,
+} from "@/lib/hospitality-sheet-lines";
+import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
+import { Reveal } from "@/components/animation/Reveal";
+import { RangeQuotePrompt } from "@/components/marketing/RangeQuotePrompt";
 
 /**
- * One Hospitality line that is on neither a range nor the product sheet:
- * Bath robes, Economy bath towels and the two napkins in Table Linen.
+ * One Hospitality line that has no page of its own elsewhere.
  *
- * The page is the shared catalogue page, so it has the same shape as Bath
- * mats next to it. With no rows to show it asks only for a quantity and says
- * "Specification on request". Lines with a range or a product page never
- * reach here; see hospitalityItemHref.
+ * TWO KINDS, TOLD APART BY THE URL:
+ *
+ *   - Lines that are on neither a range nor the product sheet (the two napkins
+ *     in Table Linen) are enquiries: the shared catalogue page, which asks only
+ *     for a quantity and says "Specification on request".
+ *   - Economy bath towels and Bath robes are lines of the client's own sheets.
+ *     They open a page of product cards, each with a page of its own; see
+ *     lib/hospitality-sheet-lines.ts.
  */
 
 export function generateStaticParams() {
-  return HOSPITALITY_ENQUIRY_LINES.map(({ group, item }) => ({
-    group: group.slug,
-    item: item.slug,
-  }));
+  return [
+    ...HOSPITALITY_ENQUIRY_LINES.map(({ group, item }) => ({
+      group: group.slug,
+      item: item.slug,
+    })),
+    ...SHEET_LINES.map((l) => ({ group: l.group, item: l.item })),
+  ];
 }
 
 function findLine(groupSlug: string, itemSlug: string) {
@@ -45,6 +64,14 @@ export async function generateMetadata({
   params: Promise<{ group: string; item: string }>;
 }): Promise<Metadata> {
   const { group, item } = await params;
+  const sheet = getSheetLine(group, item);
+  if (sheet) {
+    return {
+      title: `${sheet.name} — ${getHospitalityGroup(group)?.title ?? "Hospitality"}`,
+      description: sheet.description,
+      alternates: { canonical: sheet.base },
+    };
+  }
   const line = findLine(group, item);
   if (!line) return { title: "Not found" };
 
@@ -61,6 +88,9 @@ export default async function HospitalityLinePage({
   params: Promise<{ group: string; item: string }>;
 }) {
   const { group: groupSlug, item: itemSlug } = await params;
+  const sheet = getSheetLine(groupSlug, itemSlug);
+  if (sheet) return <SheetLineListing line={sheet} />;
+
   const line = findLine(groupSlug, itemSlug);
   if (!line) notFound();
 
@@ -93,4 +123,85 @@ function otherLines(group: HospitalityGroup, current: HospitalityItem) {
   return group.items
     .filter((item) => item.slug !== current.slug)
     .map((item) => ({ name: item.name, href: hospitalityItemHref(group, item) }));
+}
+
+/** A line of the client's own sheet: one card per product on it. */
+function SheetLineListing({ line }: { line: SheetLine }) {
+  const group = getHospitalityGroup(line.group);
+  const cards: HospitalityCardProduct[] = line.products.map((product) => {
+    const href = sheetLineProductHref(line, product);
+    return {
+      id: product.slug,
+      name: product.name,
+      href,
+      quoteHref: href,
+      ctaLabel: "View details",
+      material: healthCareCardSummary(product) || null,
+      colours: [],
+      images: line.shots(product).slice(0, CARD_SHOTS),
+      badge: null,
+      rating: null,
+    };
+  });
+
+  return (
+    <main className="bg-background">
+      <section className="border-premium/20 border-b">
+        <div className="mx-auto w-full max-w-6xl px-5 pt-10 pb-12 sm:px-8 sm:pt-14 sm:pb-14">
+          <nav aria-label="Breadcrumb">
+            <ol className="text-muted-foreground flex flex-wrap items-center gap-1.5 text-[13px]">
+              <li>
+                <Link href="/" className="hover:text-foreground transition-colors">
+                  Home
+                </Link>
+              </li>
+              <ChevronRight aria-hidden className="size-3.5 shrink-0" />
+              <li>
+                <Link href="/hospitality" className="hover:text-foreground transition-colors">
+                  Hospitality
+                </Link>
+              </li>
+              <ChevronRight aria-hidden className="size-3.5 shrink-0" />
+              <li>
+                <Link
+                  href={`/hospitality/${line.group}`}
+                  className="hover:text-foreground transition-colors"
+                >
+                  {group?.title ?? "Bath Linen"}
+                </Link>
+              </li>
+              <ChevronRight aria-hidden className="size-3.5 shrink-0" />
+              <li className="text-foreground font-medium">{line.name}</li>
+            </ol>
+          </nav>
+
+          <Reveal variant="fade-up">
+            <h1 className="font-heading text-foreground mt-6 max-w-3xl text-3xl leading-[1.1] font-semibold text-balance sm:text-4xl lg:text-5xl">
+              {line.name}
+            </h1>
+            <p className="text-muted-foreground mt-5 max-w-2xl text-[15.5px] leading-relaxed text-pretty">
+              {line.intro}
+            </p>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="py-12 sm:py-16">
+        <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
+          <Reveal
+            variant="fade-up"
+            stagger
+            batch
+            className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+          >
+            {cards.map((card) => (
+              <ProductCard key={card.id} product={card} />
+            ))}
+          </Reveal>
+        </div>
+      </section>
+
+      <RangeQuotePrompt />
+    </main>
+  );
 }

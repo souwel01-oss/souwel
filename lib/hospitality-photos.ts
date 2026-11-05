@@ -74,6 +74,32 @@ const BATH_ROBES: Shot[] = [
   { src: `${DIR}/bath-robes/new-slippers.jpg`, alt: "Pair of white terry hotel slippers" },
 ];
 
+/**
+ * The photographs of each BATH ROBE on the client's BATHROBE sheet, keyed by the
+ * product's slug in lib/health-care-sheet.ts. The two standard sizes of a collar
+ * share a pair of shots (front and back), because the supplied photographs do
+ * not show a size.
+ */
+const robePair = (front: string, back: string, what: string): Shot[] => [
+  { src: `${DIR}/bath-robes/${front}.jpg`, alt: `${what}, front` },
+  { src: `${DIR}/bath-robes/${back}.jpg`, alt: `${what}, back` },
+];
+
+const KIMONO_ROBE = robePair("new-kimono-front", "new-kimono-back", "White terry kimono bath robe");
+const SHAWL_ROBE = robePair("new-shawl-front", "new-shawl-back", "White terry shawl-collar bath robe");
+
+export const BATH_ROBE_PRODUCT_PHOTOS: Record<string, Shot[]> = {
+  "standard-terry-robe-kimono-standard": KIMONO_ROBE,
+  "standard-terry-robe-kimono-xl": KIMONO_ROBE,
+  "standard-terry-robe-shawl-standard": SHAWL_ROBE,
+  "standard-terry-robe-shawl-xl": SHAWL_ROBE,
+  "waffle-robe": [
+    { src: `${DIR}/bath-robes/new-waffle-shawl.jpg`, alt: "White waffle-weave bath robe, front" },
+    { src: `${DIR}/bath-robes/new-waffle-back.jpg`, alt: "White waffle-weave bath robe, back" },
+  ],
+  "honeycomb-robe": robePair("new-honeycomb-front", "new-honeycomb-back", "White honeycomb bath robe"),
+};
+
 // The shoot's four SALON TOWEL folders. Worth raising with the client: the
 // stacks include purple, navy, teal and pink, none of which is among the five
 // colours the salon sheet lists (Black, Grey, Burgundy, Beige, Ivory). Left

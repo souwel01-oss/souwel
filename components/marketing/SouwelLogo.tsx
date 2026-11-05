@@ -8,31 +8,28 @@ import { SITE } from "@/lib/site-config";
  * header, the footer, the 404 and the intro. Callers pass a height; the width
  * follows from the artwork's own aspect ratio.
  *
- * THE ASSET IS A DERIVED CROP, NOT THE ORIGINAL FILE. The supplied PNG is
- * 1376×280 with the artwork occupying 1324×209 inside it, offset off-centre
- * (29px of transparent padding above, 43px below). Sizing by height against
- * that file would render the mark smaller than asked for and sitting high in
- * its own box, and every placement would need a different fudge factor. So the
- * build uses a version cropped to the artwork's real bounds at
- * public/images/logo/souwel-logo.png. The original is untouched at
- * public/images/Souwel Logo/.
+ * THE ASSET IS A DERIVED CROP, NOT THE ORIGINAL FILE. The supplied "New logo"
+ * PNG is 1852×513 with the artwork occupying 1831×284 inside it and a band of
+ * transparent padding beneath. Sizing by height against that file would render
+ * the mark smaller than asked for and sitting high in its own box, and every
+ * placement would need a different fudge factor. So the build uses a version
+ * cropped to the artwork's real bounds at public/images/logo/souwel-logo-v2.png.
+ * The original is untouched at public/images/logo/New logo.png, and the previous
+ * logo is kept at public/images/logo/souwel-logo.png.
  *
  * COLOUR IS FIXED AND THAT CONSTRAINS WHERE IT CAN GO. The letters are
- * #0030F0 — a vivid but mid-luminance blue. Measured against the surfaces on
- * this site:
+ * #488BC9, a soft mid-blue, and the dot is #F6E73F. Measured against the
+ * surfaces on this site:
  *
- *   ivory / white   6.8 : 1   ideal
- *   Deep Navy       1.8 : 1   legible, because the hue separation is large,
- *                             but it is the weakest placement on the site
- *   intro scrim     1.3 : 1   unusable — which is why that scrim was inverted
- *                             to a light wash, see globals.css
+ *   ivory / white   3.4 : 1 / 3.6 : 1   readable at logo size, not at body-text size
+ *   Deep Navy       4.3 : 1             better than the old mark managed
  *
- * A one-colour light version of the artwork would fix the navy case properly.
- * Until there is one, `plate` puts the mark on an ivory chip for surfaces where
- * the blue-on-navy reading is not good enough.
+ * The lighter blue is weaker on ivory than the previous deep blue (7.3 : 1) and
+ * stronger on navy (the old one was 2.0 : 1). `plate` puts the mark on an ivory
+ * chip for surfaces where that is still not good enough.
  */
 
-const RATIO = 1324 / 209;
+const RATIO = 1831 / 284;
 
 export function SouwelLogo({
   height = 30,
@@ -51,7 +48,7 @@ export function SouwelLogo({
 }) {
   const img = (
     <Image
-      src="/images/logo/souwel-logo.png"
+      src="/images/logo/souwel-logo-v2.png"
       // The logo is the link's own label in every placement, so it carries the
       // company name rather than an empty alt.
       alt={SITE.name}

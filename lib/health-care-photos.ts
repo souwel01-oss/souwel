@@ -304,8 +304,10 @@ const BATH_TOWEL_PLAIN: Shot[] = cam("bath-towel-plain-27x54", "Stack of white p
 
 export const HEALTH_CARE_SHEET_PHOTOS: Record<string, Shot[]> = {
   // Towels
-  "wash-cloth-hemmed": cam("wash-cloth-hemmed", "Stack of white hemmed wash cloths"),
-  "hand-towel": cam("hand-towel-sng-cam", "Stack of white single cam hand towels"),
+  // At the client's request these two show the shoot's "WASH CLOTH FT" and
+  // "HAND TOWEL FT WHITE" folders (Day 6).
+  "wash-cloth-hemmed": cam("full-terry-wash", "Stack of white wash cloths"),
+  "hand-towel": cam("full-terry-hand", "Stack of white hand towels"),
   // The three terry towels from "Health Care Addition". Single and double cam
   // take their cam folders; "FT" in the shoot's hand towel and wash cloth
   // folders is full terry.
@@ -315,6 +317,12 @@ export const HEALTH_CARE_SHEET_PHOTOS: Record<string, Shot[]> = {
     ...cam("full-terry-hand", "Stack of white full terry hand towels"),
     ...cam("full-terry-wash", "Stack of white full terry wash cloths"),
   ],
+
+  // Economy bath towels' pool towel: the shoot's "POOL TOWEL BLUE STRIPE 30X60".
+  "pool-towel": [1, 2, 3].map((n) => ({
+    src: `${DIR}/towels/pool-towel-blue-stripes-${n}.jpg`,
+    alt: "Blue striped pool towel, folded",
+  })),
 
   // All five bath towels show the shoot's "BATH TOWEL PLAIN 27X54" folder, at the
   // client's request, in place of the cam-border photographs.

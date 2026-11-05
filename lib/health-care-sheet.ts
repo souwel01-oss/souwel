@@ -106,10 +106,11 @@ const towel = (
   });
 
 /**
- * A terry towel on the "Health Care Addition" sheet: a hem, then a weight and a
- * code per size. The sheet prints no size heading, so each size is read from
- * its own code (1627SCB is 16X27, 2450SCB is 24X50) and shown beside the
- * weight. It gives no packing either, so a quantity is taken as entered.
+ * A terry towel on the "Health Care Addition" and "Economy bath towels" sheets: a
+ * hem, then a weight and a code per size. The sizes are the Economy sheet's
+ * column headings (12X12, 13X13, 16X27, 22X44, 24X48, 24X50, 20X30), and they
+ * agree with the digits in each code. Neither sheet gives a packing, so a
+ * quantity is taken as entered.
  */
 const terrySizes = (
   slug: string,
@@ -439,6 +440,76 @@ export function getHealthCareProduct(
   return healthCareProducts(categorySlug).find((p) => p.slug === productSlug);
 }
 
+/**
+ * ECONOMY BATH TOWELS, a Hospitality line, from the client's "Economy bath
+ * towels" sheet ("Motels, gyms & theme parks staff towel"). Four products: the
+ * three terry towels that Health-Care Towels also carries, which are the same
+ * rows and so the same objects, and a pool towel.
+ */
+export const ECONOMY_BASE = "/hospitality/bath-linen/economy-bath-towels";
+
+const POOL_TOWEL = product("pool-towel", "Pool Towel", {
+  blend: "86% Cot / 14% Poly",
+  facts: [
+    { label: "Design", value: "Blue Stripes" },
+    { label: "Size", value: "30X60" },
+    { label: "Weight", value: "12 LBS" },
+  ],
+  variantLabel: "Size",
+  variants: [v("3060PTB", "30X60 · 12 LBS")],
+});
+
+export const ECONOMY_TOWEL_PRODUCTS: HcProduct[] = [
+  ...["single-cam-terry-towel", "double-cam-terry-towel", "full-terry-towel"].map(
+    (slug) => HEALTH_CARE_PRODUCTS.towels.find((p) => p.slug === slug) as HcProduct
+  ),
+  POOL_TOWEL,
+];
+
+export function getEconomyTowel(slug: string): HcProduct | undefined {
+  return ECONOMY_TOWEL_PRODUCTS.find((p) => p.slug === slug);
+}
+
+export function economyTowelHref(product: HcProduct): string {
+  return `${ECONOMY_BASE}/${product.slug}`;
+}
+
+/**
+ * BATH ROBES, a Hospitality line, from the client's "BATHROBE" sheet: six rows,
+ * all 100% cotton. The Standard Terry Robe is four rows (kimono or shawl collar,
+ * standard or X large), so it is four cards, each with its own code. The sheet
+ * gives the waffle and honeycomb robes no collar or size, and none is invented.
+ */
+export const BATH_ROBE_BASE = "/hospitality/bath-linen/bath-robes";
+
+const terryRobe = (collar: "Kimono" | "Shawl", sizeName: "Standard" | "X Large", sku: string) =>
+  product(
+    `standard-terry-robe-${collar.toLowerCase()}-${sizeName === "Standard" ? "standard" : "xl"}`,
+    `Standard Terry Robe — ${collar}, ${sizeName}`,
+    {
+      blend: "100% Cotton",
+      facts: [{ label: "Collar", value: collar }],
+      variantLabel: "Size",
+      variants: [v(sku, sizeName)],
+    }
+  );
+
+const designRobe = (slug: string, name: string, sku: string) =>
+  product(slug, name, {
+    blend: "100% Cotton",
+    variantLabel: "Design",
+    variants: [v(sku, name)],
+  });
+
+export const BATH_ROBE_PRODUCTS: HcProduct[] = [
+  terryRobe("Kimono", "Standard", "ROBFTKMNS"),
+  terryRobe("Kimono", "X Large", "ROBFTKMNXL"),
+  terryRobe("Shawl", "Standard", "ROBFTSHL"),
+  terryRobe("Shawl", "X Large", "ROBFTSHLXL"),
+  designRobe("waffle-robe", "Waffle Robe", "ROBWFL"),
+  designRobe("honeycomb-robe", "Honeycomb Robe", "ROBHNYCMB"),
+];
+
 /** Every product with the category it sits in, for the quote page's lookup by slug. */
 export function findHealthCareProduct(
   productSlug: string
@@ -447,7 +518,10 @@ export function findHealthCareProduct(
     const product = list.find((p) => p.slug === productSlug);
     if (product) return { category, product };
   }
-  return undefined;
+  const economy = getEconomyTowel(productSlug);
+  if (economy) return { category: "economy-bath-towels", product: economy };
+  const robe = BATH_ROBE_PRODUCTS.find((p) => p.slug === productSlug);
+  return robe ? { category: "bath-robes", product: robe } : undefined;
 }
 
 export function healthCareProductHref(categorySlug: string, product: HcProduct): string {

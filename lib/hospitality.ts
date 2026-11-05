@@ -213,16 +213,20 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         name: "Bath robes",
         slug: "bath-robes",
         productSlug: null,
-        intro:
-          "Bath robes for the guest room and the spa. This line is not on our published specification sheet yet, so construction, sizes and colours are confirmed with your quotation.",
+        // Opens a page of six product cards, from the client's "BATHROBE"
+        // sheet: see lib/health-care-sheet.ts.
+        href: "/hospitality/bath-linen/bath-robes",
+        ctaLabel: "View the range",
       },
       { name: "Bath mats", slug: "bath-mats", productSlug: "bath-mat" },
       {
         name: "Economy bath towels",
         slug: "economy-bath-towels",
         productSlug: null,
-        intro:
-          "Economy bath towels for the guest bathroom. This line is not on our published specification sheet yet, so construction, weight and sizes are confirmed with your quotation.",
+        // Opens a page of four product cards, from the client's "Economy bath
+        // towels" sheet: see lib/health-care-sheet.ts.
+        href: "/hospitality/bath-linen/economy-bath-towels",
+        ctaLabel: "View the range",
       },
     ],
   },

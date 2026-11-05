@@ -47,7 +47,7 @@ export const HEALTH_CARE_LINES: HealthCareLine[] = [
       "Terry for the ward and the patient bathroom: wash cloths, a hand towel and bath towels in three sizes, all 85% cotton / 15% polyester. Open a product for its weights and stock codes.",
   },
   {
-    name: "Sheets 55/45",
+    name: "Sheets",
     slug: "sheets",
     intro:
       "Bed sheets, fitted sheets, knitted fitted sheets and pillow cases for patient beds. Open a product for its sizes and stock codes.",
@@ -81,17 +81,17 @@ export const HEALTH_CARE_LINES: HealthCareLine[] = [
     intro: "All-cotton absorbent towels, 18″×33″, in white and three shades of green and blue.",
   },
   {
+    name: "Baby Receiving Blanket",
+    slug: "receiving-blanket",
+    intro:
+      "All-cotton receiving blankets for the nursery, in printed, woven-stripe, hands, foot print and duck designs.",
+  },
+  {
     name: "Hyperbaric Use Only",
     slug: "hyperbaric-use-only",
     intro:
       "Towel, sheets, pillow case and flannel blanket for hyperbaric use, all 100% cotton and marked “Hyperbaric Use Only”.",
     alert: true,
-  },
-  {
-    name: "Baby Receiving Blanket",
-    slug: "receiving-blanket",
-    intro:
-      "All-cotton receiving blankets for the nursery, in printed, woven-stripe, hands, foot print and duck designs.",
   },
 ];
 
