@@ -58,7 +58,7 @@ export type HcProduct = {
 const DZ = (n: number): HcCase => ({ size: n, unit: "dozen" });
 const EA = (n: number): HcCase => ({ size: n, unit: "pieces" });
 
-const COTPOLY = "85% Cot / 15% Poly";
+const COTPOLY = "85% Cotton / 15% Polyester";
 
 function product(
   slug: string,
@@ -145,7 +145,7 @@ const spread = (
 
 const gown = (slug: string, name: string, dozens: number, fabric: string | null, sku: string) =>
   product(slug, name, {
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     packing: `${dozens} DZ / BULK CASE`,
     case: DZ(dozens),
     facts: fabric ? [{ label: "Fabric weight", value: fabric }] : [],
@@ -214,7 +214,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
     towel("bath-towel-24x50-scb", "Bath Towel 24X50 SCB", 15, "24X50", "10.5 LBS", "2450SCB"),
     towel("bath-towel-24x50-dcb", "Bath Towel 24X50 DCB", 15, "24X50", "10.5 LBS", "2450DCB"),
     // From "Health Care Addition": three terry towels, each in a run of sizes.
-    terrySizes("single-cam-terry-towel", "Single Cam Terry Towel", "86% Cot / 14% Poly", [
+    terrySizes("single-cam-terry-towel", "Single Cam Terry Towel", "86% Cotton / 14% Polyester", [
       ["12X12", "1 LBS", "1212SCB"],
       ["13X13", "1.5 LBS", "1313SCB"],
       ["16X27", "3 LBS", "1627SCB"],
@@ -223,7 +223,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
       ["24X50", "10.5 LBS", "2450SCB"],
       ["20X30", "6.5 LBS", "2030SPF"],
     ]),
-    terrySizes("double-cam-terry-towel", "Double Cam Terry Towel", "78% Cot / 22% Poly", [
+    terrySizes("double-cam-terry-towel", "Double Cam Terry Towel", "78% Cotton / 22% Polyester", [
       ["12X12", "1 LBS", "1212DCB"],
       ["13X13", "1.5 LBS", "1313DCB"],
       ["16X27", "3 LBS", "1627DCB"],
@@ -240,14 +240,14 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
 
   sheets: [
     product("bed-sheet-t180", "Bed Sheet T180", {
-      blend: "55/45",
+      blend: "55% Cotton / 45% Polyester",
       packing: "5 DZ / BULK CASE",
       case: DZ(5),
       variantLabel: "Size",
       variants: [v("66104S18", "66X104"), v("66108S18", "66X108"), v("66115S18", "66X115")],
     }),
     product("fitted-sheet", "Fitted Sheet", {
-      blend: "55/45",
+      blend: "55% Cotton / 45% Polyester",
       packing: "5 DZ / BULK CASE",
       case: DZ(5),
       variantLabel: "Size",
@@ -268,7 +268,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
       variants: [v("KFIT3384P27", "33X84X18")],
     }),
     product("pillow-case-t180", "Pillow Case T180", {
-      blend: "55/45",
+      blend: "55% Cotton / 45% Polyester",
       packing: "25 DZ / BULK CASE",
       case: DZ(25),
       variantLabel: "Size",
@@ -278,7 +278,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
 
   "bath-blanket": [
     product("natural-bath-blanket", "Natural Bath Blanket", {
-      blend: "55% Cot / 45% Poly",
+      blend: "55% Cotton / 45% Polyester",
       packing: "60 EA / BULK CASE",
       case: EA(60),
       facts: [size('70"X90"')],
@@ -286,7 +286,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
       variants: [v("BB7090N175", "1.75 LBS"), v("BB7090N20", "2 LBS"), v("BB7090N225", "2.25 LBS")],
     }),
     product("white-bath-blanket", "White Bath Blanket", {
-      blend: "55% Cot / 45% Poly",
+      blend: "55% Cotton / 45% Polyester",
       packing: "60 EA / BULK CASE",
       case: EA(60),
       facts: [size('70"X90"')],
@@ -294,7 +294,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
       variants: [v("BB7090W175", "1.75 LBS"), v("BB7090W20", "2 LBS")],
     }),
     product("blue-stripe-bath-blanket", "Blue Stripe Bath Blanket", {
-      blend: "55% Cot / 45% Poly",
+      blend: "55% Cotton / 45% Polyester",
       packing: "60 EA / BULK CASE",
       case: EA(60),
       facts: [size('70"X90"')],
@@ -304,16 +304,16 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
   ],
 
   "spread-blanket": [
-    spread("herringbone-spread-blanket", "Herringbone Spread Blanket", "55/45", 12, "70X108", "3 LBS", [
+    spread("herringbone-spread-blanket", "Herringbone Spread Blanket", "55% Cotton / 45% Polyester", 12, "70X108", "3 LBS", [
       ["White", "HB70108WHT"],
       ["Nantucket Blue", "HB70108BLU"],
       ["Beige", "HB70108BGE"],
       ["Celery", "HB70108CEL"],
     ]),
-    spread("septerine-spread-blanket", "Septerine Spread Blanket", "55/45", 24, "66X90", "2.75 LBS", [
+    spread("septerine-spread-blanket", "Septerine Spread Blanket", "55% Cotton / 45% Polyester", 24, "66X90", "2.75 LBS", [
       ["White", "SPTRN6690WHT275"],
     ]),
-    spread("spectrum-spread-blanket", "Spectrum Spread Blanket", "55/45", 12, "74X104", "3.5 LBS", [
+    spread("spectrum-spread-blanket", "Spectrum Spread Blanket", "55% Cotton / 45% Polyester", 12, "74X104", "3.5 LBS", [
       ["White", "SPCTM74104WHT35"],
       ["Nantucket Blue", "SPCTM74104BLU35"],
       ["Cappuccino", "SPCTM74104CAP35"],
@@ -332,7 +332,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
         ["Grey", "SPCTM74104GRY35PL"],
       ]
     ),
-    spread("chevron-spread-blanket", "Chevron Spread Blanket", "60/40", 12, "70X90", "2.70 LBS", [
+    spread("chevron-spread-blanket", "Chevron Spread Blanket", "60% Cotton / 40% Polyester", 12, "70X90", "2.70 LBS", [
       ["White", "CHEV7090WHT27"],
       ["Blue", "CHEV7090BLU27"],
       ["Beige", "CHEV7090BGE27"],
@@ -352,7 +352,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
         ["Grey", "CHEV7090GRY3P"],
       ]
     ),
-    spread("multistripe-spread-blanket", "Multistripe Spread Blanket", "55/45", 12, "74X104", "3.5 LBS", [
+    spread("multistripe-spread-blanket", "Multistripe Spread Blanket", "55% Cotton / 45% Polyester", 12, "74X104", "3.5 LBS", [
       ["Multistripe", "MULTI74104"],
     ]),
     spread("open-weave-blanket", "Open Weave Blanket", "100% Cotton", 24, "66X96", "2.5 LBS", [
@@ -361,7 +361,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
     spread("checkers-blankets", "Checkers Blankets", "100% Cotton", 24, "66X96", "2.5 LBS", [
       ["White", "CHKR6696COT25"],
     ]),
-    spread("odyssey-spreads-blanket", "Odyssey Spreads Blanket", "55/45", 12, "74X100", "3.75 LBS", [
+    spread("odyssey-spreads-blanket", "Odyssey Spreads Blanket", "55% Cotton / 45% Polyester", 12, "74X100", "3.75 LBS", [
       ["White", "HBSG74100WHT375"],
       ["Nantucket Blue", "HBSG74100BLU375"],
       ["Cappuccino", "HBSG74100CAP375"],
@@ -372,7 +372,7 @@ export const HEALTH_CARE_PRODUCTS: Record<string, HcProduct[]> = {
   "patient-gown": [
     gown("compass-print", "Compass Print", 15, "4.10 OZ/SY", "PGCOMPASS"),
     product("multistripe-print-twill-weave", "Multistripe Print (Twill Weave)", {
-      blend: "55/45",
+      blend: "55% Cotton / 45% Polyester",
       packing: "15 DZ / BULK CASE",
       case: DZ(15),
       facts: [{ label: "Fabric weight", value: "4.10 OZ/SY" }],
@@ -449,7 +449,7 @@ export function getHealthCareProduct(
 export const ECONOMY_BASE = "/hospitality/bath-linen/economy-bath-towels";
 
 const POOL_TOWEL = product("pool-towel", "Pool Towel", {
-  blend: "86% Cot / 14% Poly",
+  blend: "86% Cotton / 14% Polyester",
   facts: [
     { label: "Design", value: "Blue Stripes" },
     { label: "Size", value: "30X60" },
@@ -482,17 +482,18 @@ export function economyTowelHref(product: HcProduct): string {
  */
 export const BATH_ROBE_BASE = "/hospitality/bath-linen/bath-robes";
 
-const terryRobe = (collar: "Kimono" | "Shawl", sizeName: "Standard" | "X Large", sku: string) =>
-  product(
-    `standard-terry-robe-${collar.toLowerCase()}-${sizeName === "Standard" ? "standard" : "xl"}`,
-    `Standard Terry Robe — ${collar}, ${sizeName}`,
-    {
-      blend: "100% Cotton",
-      facts: [{ label: "Collar", value: collar }],
-      variantLabel: "Size",
-      variants: [v(sku, sizeName)],
-    }
-  );
+/** One card per collar; the two sizes are the choice on its page. */
+const terryRobe = (
+  collar: "Kimono" | "Shawl",
+  standardSku: string,
+  xlSku: string
+) =>
+  product(`standard-terry-robe-${collar.toLowerCase()}`, `Standard Terry Robe — ${collar}`, {
+    blend: "100% Cotton",
+    facts: [{ label: "Collar", value: collar }],
+    variantLabel: "Size",
+    variants: [v(standardSku, "Standard"), v(xlSku, "X Large")],
+  });
 
 const designRobe = (slug: string, name: string, sku: string) =>
   product(slug, name, {
@@ -502,10 +503,8 @@ const designRobe = (slug: string, name: string, sku: string) =>
   });
 
 export const BATH_ROBE_PRODUCTS: HcProduct[] = [
-  terryRobe("Kimono", "Standard", "ROBFTKMNS"),
-  terryRobe("Kimono", "X Large", "ROBFTKMNXL"),
-  terryRobe("Shawl", "Standard", "ROBFTSHL"),
-  terryRobe("Shawl", "X Large", "ROBFTSHLXL"),
+  terryRobe("Kimono", "ROBFTKMNS", "ROBFTKMNXL"),
+  terryRobe("Shawl", "ROBFTSHL", "ROBFTSHLXL"),
   designRobe("waffle-robe", "Waffle Robe", "ROBWFL"),
   designRobe("honeycomb-robe", "Honeycomb Robe", "ROBHNYCMB"),
 ];
@@ -530,14 +529,7 @@ export function healthCareProductHref(categorySlug: string, product: HcProduct):
 
 /** The one-line summary a listing card shows under the title. */
 export function healthCareCardSummary(product: HcProduct): string {
-  const parts = [product.blend, ...product.facts.filter((f) => f.label === "Size").map((f) => f.value)];
-  if (!product.facts.some((f) => f.label === "Size") && product.variantLabel === "Size") {
-    parts.push(product.variants.map((x) => x.label).join(", "));
-  }
-  if (product.variantLabel === "Colour" && product.variants.length > 1) {
-    parts.push(`${product.variants.length} colours`);
-  }
-  return parts.filter((p): p is string => Boolean(p)).join(" · ");
+  return product.blend ?? "";
 }
 
 /** What a quantity is counted in, for the pages and the quote message. */

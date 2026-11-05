@@ -1,3 +1,4 @@
+import { plainName } from "@/lib/display-name";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -169,7 +170,7 @@ function toCard(product: BedLinenProduct): HospitalityCardProduct {
   const photos = BED_LINEN_PHOTOS[product.slug];
   return {
     id: product.slug,
-    name: product.name,
+    name: plainName(product.name, product.blend),
     href,
     quoteHref: href,
     ctaLabel: "View details",

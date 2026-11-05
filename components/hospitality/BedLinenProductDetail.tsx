@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { plainName } from "@/lib/display-name";
 import { ChevronRight } from "lucide-react";
 import {
   BALANCE_HEM_NOTE,
@@ -101,8 +102,13 @@ export function ProductDetail({ product }: { product: BedLinenProduct }) {
                   Bed Linen
                 </p>
                 <h1 className="font-heading text-foreground mt-4 text-4xl leading-[1.08] font-semibold text-balance sm:text-5xl">
-                  {product.name}
+                  {plainName(product.name, product.blend)}
                 </h1>
+                {product.blend ? (
+                  <p className="text-accent-gold mt-3 text-[13px] font-semibold tracking-[0.14em] uppercase">
+                    {product.blend}
+                  </p>
+                ) : null}
 
                 <p className="text-muted-foreground mt-5 leading-relaxed text-pretty">
                   Supplied in {sizes.length} {sizes.length === 1 ? "size" : "sizes"}, each with its

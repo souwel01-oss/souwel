@@ -21,7 +21,7 @@ import {
   useQuoteList,
 } from "@/lib/quote-list-store";
 import { QuantityStepper } from "@/components/quote-list/QuantityStepper";
-import { LineParCalculator } from "@/components/quote-list/LineParCalculator";
+import { ListParCalculator, type ParRow } from "@/components/quote-list/ListParCalculator";
 
 /**
  * The quote list, as a drawer from the right. There is no list PAGE: the list
@@ -132,6 +132,7 @@ export function QuoteListDrawer({
           {/* The bottom inset keeps the button clear of the home indicator on
               a phone, where this drawer is the full width of the screen. */}
           <div className="border-border border-t px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+            {items.length > 0 ? <ListParCalculator rows={parRows(items)} /> : null}
             {items.length > 0 ? (
               <Link
                 href={quoteListHref(items)}
@@ -187,6 +188,20 @@ function listRows(items: QuoteListItem[]): ListRowData[] {
       ? [{ key: item.id, item, line: null }]
       : item.lines.map((line) => ({ key: `${item.id}:${line.sku}`, item, line }))
   );
+}
+
+/** What the one Calculate PAR panel needs from each row of the list. */
+function parRows(items: QuoteListItem[]): ParRow[] {
+  return listRows(items).map(({ key, item, line }) => ({
+    key,
+    name: line ? `${item.name}, ${line.label}` : item.name,
+    step: line?.step ?? 1,
+    max: line ? QUOTE_LIST_MAX_LINE_QUANTITY : QUOTE_LIST_MAX_QUANTITY,
+    apply: (next: number) =>
+      line
+        ? setQuoteListLineQuantity(item.id, line.sku, next)
+        : setQuoteListQuantity(item.id, next),
+  }));
 }
 
 function ListRow({ row, onNavigate }: { row: ListRowData; onNavigate: () => void }) {
@@ -272,15 +287,15 @@ function ListRow({ row, onNavigate }: { row: ListRowData; onNavigate: () => void
           }
         />
 
-        <LineParCalculator
-          step={line?.step ?? 1}
-          max={line ? QUOTE_LIST_MAX_LINE_QUANTITY : QUOTE_LIST_MAX_QUANTITY}
-          onApply={(next) =>
-            line
-              ? setQuoteListLineQuantity(item.id, line.sku, next)
-              : setQuoteListQuantity(item.id, next)
-          }
-        />
+        {/* The number above is pieces (or dozens), not packs. Say how many packs
+            it is, so nobody reads 405 as 405 packs. */}
+        {line && line.step > 1 ? (
+          <p className="text-muted-foreground mt-1.5 text-[12.5px]">
+            = {(line.quantity / line.step).toLocaleString("en-US")}{" "}
+            {line.quantity / line.step === 1 ? "pack" : "packs"} of{" "}
+            {line.step.toLocaleString("en-US")}
+          </p>
+        ) : null}
       </div>
     </li>
   );

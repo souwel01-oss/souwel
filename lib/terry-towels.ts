@@ -35,7 +35,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  *
  * TWO ROWS SHARE THE NAME "CLASSIC TERRY TOWELS" and are different products —
- * one is 100% cotton, the other an 80/20 blend. They are modelled as two
+ * one is 100% cotton, the other an 80% cotton / 20% polyester blend. They are modelled as two
  * products with one `family`, which is what drives the chooser page that
  * stands between the range listing and either detail page.
  */
@@ -159,7 +159,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
     slug: "classic-terry-towels-80-20-poly",
     name: "Classic Terry Towels",
     family: "classic-terry-towels",
-    blend: "80% Cot / 20% Poly",
+    blend: "80% Cotton / 20% Polyester",
     hem: "Reinforced",
     lines: [
       std("wash-cloth", "1.5 LBS", "WC1313BRH"),
@@ -173,7 +173,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
     slug: "classic-dobby-towels",
     name: "Classic Dobby Towels",
     family: "classic-dobby-towels",
-    blend: "90% Cot / 10% Poly",
+    blend: "90% Cotton / 10% Polyester",
     hem: "Plain",
     lines: [
       std("wash-cloth", "1.5 LBS", "WC1313CDB"),
@@ -186,7 +186,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
     slug: "dobby-towels",
     name: "Dobby Towels",
     family: "dobby-towels",
-    blend: "86% Cot / 14% Poly",
+    blend: "86% Cotton / 14% Polyester",
     hem: "Plain",
     lines: [
       std("wash-cloth", "1.5 LBS", "WC1313FDB"),
@@ -215,7 +215,7 @@ export const TERRY_PRODUCTS: TerryProduct[] = [
     slug: "pique-weave-towel",
     name: "Pique Weave Towel",
     family: "pique-weave-towel",
-    blend: "86% Cot / 14% Poly",
+    blend: "86% Cotton / 14% Polyester",
     hem: "Plain",
     lines: [
       std("wash-cloth", "1.5 LBS", "WC1313PQB"),
@@ -331,7 +331,7 @@ export function hasBathMat(product: TerryProduct): boolean {
  * entries, and the brief asks for that difference to be unmissable.
  */
 export function terryCardSummary(product: TerryProduct): string {
-  return `${product.blend} · ${product.hem} hem · ${terrySizeNames(product).join(", ")}`;
+  return product.blend;
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -440,7 +440,7 @@ export function terryListingEntries(): TerryListingEntry[] {
       href: terryProductHref(product),
       lines:
         members.length > 1
-          ? members.map((m) => `${m.blend} · ${m.hem} hem`)
+          ? members.map((m) => m.blend)
           : [terryCardSummary(product)],
     });
   }

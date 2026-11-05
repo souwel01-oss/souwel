@@ -64,7 +64,7 @@ export const COMMERCIAL_GROUPS: CommercialGroup[] = [
         slug: "shop-towel",
         productSlugs: ["shop-towel"],
         intro:
-          "The workshop and rental cloth: a 75/25 blend at 14″×14″, surged on the edges so it survives being laundered and reissued, in four shades.",
+          "The workshop and rental cloth: a 75% cotton / 25% polyester blend at 14″×14″, surged on the edges so it survives being laundered and reissued, in four shades.",
       },
     ],
   },

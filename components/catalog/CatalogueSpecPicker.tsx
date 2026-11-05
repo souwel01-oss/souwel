@@ -1,10 +1,9 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { ArrowDown } from "lucide-react";
 import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import type { OrderSpec } from "@/lib/catalogue-lines";
-import { roundUpToCase } from "@/lib/case-pack";
 import { cn } from "@/lib/utils";
 
 /**
@@ -20,10 +19,6 @@ import { cn } from "@/lib/utils";
  */
 export function CatalogueSpecPicker({ spec }: { spec: OrderSpec }) {
   const { setLine, setSelected, selected } = useRangeOrderList();
-  const [quantity, setQuantity] = useState("");
-  const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
-  const qtyId = useId();
-  const qtyHelpId = useId();
   const helpId = useId();
 
   const single = spec.rows.length === 1 ? spec.rows[0] : null;
@@ -31,26 +26,14 @@ export function CatalogueSpecPicker({ spec }: { spec: OrderSpec }) {
   // Until a row is chosen, the step is the one every row shares, or 1.
   const step =
     chosen?.step ?? (new Set(spec.rows.map((r) => r.step)).size === 1 ? spec.rows[0].step : 1);
-  const stepNote = chosen?.stepNote ?? spec.rows[0].stepNote;
-  const unit = chosen?.unit ?? spec.rows[0].unit;
 
-  const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const qty = typed !== null && typed > 0 && typed % step === 0 ? typed : null;
+  // One case is the smallest order; the table below is where the quantity is set.
+  const qty = step;
 
-  // From the figure the buyer typed, not from an earlier rounding of it, so
-  // trying a few rows does not ratchet the quantity up.
-  const snapToCase = (perCase: number) => {
-    const base = roundedFrom ?? typed;
-    if (base === null || base <= 0) return;
-    const rounded = roundUpToCase(base, perCase);
-    setRoundedFrom(rounded === base ? null : base);
-    setQuantity(String(rounded));
-  };
-
-  const ready = chosen !== null && qty !== null;
+  const ready = chosen !== null;
 
   const goToTable = () => {
-    if (!chosen || !qty) return;
+    if (!chosen) return;
     setLine(chosen.code, qty);
     document
       .getElementById(SPEC_SECTION_ID)
@@ -93,7 +76,6 @@ export function CatalogueSpecPicker({ spec }: { spec: OrderSpec }) {
                     aria-pressed={active}
                     onClick={() => {
                       setSelected(row.code);
-                      snapToCase(row.step);
                     }}
                     className={cn(
                       "focus-visible:ring-ring rounded-lg border px-4 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
@@ -126,40 +108,6 @@ export function CatalogueSpecPicker({ spec }: { spec: OrderSpec }) {
         </>
       )}
 
-      {/* ── Quantity ─────────────────────────────────────────────────── */}
-      <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
-        <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity in {unit === "dz" ? "dozens" : "pieces"}{" "}
-          <span className="text-muted-foreground font-normal">(required)</span>
-        </label>
-        <input
-          id={qtyId}
-          type="number"
-          inputMode="numeric"
-          min={step}
-          step={step}
-          required
-          aria-describedby={qtyHelpId}
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            setRoundedFrom(null);
-          }}
-          onBlur={() => snapToCase(step)}
-          placeholder={`e.g. ${(step > 1 ? step * 2 : unit === "dz" ? 10 : 100).toLocaleString("en-US")}`}
-          className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
-        />
-        <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
-          {roundedFrom !== null ? (
-            <span className="text-foreground font-medium">
-              Rounded up from {roundedFrom.toLocaleString("en-US")} to a full case. {stepNote}
-            </span>
-          ) : (
-            stepNote
-          )}
-        </p>
-      </div>
-
       {/* ── Down to the table ────────────────────────────────────────── */}
       <div className="mt-7">
         <button
@@ -174,18 +122,14 @@ export function CatalogueSpecPicker({ spec }: { spec: OrderSpec }) {
               : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
-          Next
+          Request quote
           <ArrowDown aria-hidden className="size-4" />
         </button>
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
           {!chosen
             ? `Choose a ${spec.choiceLabel.toLowerCase()} above to continue.`
-            : !qty
-              ? step > 1
-                ? `Enter a quantity in multiples of ${step.toLocaleString("en-US")} to continue.`
-                : "Enter a quantity to continue."
-              : "Adds this to your list and takes you to the full table, where you can add more."}
+            : "Adds this to your list and takes you to the full table, where you set the quantity and add more."}
         </p>
       </div>
     </div>

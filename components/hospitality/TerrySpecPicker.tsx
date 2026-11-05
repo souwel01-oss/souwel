@@ -1,9 +1,8 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { ArrowDown } from "lucide-react";
 import { terryCaseStep, terryWeightLabel } from "@/lib/terry-towels";
-import { caseNote, roundUpToCase } from "@/lib/case-pack";
 import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
 
@@ -69,34 +68,19 @@ export function TerrySpecPicker({
   sizes: TerryPickerSize[];
 }) {
   const { setLine, setSelected, selected } = useRangeOrderList();
-  const [quantity, setQuantity] = useState("");
-  /** The figure the buyer typed, when rounding changed it. Cleared on edit. */
-  const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
-  const qtyId = useId();
-  const qtyHelpId = useId();
   const helpId = useId();
 
   const chosen = sizes.find((s) => s.sku === selected) ?? null;
   // Until a size is chosen there is no case to round to, only the dozen.
   const step = chosen ? terryCaseStep(chosen) : 1;
 
-  const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const qty = typed !== null && typed > 0 && typed % step === 0 ? typed : null;
+  // One case is the smallest order; the table below is where the quantity is set.
+  const qty = step;
 
-  // From the figure the buyer typed, not from an earlier rounding of it, so
-  // trying a few sizes does not ratchet the quantity up.
-  const snapToCase = (perCase: number) => {
-    const base = roundedFrom ?? typed;
-    if (base === null || base <= 0) return;
-    const rounded = roundUpToCase(base, perCase);
-    setRoundedFrom(rounded === base ? null : base);
-    setQuantity(String(rounded));
-  };
-
-  const ready = chosen !== null && qty !== null;
+  const ready = chosen !== null;
 
   const goToTable = () => {
-    if (!chosen || !qty) return;
+    if (!chosen) return;
     // Into the list BEFORE the scroll, so the row is already there when the
     // table arrives rather than appearing under the buyer a frame later.
     setLine(chosen.sku, qty);
@@ -147,7 +131,6 @@ export function TerrySpecPicker({
                 aria-pressed={active}
                 onClick={() => {
                   setSelected(size.sku);
-                  snapToCase(terryCaseStep(size));
                 }}
                 className={cn(
                   "focus-visible:ring-ring rounded-lg border px-4 py-2.5 text-left transition-colors focus-visible:ring-2 focus-visible:outline-none",
@@ -183,42 +166,6 @@ export function TerrySpecPicker({
         )}
       </p>
 
-      {/* ── Quantity ─────────────────────────────────────────────────── */}
-      <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
-        <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity in dozens <span className="text-muted-foreground font-normal">(required)</span>
-        </label>
-        <input
-          id={qtyId}
-          type="number"
-          inputMode="numeric"
-          // step and min so the browser's own spinners already move in whole
-          // cases — the blur handler is the safety net, not the only teacher.
-          min={step}
-          step={step}
-          required
-          aria-describedby={qtyHelpId}
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            setRoundedFrom(null);
-          }}
-          onBlur={() => snapToCase(step)}
-          placeholder={`e.g. ${step * 2}`}
-          className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
-        />
-        <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
-          {roundedFrom !== null ? (
-            <span className="text-foreground font-medium">
-              Rounded up from {roundedFrom.toLocaleString("en-US")} to a full case.{" "}
-            </span>
-          ) : null}
-          {chosen
-            ? caseNote(step, "dz")
-            : "Quantity in dozens. It rounds up to a full case of the size you pick."}
-        </p>
-      </div>
-
       {/* ── Down to the table ────────────────────────────────────────── */}
       <div className="mt-7">
         <button
@@ -233,16 +180,14 @@ export function TerrySpecPicker({
               : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
-          Next
+          Request quote
           <ArrowDown aria-hidden className="size-4" />
         </button>
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
           {!chosen
             ? "Choose a product type above to continue."
-            : !qty
-              ? "Enter a quantity in dozens to continue."
-              : "Adds this to your list and takes you to the full table, where you can add more sizes."}
+            : "Adds this to your list and takes you to the full table, where you set the quantity and add more sizes."}
         </p>
       </div>
     </div>

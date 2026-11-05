@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { ArrowDown } from "lucide-react";
 import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
-import { caseNote, roundUpToCase, type QuantityUnit } from "@/lib/case-pack";
+import type { QuantityUnit } from "@/lib/case-pack";
 import { cn } from "@/lib/utils";
 
 /**
@@ -54,11 +54,6 @@ export function FoodBevSpecPicker({
   const [colour, setColour] = useState<string | null>(
     colours.length === 1 ? colours[0].colour : null
   );
-  const [quantity, setQuantity] = useState("");
-  /** The figure the buyer typed, when rounding changed it. Cleared on edit. */
-  const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
-  const qtyId = useId();
-  const qtyHelpId = useId();
   const helpId = useId();
 
   const skuFor = (s: string | null, c: string | null) =>
@@ -69,18 +64,8 @@ export function FoodBevSpecPicker({
   // Until a size is chosen there is no case to round to.
   const step = size ? (stepBySize[size] ?? 1) : 1;
 
-  const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const qty = typed !== null && typed > 0 && typed % step === 0 ? typed : null;
-
-  // From the figure the buyer typed, not from an earlier rounding of it, so
-  // trying a few sizes does not ratchet the quantity up.
-  const snapToCase = (perCase: number) => {
-    const base = roundedFrom ?? typed;
-    if (base === null || base <= 0) return;
-    const rounded = roundUpToCase(base, perCase);
-    setRoundedFrom(rounded === base ? null : base);
-    setQuantity(String(rounded));
-  };
+  // One case is the smallest order; the table below is where the quantity is set.
+  const qty = step;
 
   /**
    * The picker owns its own two halves, but the row the table highlights is
@@ -92,18 +77,16 @@ export function FoodBevSpecPicker({
   const chooseSize = (next: string) => {
     setSize(next);
     setSelected(skuFor(next, colour));
-    // Sizes can be packed differently, so the quantity is rounded again.
-    snapToCase(stepBySize[next] ?? 1);
   };
   const chooseColour = (next: string) => {
     setColour(next);
     setSelected(skuFor(size, next));
   };
 
-  const ready = sku !== null && qty !== null;
+  const ready = sku !== null;
 
   const goToTable = () => {
-    if (!sku || !qty) return;
+    if (!sku) return;
     setLine(sku, qty);
     document
       .getElementById(SPEC_SECTION_ID)
@@ -218,43 +201,6 @@ export function FoodBevSpecPicker({
         Swatches are indicative only — shades are matched from a physical sample when we quote.
       </p>
 
-      {/* ── Quantity ─────────────────────────────────────────────────── */}
-      <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
-        <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity in {unit === "dz" ? "dozens" : "pieces"}{" "}
-          <span className="text-muted-foreground font-normal">(required)</span>
-        </label>
-        <input
-          id={qtyId}
-          type="number"
-          inputMode="numeric"
-          min={step}
-          step={step}
-          required
-          aria-describedby={qtyHelpId}
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            setRoundedFrom(null);
-          }}
-          onBlur={() => snapToCase(step)}
-          placeholder={`e.g. ${step > 1 ? step * 2 : unit === "dz" ? 10 : 100}`}
-          className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
-        />
-        <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
-          {roundedFrom !== null ? (
-            <span className="text-foreground font-medium">
-              Rounded up from {roundedFrom.toLocaleString("en-US")} to a full case.{" "}
-            </span>
-          ) : null}
-          {unit === "pcs"
-            ? "No pack size is given for this line — enter the pieces you need."
-            : size
-              ? caseNote(step, unit)
-              : "Quantity in dozens. It rounds up to a full case of the size you pick."}
-        </p>
-      </div>
-
       {/* ── Down to the table ────────────────────────────────────────── */}
       <div className="mt-7">
         <button
@@ -269,7 +215,7 @@ export function FoodBevSpecPicker({
               : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
-          Next
+          Request quote
           <ArrowDown aria-hidden className="size-4" />
         </button>
 
@@ -280,9 +226,7 @@ export function FoodBevSpecPicker({
               ? "Choose a colour above to continue."
               : !sku
                 ? "That size is not made in that colour. Pick another pair."
-                : !qty
-                  ? "Enter a quantity to continue."
-                  : "Adds this to your list and takes you to the full table, where you can add more."}
+                : "Adds this to your list and takes you to the full table, where you set the quantity and add more."}
         </p>
       </div>
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { ArrowDown } from "lucide-react";
 import { SPEC_SECTION_ID, useRangeOrderList } from "@/components/hospitality/RangeOrderList";
 import { cn } from "@/lib/utils";
@@ -52,11 +52,6 @@ export function SpaSalonSpecPicker({
   unit?: string;
 }) {
   const { setLine, setSelected, selected } = useRangeOrderList();
-  const [quantity, setQuantity] = useState("");
-  /** The figure the buyer typed, when rounding changed it. Cleared on edit. */
-  const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
-  const qtyId = useId();
-  const qtyHelpId = useId();
   const helpId = useId();
 
   // One option is no choice: it is selected for the buyer.
@@ -65,20 +60,13 @@ export function SpaSalonSpecPicker({
   const hasSwatches = colours.some((c) => c.hex !== undefined);
   const Noun = noun.charAt(0).toUpperCase() + noun.slice(1);
 
-  const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const qty = typed !== null && typed > 0 && typed % pack === 0 ? typed : null;
+  // One pack is the smallest order; the table below is where the quantity is set.
+  const qty = pack;
 
-  const snapToPack = () => {
-    if (typed === null || typed <= 0) return;
-    const rounded = Math.ceil(typed / pack) * pack;
-    setRoundedFrom(rounded === typed ? null : typed);
-    setQuantity(String(rounded));
-  };
-
-  const ready = chosen !== null && qty !== null;
+  const ready = chosen !== null;
 
   const goToTable = () => {
-    if (!chosen || !qty) return;
+    if (!chosen) return;
     // Into the list BEFORE the scroll, so the row is already there when the
     // table arrives rather than appearing under the buyer a frame later.
     setLine(chosen.sku, qty);
@@ -156,41 +144,6 @@ export function SpaSalonSpecPicker({
         </p>
       ) : null}
 
-      {/* ── Quantity ─────────────────────────────────────────────────── */}
-      <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
-        <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity <span className="text-muted-foreground font-normal">(required)</span>
-        </label>
-        <input
-          id={qtyId}
-          type="number"
-          inputMode="numeric"
-          min={pack}
-          step={pack}
-          required
-          aria-describedby={qtyHelpId}
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            setRoundedFrom(null);
-          }}
-          onBlur={snapToPack}
-          placeholder={`e.g. ${pack * 10}`}
-          className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
-        />
-        <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
-          {roundedFrom !== null ? (
-            <span className="text-foreground font-medium">
-              Rounded up from {roundedFrom.toLocaleString("en-US")} — supplied in packs of {pack}.
-            </span>
-          ) : pack > 1 ? (
-            `Supplied in packs of ${pack} ${unit}, so quantities go up in ${pack}s.`
-          ) : (
-            `Quantity in ${unit}.`
-          )}
-        </p>
-      </div>
-
       {/* ── Down to the table ────────────────────────────────────────── */}
       <div className="mt-7">
         <button
@@ -205,18 +158,14 @@ export function SpaSalonSpecPicker({
               : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
-          Next
+          Request quote
           <ArrowDown aria-hidden className="size-4" />
         </button>
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
           {!chosen
             ? `Choose a ${noun} above to continue.`
-            : !qty
-              ? pack > 1
-                ? `Enter a quantity in multiples of ${pack} to continue.`
-                : "Enter a quantity to continue."
-              : `Adds this to your list and takes you to the full table, where you can add more ${noun}s.`}
+            : `Adds this to your list and takes you to the full table, where you set the quantity and add more ${noun}s.`}
         </p>
       </div>
     </div>

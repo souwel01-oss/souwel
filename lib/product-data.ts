@@ -278,28 +278,28 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "Blue",
         size: '70"×90"',
         weight: "3 lbs",
-        blend: "100% poly",
+        blend: "100% polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "Grey",
         size: '70"×90"',
         weight: "3 lbs",
-        blend: "100% poly",
+        blend: "100% polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "Tan",
         size: '70"×90"',
         weight: "3 lbs",
-        blend: "100% poly",
+        blend: "100% polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "White",
         size: '70"×90"',
         weight: "3 lbs",
-        blend: "100% poly",
+        blend: "100% polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
     ],
@@ -325,9 +325,9 @@ const AUTHORED: AuthoredProduct[] = [
     sectors: ["health-care", "hospitality"],
     uom: "PCS",
     shortDescription:
-      "55/45 blend spread blanket at 74″×104″, in beige, cappuccino beige and multi colour.",
+      "55% cotton / 45% polyester blend spread blanket at 74″×104″, in beige, cappuccino beige and multi colour.",
     description:
-      "A wide spread blanket in a 55/45 blend, cut generously at 74″×104″ so it drops properly over a made bed. Selvage sides, hemmed top and bottom.",
+      "A wide spread blanket in a 55% cotton / 45% polyester blend, cut generously at 74″×104″ so it drops properly over a made bed. Selvage sides, hemmed top and bottom.",
     heroImageUrl: "/images/products/duvet-covers.jpg",
     heroImageAlt: "White duvet cover draped across a bed",
     galleryImageUrls: [
@@ -339,21 +339,21 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "Beige",
         size: '74"×104"',
         weight: "3.5 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "Cappuccino beige",
         size: '74"×104"',
         weight: "3.5 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "Multi colour",
         size: '74"×104"',
         weight: "3.5 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
     ],
@@ -378,9 +378,9 @@ const AUTHORED: AuthoredProduct[] = [
     sectors: ["health-care", "hospitality"],
     uom: "PCS",
     shortDescription:
-      "Links-pattern spread blanket, supplied in a 55/45 blend and in 100% polyester.",
+      "Links-pattern spread blanket, supplied in a 55% cotton / 45% polyester blend and in 100% polyester.",
     description:
-      "The links pattern in two builds: a 55/45 blend at 74″×108″ in teal, purple and white, and an all-polyester version at 74″×104″ in blue. Both selvage at the sides and hemmed top and bottom.",
+      "The links pattern in two builds: a 55% cotton / 45% polyester blend at 74″×108″ in teal, purple and white, and an all-polyester version at 74″×104″ in blue. Both selvage at the sides and hemmed top and bottom.",
     heroImageUrl: "/images/products/duvet-covers.jpg",
     heroImageAlt: "White duvet cover draped across a bed",
     galleryImageUrls: [
@@ -392,14 +392,14 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "Teal / purple / white",
         size: '74"×108"',
         weight: "3.75 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "Blue",
         size: '74"×104"',
         weight: "3.5 lbs",
-        blend: "100% poly",
+        blend: "100% polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
     ],
@@ -407,7 +407,7 @@ const AUTHORED: AuthoredProduct[] = [
       { title: "Colours and finishes", detail: "Supplied in Teal / purple / white, Blue." },
       {
         title: "Sizes and builds",
-        detail: 'Run in 74"×108", 74"×104". Available in 55/45 and 100% poly.',
+        detail: 'Run in 74"×108", 74"×104". Available in 55% cotton / 45% polyester and 100% polyester.',
       },
       {
         title: "How it ships",
@@ -423,9 +423,9 @@ const AUTHORED: AuthoredProduct[] = [
     categorySlug: "health-care",
     sectors: ["health-care", "hospitality"],
     uom: "PCS",
-    shortDescription: "55/45 serpentine-weave blanket in white, 66″×90″.",
+    shortDescription: "55% cotton / 45% polyester serpentine-weave blanket in white, 66″×90″.",
     description:
-      "The lighter blanket in the range at 2.30 lbs, in a 55/45 blend and a 66″×90″ cut. White only, selvage sides, hemmed top and bottom.",
+      "The lighter blanket in the range at 2.30 lbs, in a 55% cotton / 45% polyester blend and a 66″×90″ cut. White only, selvage sides, hemmed top and bottom.",
     heroImageUrl: "/images/products/pillow-covers.jpg",
     heroImageAlt: "White pillows on a made bed",
     galleryImageUrls: [
@@ -437,7 +437,7 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "White",
         size: '66"×90"',
         weight: "2.30 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
     ],
@@ -460,7 +460,7 @@ const AUTHORED: AuthoredProduct[] = [
     uom: "PCS",
     shortDescription: "Open herringbone thermal blanket in beige, celery and blue.",
     description:
-      "A thermal herringbone weave in a 55/45 blend, cut long at 70″×108″. Beige is the fully specified build; celery and blue are stocked shades whose construction detail is not on the supplied sheet.",
+      "A thermal herringbone weave in a 55% cotton / 45% polyester blend, cut long at 70″×108″. Beige is the fully specified build; celery and blue are stocked shades whose construction detail is not on the supplied sheet.",
     heroImageUrl: "/images/products/bed-sheets.jpg",
     heroImageAlt: "Bed made up in white sheets and pillows",
     galleryImageUrls: [
@@ -472,7 +472,7 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "Beige",
         size: '70"×108"',
         weight: "3 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
@@ -509,7 +509,7 @@ const AUTHORED: AuthoredProduct[] = [
     uom: "PCS",
     shortDescription: "70″×90″ bath blanket in bleached white and two striped builds.",
     description:
-      "Three builds on one 70″×90″ cut: a 55/45 bleached white, a 55/45 white with blue stripes, and a heavier 85/15 natural with blue stripes. Selvage sides, hemmed top and bottom.",
+      "Three builds on one 70″×90″ cut: a 55% cotton / 45% polyester bleached white, a 55% cotton / 45% polyester white with blue stripes, and a heavier 85% cotton / 15% polyester natural with blue stripes. Selvage sides, hemmed top and bottom.",
     heroImageUrl: "/images/products/bed-sheets.jpg",
     heroImageAlt: "Bed made up in white sheets and pillows",
     galleryImageUrls: [
@@ -521,21 +521,21 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "Bleached white",
         size: '70"×90"',
         weight: "2 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "White with blue stripes",
         size: '70"×90"',
         weight: "2 lbs",
-        blend: "55/45",
+        blend: "55% Cotton / 45% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
       {
         colour: "Natural with blue stripes",
         size: '70"×90"',
         weight: "2.5 lbs",
-        blend: "85/15",
+        blend: "85% Cotton / 15% Polyester",
         stitching: "Selvage / hemmed top and bottom",
       },
     ],
@@ -544,7 +544,7 @@ const AUTHORED: AuthoredProduct[] = [
         title: "Colours and finishes",
         detail: "Supplied in Bleached white, White with blue stripes, Natural with blue stripes.",
       },
-      { title: "Sizes and builds", detail: 'Finished at 70"×90". Available in 55/45 and 85/15.' },
+      { title: "Sizes and builds", detail: 'Finished at 70"×90". Available in 55% cotton / 45% polyester and 85% cotton / 15% polyester.' },
       {
         title: "How it ships",
         detail: "Sold by the piece. Volumes and lead times are confirmed on the quote.",
@@ -649,9 +649,9 @@ const AUTHORED: AuthoredProduct[] = [
     categorySlug: "institutional-laundry",
     sectors: ["institutional-laundry", "commercial-automotive"],
     uom: "2500 PCS/CASE",
-    shortDescription: "75/25 surged shop towel, 14″×14″, by the 2,500-piece case.",
+    shortDescription: "75% cotton / 25% polyester surged shop towel, 14″×14″, by the 2,500-piece case.",
     description:
-      "The workshop and rental cloth: a 75/25 blend at 14″×14″, surged on the edges so it survives being laundered and reissued. Sold by the case of 2,500 pieces, in four shades.",
+      "The workshop and rental cloth: a 75% cotton / 25% polyester blend at 14″×14″, surged on the edges so it survives being laundered and reissued. Sold by the case of 2,500 pieces, in four shades.",
     heroImageUrl: "/images/products/industrial-aprons.jpg",
     heroImageAlt: "White workwear textile laid flat",
     galleryImageUrls: [
@@ -659,16 +659,16 @@ const AUTHORED: AuthoredProduct[] = [
       { src: "/images/products/other-textile.jpg", alt: "Close-up of plain white woven textile" },
     ],
     variants: [
-      { colour: "Red", size: '14"×14"', weight: "150 lbs", blend: "75/25", stitching: "Surged" },
-      { colour: "White", size: '14"×14"', weight: "150 lbs", blend: "75/25", stitching: "Surged" },
+      { colour: "Red", size: '14"×14"', weight: "150 lbs", blend: "75% Cotton / 25% Polyester", stitching: "Surged" },
+      { colour: "White", size: '14"×14"', weight: "150 lbs", blend: "75% Cotton / 25% Polyester", stitching: "Surged" },
       {
         colour: "Natural",
         size: '14"×14"',
         weight: "150 lbs",
-        blend: "75/25",
+        blend: "75% Cotton / 25% Polyester",
         stitching: "Surged",
       },
-      { colour: "Green", size: '14"×14"', weight: "150 lbs", blend: "75/25", stitching: "Surged" },
+      { colour: "Green", size: '14"×14"', weight: "150 lbs", blend: "75% Cotton / 25% Polyester", stitching: "Surged" },
     ],
     customisation: [
       { title: "Colours and finishes", detail: "Supplied in Red, White, Natural, Green." },
@@ -993,7 +993,7 @@ const AUTHORED: AuthoredProduct[] = [
     uom: "DZ",
     shortDescription: "16″×19″ bar mop at 32 oz, in five centre-stripe colours.",
     description:
-      "The bar and service cloth: 16″×19″, 32 oz to the dozen, hemmed. Mostly all-cotton, with a blue-and-gold build in an 85/15 blend. The centre stripe is how a rental operation tells one account's stock from another's.",
+      "The bar and service cloth: 16″×19″, 32 oz to the dozen, hemmed. Mostly all-cotton, with a blue-and-gold build in an 85% cotton / 15% polyester blend. The centre stripe is how a rental operation tells one account's stock from another's.",
     heroImageUrl: "/images/products/bar-mops.jpg",
     heroImageAlt: "Rolled white cotton bar mops stacked together",
     galleryImageUrls: [
@@ -1008,7 +1008,7 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "White, blue & gold centre stripe",
         size: '16"×19"',
         weight: "32 oz",
-        blend: "85/15",
+        blend: "85% Cotton / 15% Polyester",
         stitching: "Hemmed",
       },
       {
@@ -1048,7 +1048,7 @@ const AUTHORED: AuthoredProduct[] = [
       },
       {
         title: "Sizes and builds",
-        detail: 'Finished at 16"×19". Available in 85/15 and 100% cotton.',
+        detail: 'Finished at 16"×19". Available in 85% cotton / 15% polyester and 100% cotton.',
       },
       {
         title: "How it ships",
@@ -1109,9 +1109,9 @@ const AUTHORED: AuthoredProduct[] = [
     categorySlug: "health-care",
     sectors: ["health-care", "hospitality", "institutional-laundry"],
     uom: "DZ",
-    shortDescription: "86/14 hand towel with a dobby border, 16″×30″.",
+    shortDescription: "86% cotton / 14% polyester hand towel with a dobby border, 16″×30″.",
     description:
-      "An 86/14 hand towel at 16″×30″ and 3 lbs to the dozen, hemmed with a dobby border. White, and specified across all three institutional sectors.",
+      "An 86% cotton / 14% polyester hand towel at 16″×30″ and 3 lbs to the dozen, hemmed with a dobby border. White, and specified across all three institutional sectors.",
     heroImageUrl: "/images/products/towels.jpg",
     heroImageAlt: "Stack of folded white towels",
     galleryImageUrls: [
@@ -1123,7 +1123,7 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "White, dobby border",
         size: '16"×30"',
         weight: "3 lbs",
-        blend: "86/14",
+        blend: "86% Cotton / 14% Polyester",
         stitching: "Hemmed",
       },
     ],
@@ -1144,9 +1144,9 @@ const AUTHORED: AuthoredProduct[] = [
     categorySlug: "health-care",
     sectors: ["health-care", "hospitality", "institutional-laundry"],
     uom: "DZ",
-    shortDescription: "86/14 bath towel in three sizes, from 24″×48″ to 27″×54″.",
+    shortDescription: "86% cotton / 14% polyester bath towel in three sizes, from 24″×48″ to 27″×54″.",
     description:
-      "One 86/14 construction across three cuts, so a property can run a standard room towel and a larger suite towel off the same specification. The two smaller sizes carry a double cam border.",
+      "One 86% cotton / 14% polyester construction across three cuts, so a property can run a standard room towel and a larger suite towel off the same specification. The two smaller sizes carry a double cam border.",
     heroImageUrl: "/images/products/towels.jpg",
     heroImageAlt: "Stack of folded white towels",
     galleryImageUrls: [
@@ -1158,17 +1158,17 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "White, double cam border",
         size: '24"×48"',
         weight: "8 lbs",
-        blend: "86/14",
+        blend: "86% Cotton / 14% Polyester",
         stitching: "Hemmed",
       },
       {
         colour: "White, double cam border",
         size: '24"×50"',
         weight: "10 lbs",
-        blend: "86/14",
+        blend: "86% Cotton / 14% Polyester",
         stitching: "Hemmed",
       },
-      { colour: "White", size: '27"×54"', weight: "12 lbs", blend: "86/14", stitching: "Hemmed" },
+      { colour: "White", size: '27"×54"', weight: "12 lbs", blend: "86% Cotton / 14% Polyester", stitching: "Hemmed" },
     ],
     customisation: [
       { title: "Colours and finishes", detail: "Supplied in White, double cam border; White." },
@@ -1187,9 +1187,9 @@ const AUTHORED: AuthoredProduct[] = [
     categorySlug: "health-care",
     sectors: ["health-care", "hospitality", "institutional-laundry"],
     uom: "DZ",
-    shortDescription: "Wash cloth in an 86/14 dobby-border build and an all-cotton 12″×12″.",
+    shortDescription: "Wash cloth in an 86% cotton / 14% polyester dobby-border build and an all-cotton 12″×12″.",
     description:
-      "Two builds: the 13″×13″ in an 86/14 blend with a dobby border, and a plain all-cotton 12″×12″ at 1 lb to the dozen. Both white and hemmed.",
+      "Two builds: the 13″×13″ in an 86% cotton / 14% polyester blend with a dobby border, and a plain all-cotton 12″×12″ at 1 lb to the dozen. Both white and hemmed.",
     heroImageUrl: "/images/products/towels.jpg",
     heroImageAlt: "Stack of folded white towels",
     galleryImageUrls: [
@@ -1201,7 +1201,7 @@ const AUTHORED: AuthoredProduct[] = [
         colour: "White, dobby border",
         size: '13"×13"',
         weight: "1.5 lbs",
-        blend: "86/14",
+        blend: "86% Cotton / 14% Polyester",
         stitching: "Hemmed",
       },
       {
@@ -1216,7 +1216,7 @@ const AUTHORED: AuthoredProduct[] = [
       { title: "Colours and finishes", detail: "Supplied in White, dobby border; White." },
       {
         title: "Sizes and builds",
-        detail: 'Run in 13"×13", 12"×12". Available in 86/14 and 100% cotton.',
+        detail: 'Run in 13"×13", 12"×12". Available in 86% cotton / 14% polyester and 100% cotton.',
       },
       {
         title: "How it ships",

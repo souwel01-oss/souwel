@@ -1,3 +1,4 @@
+import { plainName } from "@/lib/display-name";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -64,7 +65,7 @@ export default async function HealthCareCategoryPage({
     const href = healthCareProductHref(line.slug, product);
     return {
       id: product.slug,
-      name: product.name,
+      name: plainName(product.name, product.blend),
       href,
       quoteHref: href,
       ctaLabel: "View details",

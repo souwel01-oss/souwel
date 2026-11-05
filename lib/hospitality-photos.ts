@@ -89,10 +89,8 @@ const KIMONO_ROBE = robePair("new-kimono-front", "new-kimono-back", "White terry
 const SHAWL_ROBE = robePair("new-shawl-front", "new-shawl-back", "White terry shawl-collar bath robe");
 
 export const BATH_ROBE_PRODUCT_PHOTOS: Record<string, Shot[]> = {
-  "standard-terry-robe-kimono-standard": KIMONO_ROBE,
-  "standard-terry-robe-kimono-xl": KIMONO_ROBE,
-  "standard-terry-robe-shawl-standard": SHAWL_ROBE,
-  "standard-terry-robe-shawl-xl": SHAWL_ROBE,
+  "standard-terry-robe-kimono": KIMONO_ROBE,
+  "standard-terry-robe-shawl": SHAWL_ROBE,
   "waffle-robe": [
     { src: `${DIR}/bath-robes/new-waffle-shawl.jpg`, alt: "White waffle-weave bath robe, front" },
     { src: `${DIR}/bath-robes/new-waffle-back.jpg`, alt: "White waffle-weave bath robe, back" },

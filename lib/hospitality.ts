@@ -213,7 +213,7 @@ export const HOSPITALITY_GROUPS: HospitalityGroup[] = [
         name: "Bath robes",
         slug: "bath-robes",
         productSlug: null,
-        // Opens a page of six product cards, from the client's "BATHROBE"
+        // Opens a page of four product cards, from the client's "BATHROBE"
         // sheet: see lib/health-care-sheet.ts.
         href: "/hospitality/bath-linen/bath-robes",
         ctaLabel: "View the range",

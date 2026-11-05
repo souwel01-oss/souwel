@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { ArrowDown } from "lucide-react";
 import {
   SPEC_SECTION_ID,
@@ -52,29 +52,17 @@ export function BedLinenSpecPicker({
   sizes: BedLinenPickerSize[];
 }) {
   const { setLine, setSelected, selected } = useRangeOrderList();
-  const [quantity, setQuantity] = useState("");
-  const [roundedFrom, setRoundedFrom] = useState<number | null>(null);
-  const qtyId = useId();
-  const qtyHelpId = useId();
   const helpId = useId();
 
   const chosen = sizes.find((s) => s.sku === selected) ?? null;
 
-  const typed = /^\d{1,7}$/.test(quantity.trim()) ? Number(quantity.trim()) : null;
-  const validStep = typed !== null && typed > 0 && (!casePack || typed % casePack === 0);
-  const qty = validStep ? typed : null;
+  // One case is the smallest order; the table below is where the quantity is set.
+  const qty = casePack ?? 1;
 
-  const snapToCase = () => {
-    if (typed === null || typed <= 0 || !casePack) return;
-    const rounded = Math.ceil(typed / casePack) * casePack;
-    setRoundedFrom(rounded === typed ? null : typed);
-    setQuantity(String(rounded));
-  };
-
-  const ready = chosen !== null && qty !== null;
+  const ready = chosen !== null;
 
   const goToTable = () => {
-    if (!chosen || !qty) return;
+    if (!chosen) return;
     setLine(chosen.sku, qty);
     document
       .getElementById(SPEC_SECTION_ID)
@@ -137,42 +125,6 @@ export function BedLinenSpecPicker({
         </div>
       </fieldset>
 
-      {/* ── Quantity ─────────────────────────────────────────────────── */}
-      <div className="mt-6 grid gap-2 sm:max-w-[16rem]">
-        <label htmlFor={qtyId} className="text-foreground/80 text-[13px] font-semibold">
-          Quantity <span className="text-muted-foreground font-normal">(required)</span>
-        </label>
-        <input
-          id={qtyId}
-          type="number"
-          inputMode="numeric"
-          min={casePack ?? 1}
-          step={casePack ?? 1}
-          required
-          aria-describedby={qtyHelpId}
-          value={quantity}
-          onChange={(e) => {
-            setQuantity(e.target.value);
-            setRoundedFrom(null);
-          }}
-          onBlur={snapToCase}
-          placeholder={casePack ? `e.g. ${casePack * 2}` : "e.g. 50"}
-          className="border-input bg-card text-foreground placeholder:text-muted-foreground/60 focus-visible:border-primary focus-visible:ring-primary/25 h-11 w-full rounded-lg border px-3.5 text-[15px] outline-none focus-visible:ring-4"
-        />
-        <p id={qtyHelpId} className="text-muted-foreground text-[12.5px] leading-relaxed">
-          {roundedFrom !== null ? (
-            <span className="text-foreground font-medium">
-              Rounded up from {roundedFrom.toLocaleString("en-US")} — supplied by the case of{" "}
-              {casePack}.
-            </span>
-          ) : casePack ? (
-            `Supplied in cases of ${casePack}, so quantities go up in ${casePack}s.`
-          ) : (
-            "No case pack is given for this line — enter the pieces you need."
-          )}
-        </p>
-      </div>
-
       {/* ── Down to the table ────────────────────────────────────────── */}
       <div className="mt-7">
         <button
@@ -187,18 +139,14 @@ export function BedLinenSpecPicker({
               : "bg-muted text-muted-foreground cursor-not-allowed"
           )}
         >
-          Next
+          Request quote
           <ArrowDown aria-hidden className="size-4" />
         </button>
 
         <p id={helpId} className="text-muted-foreground mt-3 text-[13px]">
           {!chosen
             ? "Choose a size above to continue."
-            : !qty
-              ? casePack
-                ? `Enter a quantity in multiples of ${casePack} to continue.`
-                : "Enter a quantity to continue."
-              : "Adds this to your list and takes you to the full table, where you can add more sizes."}
+            : "Adds this to your list and takes you to the full table, where you set the quantity and add more sizes."}
         </p>
       </div>
     </div>

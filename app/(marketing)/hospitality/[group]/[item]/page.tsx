@@ -1,3 +1,4 @@
+import { plainName } from "@/lib/display-name";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -132,7 +133,7 @@ function SheetLineListing({ line }: { line: SheetLine }) {
     const href = sheetLineProductHref(line, product);
     return {
       id: product.slug,
-      name: product.name,
+      name: plainName(product.name, product.blend),
       href,
       quoteHref: href,
       ctaLabel: "View details",

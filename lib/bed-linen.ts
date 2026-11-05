@@ -88,12 +88,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   /* ── Flat Sheets — seven rows ────────────────────────────────────────── */
   {
     slug: "flat-sheet-t200-solid-55-45",
-    name: "Flat Sheet — T200 Solid, 55/45",
+    name: "Flat Sheet — T200 Solid, 55% Cotton / 45% Polyester",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
     threadCount: "T200",
     design: "Solid",
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: '2"',
     pcsPerCase: 24,
     lines: [
@@ -105,12 +105,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "flat-sheet-t250-solid-55-45",
-    name: "Flat Sheet — T250 Solid, 55/45",
+    name: "Flat Sheet — T250 Solid, 55% Cotton / 45% Polyester",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
     threadCount: "T250",
     design: "Solid",
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: '2"',
     pcsPerCase: 24,
     lines: [
@@ -122,12 +122,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "flat-sheet-t200-solid-60-40",
-    name: "Flat Sheet — T200 Solid, 60/40",
+    name: "Flat Sheet — T200 Solid, 60% Cotton / 40% Polyester",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
     threadCount: "T200",
     design: "Solid",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Balance*",
     pcsPerCase: 24,
     lines: [
@@ -139,12 +139,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "flat-sheet-t250-solid-60-40",
-    name: "Flat Sheet — T250 Solid, 60/40",
+    name: "Flat Sheet — T250 Solid, 60% Cotton / 40% Polyester",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
     threadCount: "T250",
     design: "Solid",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Balance*",
     pcsPerCase: 24,
     lines: [
@@ -177,12 +177,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     // with no closing inch mark; the client confirmed that is a typo in the
     // sheet and that the size is 114"X125", so it is written that way here.
     slug: "flat-sheet-t300-solid-60-40",
-    name: "Flat Sheet — T300 Solid, 60/40",
+    name: "Flat Sheet — T300 Solid, 60% Cotton / 40% Polyester",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
     threadCount: "T300",
     design: "Solid",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: '2"',
     pcsPerCase: 24,
     lines: [
@@ -193,12 +193,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "flat-sheet-t300-satin-stripes",
-    name: "Flat Sheet — T300 Satin Stripes, 60/40",
+    name: "Flat Sheet — T300 Satin Stripes, 60% Cotton / 40% Polyester",
     family: "flat-sheets",
     familyLabel: "Flat Sheets",
     threadCount: "T300",
     design: "Satin Stripes",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Balance*",
     pcsPerCase: 24,
     lines: [
@@ -210,12 +210,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   /* ── Fitted Sheets — three rows ──────────────────────────────────────── */
   {
     slug: "fitted-sheet-t200-55-45",
-    name: "Fitted Sheet — T200 Plain, 55/45",
+    name: "Fitted Sheet — T200 Plain, 55% Cotton / 45% Polyester",
     family: "fitted-sheets",
     familyLabel: "Fitted Sheets",
     threadCount: "T200",
     design: "Plain",
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: "Elastic",
     pcsPerCase: 24,
     lines: [
@@ -227,12 +227,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "fitted-sheet-t200-60-40",
-    name: "Fitted Sheet — T200 Plain, 60/40",
+    name: "Fitted Sheet — T200 Plain, 60% Cotton / 40% Polyester",
     family: "fitted-sheets",
     familyLabel: "Fitted Sheets",
     threadCount: "T200",
     design: "Plain",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Elastic",
     pcsPerCase: 24,
     lines: [
@@ -244,12 +244,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "fitted-sheet-t300-55-45",
-    name: "Fitted Sheet — T300 Plain, 55/45",
+    name: "Fitted Sheet — T300 Plain, 55% Cotton / 45% Polyester",
     family: "fitted-sheets",
     familyLabel: "Fitted Sheets",
     threadCount: "T300",
     design: "Plain",
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: "Elastic",
     pcsPerCase: 24,
     lines: [
@@ -264,12 +264,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     // 42"X36" is printed once across Twin, Full and Queen with a single code:
     // one pillow case that suits all three beds, not three products.
     slug: "pillow-case-t200-percale-55-45",
-    name: "Pillow Case — T200 Plain Percale, 55/45",
+    name: "Pillow Case — T200 Plain Percale, 55% Cotton / 45% Polyester",
     family: "pillow-case",
     familyLabel: "Pillow Case",
     threadCount: "T200",
     design: "Plain - Percale",
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: "Open End",
     pcsPerCase: 72,
     lines: [
@@ -279,12 +279,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "pillow-case-t250-percale-60-40",
-    name: "Pillow Case — T250 Plain Percale, 60/40",
+    name: "Pillow Case — T250 Plain Percale, 60% Cotton / 40% Polyester",
     family: "pillow-case",
     familyLabel: "Pillow Case",
     threadCount: "T250",
     design: "Plain - Percale",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Open End",
     pcsPerCase: 72,
     lines: [
@@ -296,12 +296,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     // Here the merge covers Twin and Full only — Queen steps up to its own
     // 42"X40" with its own code.
     slug: "pillow-case-t300-plain-60-40",
-    name: "Pillow Case — T300 Plain, 60/40",
+    name: "Pillow Case — T300 Plain, 60% Cotton / 40% Polyester",
     family: "pillow-case",
     familyLabel: "Pillow Case",
     threadCount: "T300",
     design: "Plain",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Open End",
     pcsPerCase: 72,
     lines: [
@@ -312,12 +312,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "pillow-case-t300-satin-stripes",
-    name: "Pillow Case — T300 Satin Stripes, 60/40",
+    name: "Pillow Case — T300 Satin Stripes, 60% Cotton / 40% Polyester",
     family: "pillow-case",
     familyLabel: "Pillow Case",
     threadCount: "T300",
     design: "Satin Stripes",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "EZ Fit",
     pcsPerCase: 72,
     lines: [
@@ -329,12 +329,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   /* ── Duvet Cover — three rows ────────────────────────────────────────── */
   {
     slug: "duvet-cover-t200-plain",
-    name: "Duvet Cover — T200 Plain, 55/40",
+    name: "Duvet Cover — T200 Plain, 55% Cotton / 40% Polyester",
     family: "duvet-cover",
     familyLabel: "Duvet Cover",
     threadCount: "T200",
     design: "Plain",
-    blend: "55/40",
+    blend: "55% Cotton / 40% Polyester",
     hem: "Center Open",
     pcsPerCase: 12,
     lines: [
@@ -345,12 +345,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "duvet-cover-t300-plain",
-    name: "Duvet Cover — T300 Plain, 60/40",
+    name: "Duvet Cover — T300 Plain, 60% Cotton / 40% Polyester",
     family: "duvet-cover",
     familyLabel: "Duvet Cover",
     threadCount: "T300",
     design: "Plain",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Center Open",
     pcsPerCase: 12,
     lines: [
@@ -360,12 +360,12 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
   },
   {
     slug: "duvet-cover-t300-satin-stripes",
-    name: "Duvet Cover — T300 Satin Stripes, 60/40",
+    name: "Duvet Cover — T300 Satin Stripes, 60% Cotton / 40% Polyester",
     family: "duvet-cover",
     familyLabel: "Duvet Cover",
     threadCount: "T300",
     design: "Satin Stripes",
-    blend: "60/40",
+    blend: "60% Cotton / 40% Polyester",
     hem: "Center Open",
     pcsPerCase: 12,
     lines: [
@@ -384,7 +384,7 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     familyLabel: "Mattress Protector",
     threadCount: "T140 with polyester fill",
     design: null,
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: null,
     pcsPerCase: 12,
     lines: [
@@ -403,7 +403,7 @@ export const BED_LINEN_PRODUCTS: BedLinenProduct[] = [
     familyLabel: "Pillow Protector",
     threadCount: "T180",
     design: null,
-    blend: "55/45",
+    blend: "55% Cotton / 45% Polyester",
     hem: "Hidden Zipper",
     pcsPerCase: 24,
     lines: [
@@ -473,10 +473,7 @@ export function bedSizesCovered(product: BedLinenProduct): string[] {
 
 /** The one-line summary a listing card shows under the title. */
 export function bedLinenCardSummary(product: BedLinenProduct): string {
-  const facts = [product.blend, product.hem ? `${product.hem} hem` : null].filter(
-    (v): v is string => Boolean(v)
-  );
-  return [...facts, bedSizesCovered(product).join(", ")].filter(Boolean).join(" · ");
+  return product.blend ?? "";
 }
 
 /**

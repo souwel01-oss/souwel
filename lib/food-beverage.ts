@@ -133,11 +133,11 @@ export const FB_PRODUCTS: FbProduct[] = [
   },
   {
     slug: "bar-mop-full-terry-6040",
-    name: "Bar Mop — Full Terry, 60% Cot / 40% Poly",
+    name: "Bar Mop — Full Terry, 60% Cotton / 40% Polyester",
     family: "bar-mop",
     familyLabel: "Bar Mop",
     description: "Full Terry",
-    blend: "60% Cot / 40% Poly",
+    blend: "60% Cotton / 40% Polyester",
     weight: "30 OZ/DZ",
     unit: "dozen",
     sizes: [{ size: "16X19", packing: "100 DZ / BULK CASE" }],
@@ -334,7 +334,7 @@ export const FB_PRODUCTS: FbProduct[] = [
   /* ── Napkins ─────────────────────────────────────────────────────────── */
   {
     slug: "napkins-spun-polyester",
-    name: "Spun Poly Napkins",
+    name: "Spun Polyester Napkins",
     family: "napkin",
     familyLabel: "Napkin",
     description: "Spun Polyester",
@@ -460,15 +460,7 @@ export function fbPackingFor(product: FbProduct, size: string): string | null {
 
 /** The one-line summary a listing card shows under the title. */
 export function fbCardSummary(product: FbProduct): string {
-  const sizes =
-    product.sizes.length === 1
-      ? product.sizes[0].size
-      : `${product.sizes.length} sizes`;
-  const colours =
-    product.colours.length === 1
-      ? product.colours[0]
-      : `${product.colours.length} colours`;
-  return [product.blend, sizes, colours].join(" · ");
+  return product.blend;
 }
 
 /** The one line the group card shows for a family as a whole. */

@@ -22,6 +22,14 @@ const nextConfig: NextConfig = {
       // The same move for Health-Care and Commercial, once each range had pages
       // of its own.
       { source: "/categories/health-care", destination: "/health-care", permanent: true },
+      // The two sizes of a standard terry robe collar now share one page.
+      ...["kimono", "shawl"].flatMap((collar) =>
+        ["standard", "xl"].map((size) => ({
+          source: `/hospitality/bath-linen/bath-robes/standard-terry-robe-${collar}-${size}`,
+          destination: `/hospitality/bath-linen/bath-robes/standard-terry-robe-${collar}`,
+          permanent: true,
+        }))
+      ),
       {
         source: "/categories/commercial-automotive",
         destination: "/commercial",
