@@ -124,11 +124,7 @@ function FamilyChooser({ family }: { family: TerryProduct[] }) {
 
       <section className="py-12 sm:py-16">
         <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-          <Reveal
-            variant="fade-up"
-            stagger
-            className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2"
-          >
+          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2">
             {family.map((product) => (
               <div key={product.slug}>
                 {/* The blend as a heading above the card, not only inside it.
@@ -140,7 +136,7 @@ function FamilyChooser({ family }: { family: TerryProduct[] }) {
                 <ProductCard product={toDetailCard(product)} />
               </div>
             ))}
-          </Reveal>
+          </div>
         </div>
       </section>
     </main>

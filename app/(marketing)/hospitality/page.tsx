@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HOSPITALITY_GROUPS } from "@/lib/hospitality";
-import { RangeVideoBand } from "@/components/marketing/RangeVideoBand";
 import { RangeQuotePrompt } from "@/components/marketing/RangeQuotePrompt";
 import { Reveal } from "@/components/animation/Reveal";
 
@@ -22,22 +21,18 @@ export const metadata: Metadata = {
 };
 
 /**
- * The Hospitality landing page: a video band, then the five ranges.
+ * The Hospitality landing page: the five ranges.
  *
  * THIS IS THE CANONICAL HOSPITALITY PAGE. /categories/hospitality redirects
  * here rather than serving a second page about the same thing — two URLs
  * covering one range splits the inbound links and asks a search engine to pick
  * a winner.
  *
- * The film is public/videos/hospitality.mp4 once it exists — see
- * components/marketing/RangeVideoBand.tsx.
  */
 
 export default function HospitalityPage() {
   return (
     <main className="bg-background">
-      <RangeVideoBand name="hospitality" label="Hospitality Linens" />
-
       {/* ── Heading ─────────────────────────────────────────────────────── */}
       <section className="border-premium/20 border-b">
         <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
@@ -66,11 +61,7 @@ export default function HospitalityPage() {
               columns the first three take two columns each and the last two
               take three each, so both rows fill edge to edge and the change of
               width reads as a deliberate rhythm rather than a gap. */}
-          <Reveal
-            variant="fade-up"
-            stagger
-            className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-6"
-          >
+          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-6">
             {HOSPITALITY_GROUPS.map((group, index) => (
               <Link
                 key={group.slug}
@@ -124,7 +115,7 @@ export default function HospitalityPage() {
                 </span>
               </Link>
             ))}
-          </Reveal>
+          </div>
         </div>
       </section>
 

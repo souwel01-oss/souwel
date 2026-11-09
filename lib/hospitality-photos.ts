@@ -490,31 +490,31 @@ export const BED_LINEN_PHOTOS: Record<string, { card: Shot; gallery: Shot[] }> =
  * so the range pages look up by the same key.
  */
 export const LINE_PHOTOS: Record<string, Shot[]> = {
-  // Bed Linen. The family's own card pictures, so the range card and the family
+  // Bed Linen. The family's own product photographs, so the range card and the family
   // page cannot show different sheets.
   "flat-sheets": [
-    BED_LINEN_PHOTOS["flat-sheet-t200-solid-55-45"].card,
-    BED_LINEN_PHOTOS["flat-sheet-t210-poly-modal"].card,
-    BED_LINEN_PHOTOS["flat-sheet-t300-satin-stripes"].card,
+    BED_LINEN_PHOTOS["flat-sheet-t200-solid-55-45"].gallery[0],
+    BED_LINEN_PHOTOS["flat-sheet-t210-poly-modal"].gallery[0],
+    BED_LINEN_PHOTOS["flat-sheet-t300-satin-stripes"].gallery[0],
   ],
   "fitted-sheets": [
-    BED_LINEN_PHOTOS["fitted-sheet-t200-60-40"].card,
-    BED_LINEN_PHOTOS["fitted-sheet-t200-55-45"].card,
-    BED_LINEN_PHOTOS["fitted-sheet-t300-55-45"].card,
+    BED_LINEN_PHOTOS["fitted-sheet-t200-60-40"].gallery[0],
+    BED_LINEN_PHOTOS["fitted-sheet-t200-55-45"].gallery[0],
+    BED_LINEN_PHOTOS["fitted-sheet-t300-55-45"].gallery[0],
   ],
   "pillow-case": [
-    BED_LINEN_PHOTOS["pillow-case-t200-percale-55-45"].card,
-    BED_LINEN_PHOTOS["pillow-case-t250-percale-60-40"].card,
-    BED_LINEN_PHOTOS["pillow-case-t300-satin-stripes"].card,
+    BED_LINEN_PHOTOS["pillow-case-t200-percale-55-45"].gallery[0],
+    BED_LINEN_PHOTOS["pillow-case-t250-percale-60-40"].gallery[0],
+    BED_LINEN_PHOTOS["pillow-case-t300-satin-stripes"].gallery[0],
   ],
 
   "duvet-cover": [
-    BED_LINEN_PHOTOS["duvet-cover-t200-plain"].card,
-    BED_LINEN_PHOTOS["duvet-cover-t300-plain"].card,
-    BED_LINEN_PHOTOS["duvet-cover-t300-satin-stripes"].card,
+    BED_LINEN_PHOTOS["duvet-cover-t200-plain"].gallery[0],
+    BED_LINEN_PHOTOS["duvet-cover-t300-plain"].gallery[0],
+    BED_LINEN_PHOTOS["duvet-cover-t300-satin-stripes"].gallery[0],
   ],
-  "mattress-protector": MATTRESS_PROTECTOR_CARDS,
-  "pillow-protector": PILLOW_PROTECTOR_CARDS,
+  "mattress-protector": MATTRESS_PROTECTOR,
+  "pillow-protector": PILLOW_PROTECTOR,
 
   // Bath Linen
   "terry-towels": TERRY,

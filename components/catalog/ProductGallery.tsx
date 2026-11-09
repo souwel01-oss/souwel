@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useRef, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { gsap, useGSAP, prefersReducedMotion } from "@/lib/animation/gsap";
 
 /**
@@ -47,6 +48,9 @@ export function ProductGallery({ images }: { images: Shot[] }) {
     zoomLayer.current.style.transform = `scale(${ZOOM})`;
   };
 
+  const step = (delta: number) =>
+    setActive((i) => (i + delta + images.length) % images.length);
+
   const zoomOut = () => {
     if (zoomLayer.current) zoomLayer.current.style.transform = "scale(1)";
   };
@@ -56,10 +60,14 @@ export function ProductGallery({ images }: { images: Shot[] }) {
       if (prefersReducedMotion()) return;
       const el = scope.current?.querySelector<HTMLElement>("[data-gallery='active']");
       if (!el) return;
+      // Scale only. The fade between photographs is the CSS opacity on each
+      // image; a GSAP opacity tween leaves an inline opacity:1 behind on every
+      // photograph it has shown, which then sits on top of the one chosen next
+      // (so going back to the first photograph appeared to do nothing).
       gsap.fromTo(
         el,
-        { opacity: 0, scale: 1.02 },
-        { opacity: 1, scale: 1, duration: 0.45, ease: "power3.out" }
+        { scale: 1.02 },
+        { scale: 1, duration: 0.45, ease: "power3.out", clearProps: "transform" }
       );
     },
     { scope, dependencies: [active] }
@@ -101,6 +109,27 @@ export function ProductGallery({ images }: { images: Shot[] }) {
               />
             ))}
           </div>
+
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={() => step(-1)}
+                aria-label="Previous image"
+                className="text-navy focus-visible:ring-ring absolute top-1/2 left-3 z-10 grid size-10 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white/90 shadow-md transition-colors hover:bg-white focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <ChevronLeft aria-hidden className="size-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => step(1)}
+                aria-label="Next image"
+                className="text-navy focus-visible:ring-ring absolute top-1/2 right-3 z-10 grid size-10 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white/90 shadow-md transition-colors hover:bg-white focus-visible:ring-2 focus-visible:outline-none"
+              >
+                <ChevronRight aria-hidden className="size-5" />
+              </button>
+            </>
+          )}
         </div>
       </div>
 

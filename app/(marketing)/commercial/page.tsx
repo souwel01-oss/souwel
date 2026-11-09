@@ -5,7 +5,6 @@ import { CARD_SHOTS } from "@/lib/hospitality-photos";
 import { catalogueSummary } from "@/lib/catalogue-summary";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
-import { RangeVideoBand } from "@/components/marketing/RangeVideoBand";
 import { RangeQuotePrompt } from "@/components/marketing/RangeQuotePrompt";
 
 export const metadata: Metadata = {
@@ -28,8 +27,6 @@ export const metadata: Metadata = {
 export default function CommercialPage() {
   return (
     <main className="bg-background">
-      <RangeVideoBand name="commercial" label="Commercial Textiles" />
-
       {/* The same heading as the Hospitality page, so the ranges open alike. */}
       <section className="border-premium/20 border-b">
         <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
@@ -79,16 +76,11 @@ export default function CommercialPage() {
               </p>
             </Reveal>
 
-            <Reveal
-              variant="fade-up"
-              stagger
-              batch
-              className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
-            >
+            <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {group.items.map((item) => (
                 <ProductCard key={item.slug} product={toCard(item)} />
               ))}
-            </Reveal>
+            </div>
           </div>
         </section>
       ))}

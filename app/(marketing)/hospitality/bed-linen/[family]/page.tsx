@@ -13,7 +13,7 @@ import {
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
 import { ProductDetail, IMAGES } from "@/components/hospitality/BedLinenProductDetail";
-import { BED_LINEN_PHOTOS } from "@/lib/hospitality-photos";
+import { BED_LINEN_PHOTOS, CARD_SHOTS } from "@/lib/hospitality-photos";
 
 /**
  * One segment, two kinds of page — the same trick as
@@ -122,16 +122,11 @@ function FamilyListing({ family, members }: { family: string; members: BedLinenP
 
       <section className="py-12 sm:py-16">
         <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-          <Reveal
-            variant="fade-up"
-            stagger
-            batch
-            className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => (
               <ProductCard key={card.id} product={card} />
             ))}
-          </Reveal>
+          </div>
         </div>
       </section>
 
@@ -176,7 +171,7 @@ function toCard(product: BedLinenProduct): HospitalityCardProduct {
     ctaLabel: "View details",
     material: bedLinenCardSummary(product),
     colours: [],
-    images: photos ? [photos.card] : IMAGES,
+    images: photos ? photos.gallery.slice(0, CARD_SHOTS) : IMAGES,
     badge: null,
     rating: null,
   };

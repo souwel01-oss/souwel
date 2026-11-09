@@ -450,7 +450,7 @@ export function SiteHeader() {
                     {groups.map((group, gi) => (
                       <div key={group.title ?? "all"} className={gi > 0 ? "mt-3" : ""}>
                         {group.title ? (
-                          <h3 className="text-accent-gold mb-0.5 text-[10px] font-semibold tracking-[0.16em] uppercase">
+                          <h3 className="font-sans text-accent-gold mb-0.5 text-[12px] font-bold tracking-[0.08em] uppercase">
                             {group.title}
                           </h3>
                         ) : null}

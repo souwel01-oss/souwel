@@ -5,7 +5,6 @@ import { CARD_SHOTS } from "@/lib/hospitality-photos";
 import { healthCareProducts } from "@/lib/health-care-sheet";
 import { ProductCard, type HospitalityCardProduct } from "@/components/hospitality/ProductCard";
 import { Reveal } from "@/components/animation/Reveal";
-import { RangeVideoBand } from "@/components/marketing/RangeVideoBand";
 import { RangeQuotePrompt } from "@/components/marketing/RangeQuotePrompt";
 
 export const metadata: Metadata = {
@@ -28,8 +27,6 @@ export default function HealthCarePage() {
 
   return (
     <main className="bg-background">
-      <RangeVideoBand name="health-care" label="Health-Care Linens" />
-
       {/* The same heading as the Hospitality page, so the ranges open alike. */}
       <section className="border-premium/20 border-b">
         <div className="mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 sm:py-20">
@@ -51,16 +48,11 @@ export default function HealthCarePage() {
 
       <section className="py-12 sm:py-16">
         <div className="mx-auto w-full max-w-6xl px-5 sm:px-8">
-          <Reveal
-            variant="fade-up"
-            stagger
-            batch
-            className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3"
-          >
+          <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => (
               <ProductCard key={card.id} product={card} />
             ))}
-          </Reveal>
+          </div>
 
         </div>
       </section>

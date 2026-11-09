@@ -343,7 +343,7 @@ function GroupBlock({ group, categorySlug }: { group: ProductGroup; categorySlug
       {group.title ? (
         <h3
           data-mm="item"
-          className="text-accent-gold dark:text-accent-gold mb-1.5 text-[10.5px] font-semibold tracking-[0.16em] uppercase"
+          className="font-sans text-accent-gold dark:text-accent-gold mb-1.5 text-[12.5px] font-bold tracking-[0.08em] uppercase"
         >
           {group.title}
         </h3>
