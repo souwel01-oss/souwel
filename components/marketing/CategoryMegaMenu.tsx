@@ -228,10 +228,10 @@ export function CategoryMegaMenu({
               <div data-mm="aside" className="lg:col-span-3">
                 <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl">
                   <Image
-                    src={`/images/categories/${category.slug}.jpg`}
-                    alt={category.imageAlt}
+                    src={`/images/categories/${category.menuImage ?? `${category.slug}.jpg`}`}
+                    alt={category.menuImageAlt ?? category.imageAlt}
                     fill
-                    sizes="(max-width: 1280px) 0px, 18rem"
+                    sizes="(max-width: 1280px) 28rem, 22rem"
                     className="object-cover object-center"
                   />
                   <span

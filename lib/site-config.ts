@@ -43,6 +43,10 @@ export type CategoryNavItem = {
    * file with the matching name.
    */
   imageAlt: string;
+  /** A different photograph for the nav menu card only, under public/images/categories/. */
+  menuImage?: string;
+  /** Alt text for menuImage. */
+  menuImageAlt?: string;
 };
 
 export const CATEGORIES: CategoryNavItem[] = [
@@ -53,6 +57,8 @@ export const CATEGORIES: CategoryNavItem[] = [
     description: "Linens made for the moments guests remember most.",
     accent: "#6D1A2A",
     imageAlt: "Hotel bed made up in crisp white linen",
+    menuImage: "hospitality-menu.jpg",
+    menuImageAlt: "Rolled white towels on a made hotel bed",
   },
   {
     slug: "health-care",
@@ -61,6 +67,8 @@ export const CATEGORIES: CategoryNavItem[] = [
     description: "Comfort and reliability, ready for every shift, every patient.",
     accent: "#2D4A22",
     imageAlt: "Stack of clean white medical-grade towels",
+    menuImage: "health-care-menu.jpg",
+    menuImageAlt: "Folded blue and green hospital linen stacked in rolls",
   },
   {
     slug: "institutional-laundry",
@@ -80,6 +88,8 @@ export const CATEGORIES: CategoryNavItem[] = [
     description: "Hard-working textiles for hard-working spaces.",
     accent: "#4A5C2F",
     imageAlt: "Plain white technical textile laid flat",
+    menuImage: "commercial-menu.jpg",
+    menuImageAlt: "Stacks of folded cream and grey terry towels",
   },
 ];
 
