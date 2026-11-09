@@ -19,6 +19,7 @@ import { SouwelLogo } from "@/components/marketing/SouwelLogo";
 import { DrawerAuth, HeaderAuth } from "@/components/auth/HeaderAuth";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { QuoteListButton } from "@/components/quote-list/QuoteListButton";
+import { SearchButton } from "@/components/marketing/SearchButton";
 import { cn } from "@/lib/utils";
 
 /**
@@ -323,6 +324,7 @@ export function SiteHeader() {
             last decision; see the note at the top of it for why the session is
             read on the client. */}
         <div className="hidden shrink-0 items-center gap-1.5 xl:flex">
+          <SearchButton />
           <QuoteListButton />
           <HeaderAuth />
         </div>
@@ -335,6 +337,12 @@ export function SiteHeader() {
             from inside a closed menu. */}
         <div className="flex items-center gap-1 xl:hidden">
           <ThemeToggle tone="auto" />
+          <SearchButton
+            onOpen={() => {
+              setOpen(false);
+              setDrawerOpen(null);
+            }}
+          />
           {/* Opening the list closes the navigation menu. They are both
               answers to "show me something over this page", and Escape would
               otherwise have two things to dismiss at once. */}
